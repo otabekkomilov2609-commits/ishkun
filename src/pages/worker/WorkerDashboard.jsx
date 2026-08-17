@@ -47,7 +47,7 @@ export default function WorkerDashboard() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-5">
-        <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{t('wrk.browseTitle')}</h1>
+        <h1 className="text-2xl font-display font-bold tracking-tight text-primary">{t('wrk.browseTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t('tagline')}</p>
       </div>
 

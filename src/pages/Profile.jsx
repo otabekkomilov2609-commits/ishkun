@@ -85,7 +85,7 @@ export default function Profile() {
           {initials}
         </div>
         <div>
-          <h1 className="text-xl font-display font-bold text-foreground">{user.full_name || '—'}</h1>
+          <h1 className="text-xl font-display font-bold text-primary">{user.full_name || '—'}</h1>
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function Profile() {
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-3">
             <History className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-display font-bold text-foreground">{t('wrk.completedJobs')}</h2>
+            <h2 className="text-lg font-display font-bold text-primary">{t('wrk.completedJobs')}</h2>
           </div>
           {completedApps === null ? (
             <Skeleton className="h-20 w-full" />

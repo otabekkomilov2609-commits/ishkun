@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
+import TabsNav from '@/components/TabsNav';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,7 +17,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel
 } from '@/components/ui/alert-dialog';
-import { ClipboardList, Calendar, Clock, Wallet, XCircle, CheckCircle2, Briefcase } from 'lucide-react';
+import { ClipboardList, Calendar, Clock, Wallet, XCircle } from 'lucide-react';
 import { formatSom } from '@/lib/format';
 
 export default function MyApplications() {
@@ -25,6 +26,7 @@ export default function MyApplications() {
   const navigate = useNavigate();
   const [apps, setApps] = useState(null);
   const [shifts, setShifts] = useState({});
+  const [tab, setTab] = useState('pending');
   const [cancelTarget, setCancelTarget] = useState(null);
   const [canceling, setCanceling] = useState(false);
 
@@ -55,10 +57,20 @@ export default function MyApplications() {
 
   const statusLabel = (s) => t(`app.status${s.charAt(0).toUpperCase()}${s.slice(1)}`);
 
+  const tabs = [
+    { id: 'pending', label: t('wrk.tabPending'), count: apps?.filter(a => a.status === 'pending').length ?? 0 },
+    { id: 'approved', label: t('wrk.tabApproved'), count: apps?.filter(a => a.status === 'approved').length ?? 0 },
+    { id: 'completed', label: t('wrk.tabCompleted'), count: apps?.filter(a => a.status === 'completed').length ?? 0 },
+    { id: 'no_show', label: t('wrk.tabNoShow'), count: apps?.filter(a => a.status === 'no_show').length ?? 0 }
+  ];
+
+  const visible = (apps || []).filter(a => a.status === tab);
+
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-display font-bold tracking-tight text-foreground mb-1">{t('wrk.myAppsTitle')}</h1>
-      <p className="text-sm text-muted-foreground mb-5">{t('wrk.trackTitle')}</p>
+      <h1 className="text-2xl font-display font-bold tracking-tight text-primary mb-4">{t('wrk.myAppsTitle')}</h1>
+
+      <TabsNav tabs={tabs} active={tab} onChange={setTab} className="mb-4" />
 
       {apps === null ? (
         <div className="space-y-3">{[0,1].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
@@ -68,61 +80,40 @@ export default function MyApplications() {
           title={t('wrk.noMyApps')}
           action={<button onClick={() => navigate('/worker')} className="text-primary font-semibold text-sm hover:underline">{t('nav.browse')}</button>}
         />
+      ) : visible.length === 0 ? (
+        <EmptyState icon={ClipboardList} title={t('wrk.sectionEmpty')} />
       ) : (
-        <div className="space-y-6">
-          {[
-            { statuses: ['pending'], title: t('wrk.sectionPending'), icon: Clock, color: 'text-amber-600' },
-            { statuses: ['approved'], title: t('wrk.sectionApproved'), icon: CheckCircle2, color: 'text-emerald-600' },
-            { statuses: ['completed'], title: t('wrk.sectionCompleted'), icon: Briefcase, color: 'text-zinc-500' }
-          ].map(group => {
-            const items = apps.filter(a => group.statuses.includes(a.status));
-            const GIcon = group.icon;
+        <div className="space-y-3">
+          {visible.map(a => {
+            const s = shifts[a.shift_id];
             return (
-              <div key={group.title}>
-                <div className="flex items-center gap-2 mb-2.5">
-                  <GIcon className={`h-4 w-4 ${group.color}`} />
-                  <h2 className="text-sm font-bold text-foreground">{group.title}</h2>
-                  <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{items.length}</span>
+              <Card key={a.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1 cursor-pointer" onClick={() => s && navigate(`/worker/shifts/${a.shift_id}`)}>
+                    <h3 className="font-semibold text-foreground line-clamp-1">{s?.title || '—'}</h3>
+                    <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
+                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {s?.start_time}</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(s.payment_amount) : ''}</span>
+                    </div>
+                  </div>
+                  <StatusBadge status={a.status} label={statusLabel(a.status)} />
                 </div>
-                {items.length === 0 ? (
-                  <p className="text-xs text-muted-foreground pl-6 pb-1">{t('wrk.sectionEmpty')}</p>
-                ) : (
-                  <div className="space-y-2.5">
-                    {items.map(a => {
-                      const s = shifts[a.shift_id];
-                      return (
-                        <Card key={a.id} className="p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0 flex-1 cursor-pointer" onClick={() => s && navigate(`/worker/shifts/${a.shift_id}`)}>
-                              <h3 className="font-semibold text-foreground line-clamp-1">{s?.title || '—'}</h3>
-                              <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                                <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
-                                <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {s?.start_time}</span>
-                                <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(s.payment_amount) : ''}</span>
-                              </div>
-                            </div>
-                            <StatusBadge status={a.status} label={statusLabel(a.status)} />
-                          </div>
-                          {a.status === 'pending' && (
-                            <div className="mt-3">
-                              <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
-                                <XCircle className="h-4 w-4" /> {t('wrk.cancelApp')}
-                              </Button>
-                            </div>
-                          )}
-                          {a.status === 'approved' && (
-                            <div className="mt-3">
-                              <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
-                                <XCircle className="h-4 w-4" /> {t('cancel')}
-                              </Button>
-                            </div>
-                          )}
-                        </Card>
-                      );
-                    })}
+                {a.status === 'pending' && (
+                  <div className="mt-3">
+                    <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
+                      <XCircle className="h-4 w-4" /> {t('wrk.cancelApp')}
+                    </Button>
                   </div>
                 )}
-              </div>
+                {a.status === 'approved' && (
+                  <div className="mt-3">
+                    <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
+                      <XCircle className="h-4 w-4" /> {t('cancel')}
+                    </Button>
+                  </div>
+                )}
+              </Card>
             );
           })}
         </div>
