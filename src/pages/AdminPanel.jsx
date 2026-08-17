@@ -5,15 +5,17 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
-import { Users, CalendarDays, Building2, ClipboardList, Shield, ShieldCheck, ShieldOff, ShieldAlert } from 'lucide-react';
+import { Users, CalendarDays, Building2, ClipboardList, Shield, ShieldCheck, ShieldOff, ShieldAlert, Bell, UserX } from 'lucide-react';
 import { formatSom } from '@/lib/format';
 
 export default function AdminPanel() {
+  const { user } = useAuth();
   const { t } = useLang();
   const [tab, setTab] = useState('overview');
   const [stats, setStats] = useState(null);
   const [shifts, setShifts] = useState(null);
   const [users, setUsers] = useState(null);
+  const [notifs, setNotifs] = useState(null);
 
   const loadStats = async () => {
     const [u, s, c, a] = await Promise.all([
@@ -25,6 +27,10 @@ export default function AdminPanel() {
     setStats({ users: u.length, shifts: s.length, companies: c.length, apps: a.length });
     setShifts(s);
     setUsers(u);
+    if (user) {
+      const n = await base44.entities.Notification.filter({ user_id: user.id }, '-created_date', 50);
+      setNotifs(n);
+    }
   };
 
   useEffect(() => { loadStats(); }, []);
@@ -44,7 +50,8 @@ export default function AdminPanel() {
   const tabs = [
     { id: 'overview', label: t('adm.overview') },
     { id: 'shifts', label: t('adm.allShifts') },
-    { id: 'users', label: t('adm.allUsers') }
+    { id: 'users', label: t('adm.allUsers') },
+    { id: 'notifications', label: t('adm.notifications') }
   ];
 
   return (
@@ -136,6 +143,37 @@ export default function AdminPanel() {
                 </div>
               ))}
             </Card>
+          )}
+        </div>
+      )}
+
+      {tab === 'notifications' && (
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Bell className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-display font-bold text-foreground">{t('adm.noShowNotif')}</h2>
+          </div>
+          {notifs === null ? (
+            <div className="space-y-3">{[0,1].map(i => <Skeleton key={i} className="h-20 w-full" />)}</div>
+          ) : notifs.length === 0 ? (
+            <EmptyState icon={Bell} title={t('adm.noNotifs')} />
+          ) : (
+            <div className="space-y-3">
+              {notifs.map(n => (
+                <Card key={n.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={`grid h-9 w-9 place-items-center rounded-xl flex-shrink-0 ${n.type === 'worker_no_show' ? 'bg-rose-50 text-rose-600' : 'bg-primary/10 text-primary'}`}>
+                      {n.type === 'worker_no_show' ? <UserX className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground text-sm">{n.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{n.body}</p>
+                    </div>
+                    {!n.read && <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-2" />}
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       )}

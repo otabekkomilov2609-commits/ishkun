@@ -4,8 +4,10 @@ import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
-import { Button, Input, Select, Field, Card } from '@/components/ui';
-import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight } from 'lucide-react';
+import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
+import StatusBadge from '@/components/StatusBadge';
+import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet } from 'lucide-react';
+import { formatSom } from '@/lib/format';
 
 export default function Profile() {
   const { user, checkUserAuth } = useAuth();
@@ -14,6 +16,8 @@ export default function Profile() {
   const [form, setForm] = useState({ phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [completedApps, setCompletedApps] = useState(null);
+  const [completedShifts, setCompletedShifts] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -24,6 +28,21 @@ export default function Profile() {
         account_type: user.account_type || '',
         language: user.language || lang
       });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && user.account_type === 'worker') {
+      (async () => {
+        const a = await base44.entities.Application.filter({ worker_id: user.id, status: 'completed' }, '-created_date', 50);
+        setCompletedApps(a);
+        const ids = [...new Set(a.map(x => x.shift_id))];
+        const map = {};
+        await Promise.all(ids.map(async sid => {
+          try { map[sid] = await base44.entities.Shift.get(sid); } catch {}
+        }));
+        setCompletedShifts(map);
+      })();
     }
   }, [user]);
 
@@ -117,6 +136,40 @@ export default function Profile() {
           </span>
         </div>
       </Card>
+
+      {form.account_type === 'worker' && (
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <History className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-display font-bold text-foreground">{t('wrk.completedJobs')}</h2>
+          </div>
+          {completedApps === null ? (
+            <Skeleton className="h-20 w-full" />
+          ) : completedApps.length === 0 ? (
+            <Card className="p-5 text-center text-sm text-muted-foreground">{t('wrk.noCompleted')}</Card>
+          ) : (
+            <div className="space-y-2">
+              {completedApps.map(a => {
+                const s = completedShifts[a.shift_id];
+                return (
+                  <Card key={a.id} className="p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground text-sm line-clamp-1">{s?.title || '—'}</h3>
+                        <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                          <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
+                          <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(s.payment_amount) : ''}</span>
+                        </div>
+                      </div>
+                      <StatusBadge status="completed" label={t('app.statusCompleted')} />
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

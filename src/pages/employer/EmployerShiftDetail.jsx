@@ -52,6 +52,35 @@ export default function EmployerShiftDetail() {
     })));
   };
 
+  const markWorkerDone = async (app) => {
+    await base44.entities.Application.update(app.id, { status: 'completed' });
+    setApps(prev => prev.map(a => a.id === app.id ? { ...a, status: 'completed' } : a));
+    await base44.entities.Notification.create({
+      user_id: app.worker_id,
+      title: t('notif.shiftDone'),
+      body: shift.title,
+      type: 'shift_completed',
+      link: '/worker/applications'
+    });
+  };
+
+  const markWorkerNoShow = async (app) => {
+    await base44.entities.Application.update(app.id, { status: 'no_show' });
+    setApps(prev => prev.map(a => a.id === app.id ? { ...a, status: 'no_show' } : a));
+    const remainingApproved = apps.filter(a => a.id !== app.id && a.status === 'approved');
+    if (remainingApproved.length < shift.required_workers && shift.status !== 'open') {
+      await base44.entities.Shift.update(id, { status: 'open' });
+      setShift({ ...shift, status: 'open' });
+    }
+    try {
+      await base44.functions.invoke('notifyAdminsNoShow', {
+        shift_id: id,
+        shift_title: shift.title,
+        employer_name: user?.full_name || ''
+      });
+    } catch (e) { console.error(e); }
+  };
+
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-48 w-full" /></div>;
 
   return (
@@ -103,6 +132,12 @@ export default function EmployerShiftDetail() {
                   <div className="flex gap-2 mt-3">
                     <Button size="sm" onClick={() => setStatus(a, 'approved')}><CheckCircle2 className="h-4 w-4" /> {t('app.approve')}</Button>
                     <Button size="sm" variant="outline" onClick={() => setStatus(a, 'rejected')}><XCircle className="h-4 w-4" /> {t('app.reject')}</Button>
+                  </div>
+                )}
+                {a.status === 'approved' && (
+                  <div className="flex gap-2 mt-3">
+                    <Button size="sm" variant="soft" onClick={() => markWorkerDone(a)}><CheckCircle2 className="h-4 w-4" /> {t('app.markDone')}</Button>
+                    <Button size="sm" variant="outline" onClick={() => markWorkerNoShow(a)}><XCircle className="h-4 w-4" /> {t('app.markNoShow')}</Button>
                   </div>
                 )}
               </Card>

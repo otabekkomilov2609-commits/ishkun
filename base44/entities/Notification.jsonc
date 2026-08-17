@@ -20,7 +20,8 @@
         "application_approved",
         "application_rejected",
         "new_application",
-        "shift_completed"
+        "shift_completed",
+        "worker_no_show"
       ],
       "title": "Turi"
     },
