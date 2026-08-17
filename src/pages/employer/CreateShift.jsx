@@ -5,6 +5,7 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
+import { useToast } from '@/components/ui/use-toast';
 import { PlusCircle, Check, Building2 } from 'lucide-react';
 
 export default function CreateShift() {
@@ -17,6 +18,7 @@ export default function CreateShift() {
     location: '', city: user?.city || '', payment_amount: '', required_workers: 1
   });
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!user) return;
@@ -27,7 +29,10 @@ export default function CreateShift() {
   }, [user]);
 
   const submit = async () => {
-    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.payment_amount || !form.city) return;
+    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.payment_amount || !form.city) {
+      toast({ title: t('required'), variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     try {
       await base44.entities.Shift.create({
@@ -38,8 +43,13 @@ export default function CreateShift() {
         status: 'open',
         moderation: 'approved'
       });
+      toast({ title: t('shift.created') });
       navigate('/employer/shifts');
-    } catch (e) { console.error(e); setSaving(false); }
+    } catch (e) {
+      console.error(e);
+      toast({ title: e?.message || 'Xatolik', description: 'Shift e\'lon qilinmadi', variant: 'destructive' });
+      setSaving(false);
+    }
   };
 
   if (company === undefined) return null;
