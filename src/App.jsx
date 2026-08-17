@@ -1,12 +1,33 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
-// Add page imports here
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
+import RoleGuard from '@/components/RoleGuard';
+import { LanguageProvider } from '@/lib/i18n';
+// Auth pages
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+// App pages
+import Home from '@/pages/Home';
+import Onboarding from '@/pages/Onboarding';
+import Profile from '@/pages/Profile';
+import AdminPanel from '@/pages/AdminPanel';
+import EmployerDashboard from '@/pages/employer/EmployerDashboard';
+import CompanyProfile from '@/pages/employer/CompanyProfile';
+import CreateShift from '@/pages/employer/CreateShift';
+import MyShifts from '@/pages/employer/MyShifts';
+import EmployerShiftDetail from '@/pages/employer/EmployerShiftDetail';
+import WorkerDashboard from '@/pages/worker/WorkerDashboard';
+import WorkerShiftDetail from '@/pages/worker/WorkerShiftDetail';
+import MyApplications from '@/pages/worker/MyApplications';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -34,7 +55,34 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      {/* Auth */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Authenticated */}
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route element={<Layout />}>
+          {/* Worker */}
+          <Route path="/worker" element={<RoleGuard roles={['worker']}><WorkerDashboard /></RoleGuard>} />
+          <Route path="/worker/applications" element={<RoleGuard roles={['worker']}><MyApplications /></RoleGuard>} />
+          <Route path="/worker/shifts/:id" element={<RoleGuard roles={['worker']}><WorkerShiftDetail /></RoleGuard>} />
+          {/* Employer */}
+          <Route path="/employer" element={<RoleGuard roles={['employer']}><EmployerDashboard /></RoleGuard>} />
+          <Route path="/employer/shifts" element={<RoleGuard roles={['employer']}><MyShifts /></RoleGuard>} />
+          <Route path="/employer/shifts/new" element={<RoleGuard roles={['employer']}><CreateShift /></RoleGuard>} />
+          <Route path="/employer/shifts/:id" element={<RoleGuard roles={['employer']}><EmployerShiftDetail /></RoleGuard>} />
+          <Route path="/employer/company" element={<RoleGuard roles={['employer']}><CompanyProfile /></RoleGuard>} />
+          {/* Admin */}
+          <Route path="/admin" element={<RoleGuard allowAdmin><AdminPanel /></RoleGuard>} />
+          {/* Shared */}
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+      </Route>
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -47,8 +95,10 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <ScrollToTop />
-          <AuthenticatedApp />
+          <LanguageProvider>
+            <ScrollToTop />
+            <AuthenticatedApp />
+          </LanguageProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>
