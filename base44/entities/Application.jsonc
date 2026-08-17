@@ -1,0 +1,71 @@
+{
+  "name": "Application",
+  "type": "object",
+  "properties": {
+    "worker_id": {
+      "type": "string",
+      "title": "Ishchi"
+    },
+    "employer_id": {
+      "type": "string",
+      "title": "Ish beruvchi"
+    },
+    "shift_id": {
+      "type": "string",
+      "title": "Shift"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "completed"
+      ],
+      "default": "pending",
+      "title": "Holati"
+    },
+    "application_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Ariza sanasi"
+    }
+  },
+  "required": [
+    "worker_id",
+    "shift_id"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "data.worker_id": "{{user.id}}"
+        },
+        {
+          "data.employer_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.worker_id": "{{user.id}}"
+        },
+        {
+          "data.employer_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.worker_id": "{{user.id}}"
+        },
+        {
+          "data.employer_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

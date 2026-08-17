@@ -1,0 +1,104 @@
+{
+  "name": "Shift",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Sarlavha"
+    },
+    "description": {
+      "type": "string",
+      "title": "Tavsif"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Sana"
+    },
+    "start_time": {
+      "type": "string",
+      "title": "Boshlanish vaqti"
+    },
+    "end_time": {
+      "type": "string",
+      "title": "Tugash vaqti"
+    },
+    "location": {
+      "type": "string",
+      "title": "Joylashuv"
+    },
+    "city": {
+      "type": "string",
+      "title": "Shahar"
+    },
+    "payment_amount": {
+      "type": "number",
+      "title": "To'lov miqdori (so'm)"
+    },
+    "required_workers": {
+      "type": "number",
+      "default": 1,
+      "title": "Kerakli ishchilar soni"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "filled",
+        "completed"
+      ],
+      "default": "open",
+      "title": "Holati"
+    },
+    "company_id": {
+      "type": "string",
+      "title": "Kompaniya"
+    },
+    "moderation": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "pending",
+        "blocked"
+      ],
+      "default": "approved",
+      "title": "Moderatsiya"
+    }
+  },
+  "required": [
+    "title",
+    "date",
+    "start_time",
+    "end_time",
+    "payment_amount",
+    "city"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

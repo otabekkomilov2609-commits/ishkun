@@ -1,0 +1,54 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "title": "Foydalanuvchi"
+    },
+    "title": {
+      "type": "string",
+      "title": "Sarlavha"
+    },
+    "body": {
+      "type": "string",
+      "title": "Matn"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "application_approved",
+        "application_rejected",
+        "new_application",
+        "shift_completed"
+      ],
+      "title": "Turi"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "title": "O'qildi"
+    },
+    "link": {
+      "type": "string",
+      "title": "Havola"
+    }
+  },
+  "required": [
+    "user_id",
+    "title",
+    "type"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}

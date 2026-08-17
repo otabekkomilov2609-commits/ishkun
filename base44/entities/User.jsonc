@@ -1,0 +1,40 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "worker",
+        "employer"
+      ],
+      "title": "Hisob turi"
+    },
+    "phone_number": {
+      "type": "string",
+      "title": "Telefon raqami"
+    },
+    "city": {
+      "type": "string",
+      "title": "Shahar"
+    },
+    "profile_image": {
+      "type": "string",
+      "title": "Profil rasmi"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "uz",
+        "ru"
+      ],
+      "default": "uz",
+      "title": "Til"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false,
+      "title": "Onboarding o'tgan"
+    }
+  }
+}

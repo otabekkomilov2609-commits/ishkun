@@ -1,0 +1,64 @@
+{
+  "name": "Company",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nomi"
+    },
+    "industry": {
+      "type": "string",
+      "enum": [
+        "savdo",
+        "restoran",
+        "logistika",
+        "event"
+      ],
+      "title": "Soha"
+    },
+    "address": {
+      "type": "string",
+      "title": "Manzil"
+    },
+    "description": {
+      "type": "string",
+      "title": "Tavsif"
+    },
+    "logo": {
+      "type": "string",
+      "title": "Logotip"
+    }
+  },
+  "required": [
+    "name",
+    "industry"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
