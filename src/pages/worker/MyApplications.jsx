@@ -60,8 +60,7 @@ export default function MyApplications() {
   const tabs = [
     { id: 'pending', label: t('wrk.tabPending'), count: apps?.filter(a => a.status === 'pending').length ?? 0 },
     { id: 'approved', label: t('wrk.tabApproved'), count: apps?.filter(a => a.status === 'approved').length ?? 0 },
-    { id: 'completed', label: t('wrk.tabCompleted'), count: apps?.filter(a => a.status === 'completed').length ?? 0 },
-    { id: 'no_show', label: t('wrk.tabNoShow'), count: apps?.filter(a => a.status === 'no_show').length ?? 0 }
+    { id: 'completed', label: t('wrk.tabCompleted'), count: apps?.filter(a => a.status === 'completed').length ?? 0 }
   ];
 
   const visible = (apps || []).filter(a => a.status === tab);
