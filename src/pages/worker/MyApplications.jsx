@@ -16,7 +16,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel
 } from '@/components/ui/alert-dialog';
-import { ClipboardList, Calendar, Clock, Wallet, XCircle } from 'lucide-react';
+import { ClipboardList, Calendar, Clock, Wallet, XCircle, CheckCircle2, Briefcase } from 'lucide-react';
 import { formatSom } from '@/lib/format';
 
 export default function MyApplications() {
@@ -69,37 +69,60 @@ export default function MyApplications() {
           action={<button onClick={() => navigate('/worker')} className="text-primary font-semibold text-sm hover:underline">{t('nav.browse')}</button>}
         />
       ) : (
-        <div className="space-y-3">
-          {apps.map(a => {
-            const s = shifts[a.shift_id];
+        <div className="space-y-6">
+          {[
+            { statuses: ['pending'], title: t('wrk.sectionPending'), icon: Clock, color: 'text-amber-600' },
+            { statuses: ['approved'], title: t('wrk.sectionApproved'), icon: CheckCircle2, color: 'text-emerald-600' },
+            { statuses: ['completed'], title: t('wrk.sectionCompleted'), icon: Briefcase, color: 'text-zinc-500' }
+          ].map(group => {
+            const items = apps.filter(a => group.statuses.includes(a.status));
+            const GIcon = group.icon;
             return (
-              <Card key={a.id} className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1 cursor-pointer" onClick={() => s && navigate(`/worker/shifts/${a.shift_id}`)}>
-                    <h3 className="font-semibold text-foreground line-clamp-1">{s?.title || '—'}</h3>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
-                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {s?.start_time}</span>
-                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(s.payment_amount) : ''}</span>
-                    </div>
-                  </div>
-                  <StatusBadge status={a.status} label={statusLabel(a.status)} />
+              <div key={group.title}>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <GIcon className={`h-4 w-4 ${group.color}`} />
+                  <h2 className="text-sm font-bold text-foreground">{group.title}</h2>
+                  <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{items.length}</span>
                 </div>
-                {a.status === 'pending' && (
-                  <div className="mt-3">
-                    <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
-                      <XCircle className="h-4 w-4" /> {t('wrk.cancelApp')}
-                    </Button>
+                {items.length === 0 ? (
+                  <p className="text-xs text-muted-foreground pl-6 pb-1">{t('wrk.sectionEmpty')}</p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {items.map(a => {
+                      const s = shifts[a.shift_id];
+                      return (
+                        <Card key={a.id} className="p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1 cursor-pointer" onClick={() => s && navigate(`/worker/shifts/${a.shift_id}`)}>
+                              <h3 className="font-semibold text-foreground line-clamp-1">{s?.title || '—'}</h3>
+                              <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                                <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
+                                <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {s?.start_time}</span>
+                                <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(s.payment_amount) : ''}</span>
+                              </div>
+                            </div>
+                            <StatusBadge status={a.status} label={statusLabel(a.status)} />
+                          </div>
+                          {a.status === 'pending' && (
+                            <div className="mt-3">
+                              <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
+                                <XCircle className="h-4 w-4" /> {t('wrk.cancelApp')}
+                              </Button>
+                            </div>
+                          )}
+                          {a.status === 'approved' && (
+                            <div className="mt-3">
+                              <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
+                                <XCircle className="h-4 w-4" /> {t('cancel')}
+                              </Button>
+                            </div>
+                          )}
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
-                {a.status === 'approved' && (
-                  <div className="mt-3">
-                    <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
-                      <XCircle className="h-4 w-4" /> {t('cancel')}
-                    </Button>
-                  </div>
-                )}
-              </Card>
+              </div>
             );
           })}
         </div>
