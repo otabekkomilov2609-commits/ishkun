@@ -46,6 +46,7 @@ export default function WorkerShiftDetail() {
   const apply = async () => {
     if (!verified || sameDayConflict) return;
     setApplying(true);
+    setApplied(true);
     try {
       await base44.entities.Application.create({
         worker_id: user.id,
@@ -61,8 +62,10 @@ export default function WorkerShiftDetail() {
         type: 'new_application',
         link: `/employer/shifts/${id}`
       });
-      setApplied(true);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      setApplied(false);
+      console.error(e);
+    }
     setApplying(false);
   };
 

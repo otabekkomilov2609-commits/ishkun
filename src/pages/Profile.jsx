@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
-import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react';
 import { formatSom } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
@@ -96,6 +96,12 @@ export default function Profile() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <button
+        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ArrowLeft className="h-4 w-4" /> {t('back')}
+      </button>
       <div className="flex items-center gap-4 mb-6">
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-primary-foreground text-lg font-bold shadow-sm">
           {initials}

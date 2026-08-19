@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import MobileSelect from '@/components/MobileSelect';
 
 export function Button({ variant = 'primary', size = 'md', className, children, ...props }) {
   const variants = {
@@ -54,7 +55,7 @@ export function Textarea({ className, ...props }) {
 
 export function Select({ className, children, ...props }) {
   return (
-    <select
+    <MobileSelect
       className={cn(
         'h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60',
         className
@@ -62,7 +63,7 @@ export function Select({ className, children, ...props }) {
       {...props}
     >
       {children}
-    </select>
+    </MobileSelect>
   );
 }
 

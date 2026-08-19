@@ -1,11 +1,12 @@
-import React from 'react';
-import { Outlet, NavLink, Link } from 'react-router-dom';
-import { Search, ClipboardList, LayoutDashboard, CalendarDays, PlusCircle, User, Shield, ShieldCheck, LogOut } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, ClipboardList, LayoutDashboard, CalendarDays, PlusCircle, User, Shield, ShieldCheck, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import Brand from './Brand';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationsBell from './NotificationsBell';
+import AnimatedOutlet from './AnimatedOutlet';
 import { cn } from '@/lib/utils';
 
 function initials(name) {
@@ -16,6 +17,9 @@ function initials(name) {
 export default function Layout() {
   const { user, logout } = useAuth();
   const { t } = useLang();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const scrollMap = useRef({});
 
   const role = user?.role || 'worker';
 
@@ -39,12 +43,39 @@ export default function Layout() {
 
   const nav = navByRole[role] || navByRole.worker;
 
+  // Scroll memory: save scroll offset per path, restore on return
+  useEffect(() => {
+    return () => {
+      scrollMap.current[location.pathname] = window.scrollY;
+    };
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const y = scrollMap.current[location.pathname] || 0;
+    if (y > 0) setTimeout(() => window.scrollTo(0, y), 280);
+  }, [location.pathname]);
+
+  // Back button shows on subpages (not tab roots)
+  const tabRoots = new Set(nav.map(n => n.to));
+  const isSubpage = !tabRoots.has(location.pathname);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between gap-3">
-          <Brand />
+          <div className="flex items-center gap-2 min-w-0">
+            {isSubpage && (
+              <button
+                onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+                className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex-shrink-0"
+                aria-label={t('back')}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            )}
+            <Brand />
+          </div>
           <div className="flex items-center gap-1.5">
             <LanguageSwitcher />
             <NotificationsBell />
@@ -57,7 +88,7 @@ export default function Layout() {
 
       {/* Page content */}
       <main className="flex-1 mx-auto w-full max-w-5xl px-4 pb-28 pt-4 sm:pt-8">
-        <Outlet />
+        <AnimatedOutlet />
       </main>
 
       {/* Bottom navigation */}

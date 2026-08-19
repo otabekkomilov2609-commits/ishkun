@@ -32,53 +32,79 @@ export default function EmployerShiftDetail() {
   useEffect(() => { load(); }, [id]);
 
   const setStatus = async (app, status) => {
-    await base44.entities.Application.update(app.id, { status });
-    setApps(prev => prev.map(a => a.id === app.id ? { ...a, status } : a));
-    await base44.entities.Notification.create({
-      user_id: app.worker_id,
-      title: status === 'approved' ? t('notif.approved') : t('notif.rejected'),
-      body: shift.title,
-      type: status === 'approved' ? 'application_approved' : 'application_rejected',
-      link: `/worker/applications`
-    });
+    const prev = apps;
+    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status } : a));
+    try {
+      await base44.entities.Application.update(app.id, { status });
+      await base44.entities.Notification.create({
+        user_id: app.worker_id,
+        title: status === 'approved' ? t('notif.approved') : t('notif.rejected'),
+        body: shift.title,
+        type: status === 'approved' ? 'application_approved' : 'application_rejected',
+        link: `/worker/applications`
+      });
+    } catch (e) {
+      setApps(prev);
+      console.error(e);
+    }
   };
 
   const markCompleted = async () => {
-    await base44.entities.Shift.update(id, { status: 'completed' });
+    const prevStatus = shift.status;
     setShift({ ...shift, status: 'completed' });
-    const approved = apps.filter(a => a.status === 'approved');
-    await base44.entities.Notification.bulkCreate(approved.map(a => ({
-      user_id: a.worker_id, title: t('notif.shiftDone'), body: shift.title, type: 'shift_completed', link: '/worker/applications'
-    })));
+    try {
+      await base44.entities.Shift.update(id, { status: 'completed' });
+      const approved = apps.filter(a => a.status === 'approved');
+      await base44.entities.Notification.bulkCreate(approved.map(a => ({
+        user_id: a.worker_id, title: t('notif.shiftDone'), body: shift.title, type: 'shift_completed', link: '/worker/applications'
+      })));
+    } catch (e) {
+      setShift({ ...shift, status: prevStatus });
+      console.error(e);
+    }
   };
 
   const markWorkerDone = async (app) => {
-    await base44.entities.Application.update(app.id, { status: 'completed' });
-    setApps(prev => prev.map(a => a.id === app.id ? { ...a, status: 'completed' } : a));
-    await base44.entities.Notification.create({
-      user_id: app.worker_id,
-      title: t('notif.shiftDone'),
-      body: shift.title,
-      type: 'shift_completed',
-      link: '/worker/applications'
-    });
+    const prev = apps;
+    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status: 'completed' } : a));
+    try {
+      await base44.entities.Application.update(app.id, { status: 'completed' });
+      await base44.entities.Notification.create({
+        user_id: app.worker_id,
+        title: t('notif.shiftDone'),
+        body: shift.title,
+        type: 'shift_completed',
+        link: '/worker/applications'
+      });
+    } catch (e) {
+      setApps(prev);
+      console.error(e);
+    }
   };
 
   const markWorkerNoShow = async (app) => {
-    await base44.entities.Application.update(app.id, { status: 'no_show' });
-    setApps(prev => prev.map(a => a.id === app.id ? { ...a, status: 'no_show' } : a));
+    const prev = apps;
+    const prevStatus = shift.status;
+    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status: 'no_show' } : a));
     const remainingApproved = apps.filter(a => a.id !== app.id && a.status === 'approved');
     if (remainingApproved.length < shift.required_workers && shift.status !== 'open') {
-      await base44.entities.Shift.update(id, { status: 'open' });
       setShift({ ...shift, status: 'open' });
     }
     try {
+      await base44.entities.Application.update(app.id, { status: 'no_show' });
+      if (remainingApproved.length < shift.required_workers && prevStatus !== 'open') {
+        await base44.entities.Shift.update(id, { status: 'open' });
+      }
       await base44.functions.invoke('notifyAdminsNoShow', {
         shift_id: id,
         shift_title: shift.title,
         employer_name: user?.full_name || ''
       });
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      setApps(prev);
+      setShift({ ...shift, status: prevStatus });
+      console.error(e);
+    }
   };
 
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-48 w-full" /></div>;

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Input, Field, Card, Skeleton } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
-import { ShieldCheck, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { ShieldCheck, AlertCircle, CheckCircle2, Clock, ArrowLeft } from 'lucide-react';
 
 export default function Verification() {
   const { user, checkUserAuth } = useAuth();
   const { t } = useLang();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     phone_number: '', jshshir: '', date_of_birth: '', address: '',
     passport_front: '', passport_back: '',
@@ -69,6 +71,12 @@ export default function Verification() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <button
+        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ArrowLeft className="h-4 w-4" /> {t('back')}
+      </button>
       <div className="flex items-center gap-2 mb-5">
         <ShieldCheck className="h-6 w-6 text-primary" />
         <h1 className="text-2xl font-display font-bold tracking-tight text-primary">{t('kyc.title')}</h1>

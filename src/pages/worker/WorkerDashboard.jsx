@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
@@ -6,35 +7,52 @@ import { CITIES } from '@/lib/format';
 import { Input, Select, Skeleton } from '@/components/ui';
 import ShiftCard from '@/components/ShiftCard';
 import EmptyState from '@/components/EmptyState';
+import PullToRefresh from '@/components/PullToRefresh';
 import { Search, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function WorkerDashboard() {
   const { user } = useAuth();
   const { t } = useLang();
-  const [shifts, setShifts] = useState(null);
-  const [apps, setApps] = useState([]);
-  const [busyDates, setBusyDates] = useState(new Set());
   const [q, setQ] = useState('');
   const [city, setCity] = useState(user?.city || '');
   const [date, setDate] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      const s = await base44.entities.Shift.filter({ status: 'open', moderation: 'approved' }, 'date', 100);
-      setShifts(s);
-      if (user) {
-        const a = await base44.entities.Application.filter({ worker_id: user.id }, '-created_date', 200);
-        setApps(a);
-        const active = a.filter(x => x.status === 'approved');
-        const ids = [...new Set(active.map(x => x.shift_id))];
-        const otherShifts = await Promise.all(ids.map(async sid => {
-          try { return await base44.entities.Shift.get(sid); } catch { return null; }
-        }));
-        setBusyDates(new Set(otherShifts.filter(Boolean).map(os => os.date)));
-      }
-    })();
-  }, [user]);
+  const shiftsQ = useQuery({
+    queryKey: ['workerShifts'],
+    queryFn: () => base44.entities.Shift.filter({ status: 'open', moderation: 'approved' }, 'date', 100),
+    staleTime: 60_000,
+  });
+
+  const appsQ = useQuery({
+    queryKey: ['myApps', user?.id],
+    queryFn: () => base44.entities.Application.filter({ worker_id: user.id }, '-created_date', 200),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
+  const apps = appsQ.data || [];
+  const activeAppShiftIds = useMemo(
+    () => [...new Set(apps.filter(x => x.status === 'approved').map(x => x.shift_id))],
+    [apps]
+  );
+
+  const busyQ = useQuery({
+    queryKey: ['busyShifts', activeAppShiftIds],
+    queryFn: async () => {
+      const res = await Promise.all(activeAppShiftIds.map(async sid => {
+        try { return await base44.entities.Shift.get(sid); } catch { return null; }
+      }));
+      return res.filter(Boolean);
+    },
+    enabled: activeAppShiftIds.length > 0,
+    staleTime: 30_000,
+  });
+
+  const busyDates = useMemo(() => new Set((busyQ.data || []).map(s => s.date)), [busyQ.data]);
+
+  const shifts = shiftsQ.data;
+  const loading = shiftsQ.isLoading;
 
   const filtered = useMemo(() => {
     if (!shifts) return [];
@@ -52,6 +70,10 @@ export default function WorkerDashboard() {
   }, [shifts, city, date, q, user, busyDates]);
 
   const appliedIds = new Set(apps.map(a => a.shift_id));
+
+  const refresh = async () => {
+    await Promise.all([shiftsQ.refetch(), appsQ.refetch(), busyQ.refetch()]);
+  };
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -78,27 +100,29 @@ export default function WorkerDashboard() {
         <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="sm:w-44" />
       </div>
 
-      {shifts === null ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[0,1,2,3].map(i => <Skeleton key={i} className="h-28 w-full" />)}</div>
-      ) : filtered.length === 0 ? (
-        <EmptyState icon={CalendarDays} title={t('wrk.noShifts')} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filtered.map(s => {
-            const applied = appliedIds.has(s.id);
-            return (
-              <div key={s.id} className="relative">
-                <ShiftCard shift={s} />
-                {applied && (
-                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold px-2 py-0.5">
-                    {t('wrk.applied')}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <PullToRefresh onRefresh={refresh}>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[0,1,2,3].map(i => <Skeleton key={i} className="h-28 w-full" />)}</div>
+        ) : filtered.length === 0 ? (
+          <EmptyState icon={CalendarDays} title={t('wrk.noShifts')} />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {filtered.map(s => {
+              const applied = appliedIds.has(s.id);
+              return (
+                <div key={s.id} className="relative">
+                  <ShiftCard shift={s} />
+                  {applied && (
+                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold px-2 py-0.5">
+                      {t('wrk.applied')}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </PullToRefresh>
     </div>
   );
 }

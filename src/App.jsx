@@ -30,6 +30,7 @@ import WorkerDashboard from '@/pages/worker/WorkerDashboard';
 import WorkerShiftDetail from '@/pages/worker/WorkerShiftDetail';
 import MyApplications from '@/pages/worker/MyApplications';
 import Verification from '@/pages/Verification';
+import PageTransition from '@/components/PageTransition';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -65,8 +66,8 @@ const AuthenticatedApp = () => {
 
       {/* Authenticated */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
         <Route element={<Layout />}>
           {/* Worker */}
           <Route path="/worker" element={<RoleGuard roles={['worker']}><WorkerDashboard /></RoleGuard>} />
