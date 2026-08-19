@@ -26,6 +26,10 @@
       "type": "string",
       "title": "Kiyinish tartibi"
     },
+    "map_link": {
+      "type": "string",
+      "title": "Yandex xarita havolasi"
+    },
     "geo_lat": {
       "type": "number",
       "title": "Kenglik (latitude)"
@@ -113,7 +117,8 @@
     "end_time",
     "hourly_rate",
     "city",
-    "location"
+    "location",
+    "map_link"
   ],
   "rls": {
     "create": true,

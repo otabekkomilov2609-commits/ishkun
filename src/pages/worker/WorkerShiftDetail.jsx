@@ -79,9 +79,10 @@ export default function WorkerShiftDetail() {
 
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-64 w-full" /></div>;
 
-  const mapUrl = (shift.geo_lat != null && shift.geo_lng != null)
-    ? `https://yandex.com/maps/?pt=${shift.geo_lng},${shift.geo_lat}&z=16&l=map`
-    : `https://yandex.com/maps/?text=${encodeURIComponent([shift.location, shift.city].filter(Boolean).join(', '))}`;
+  const mapUrl = shift.map_link
+    || ((shift.geo_lat != null && shift.geo_lng != null)
+      ? `https://yandex.com/maps/?pt=${shift.geo_lng},${shift.geo_lat}&z=16&l=map`
+      : `https://yandex.com/maps/?text=${encodeURIComponent([shift.location, shift.city].filter(Boolean).join(', '))}`);
 
   const tasksList = (shift.tasks_text || '').split('\n').map(s => s.trim()).filter(Boolean);
 

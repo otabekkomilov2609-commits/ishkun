@@ -15,6 +15,7 @@ export default function CreateShift() {
   const [company, setCompany] = useState(undefined);
   const [form, setForm] = useState({
     title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
+    map_link: '',
     date: '', start_time: '', end_time: '',
     location: '', city: user?.city || '', hourly_rate: '', required_workers: 1, required_skill: ''
   });
@@ -30,7 +31,7 @@ export default function CreateShift() {
   }, [user]);
 
   const submit = async () => {
-    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.hourly_rate || !form.city || !form.location) {
+    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.hourly_rate || !form.city || !form.location || !form.map_link) {
       toast({ title: t('required'), variant: 'destructive' });
       return;
     }
@@ -43,6 +44,7 @@ export default function CreateShift() {
         important_notes_text: form.important_notes_text || undefined,
         requirements_text: form.requirements_text || undefined,
         dress_code_text: form.dress_code_text || undefined,
+        map_link: form.map_link,
         date: form.date,
         start_time: form.start_time,
         end_time: form.end_time,
@@ -120,6 +122,11 @@ export default function CreateShift() {
               {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
           </Field>
+          <div className="sm:col-span-2">
+            <Field label={t('shift.mapLink')} required hint={t('shift.mapLinkHint')}>
+              <Input value={form.map_link} onChange={e => setForm({ ...form, map_link: e.target.value })} placeholder="https://yandex.com/maps/..." />
+            </Field>
+          </div>
           <div className="sm:col-span-2">
             <Field label={t('shift.skill')}>
               <Select value={form.required_skill} onChange={e => setForm({ ...form, required_skill: e.target.value })}>
