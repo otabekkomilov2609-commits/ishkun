@@ -14,7 +14,8 @@ export default function CreateShift() {
   const navigate = useNavigate();
   const [company, setCompany] = useState(undefined);
   const [form, setForm] = useState({
-    title: '', description: '', date: '', start_time: '', end_time: '',
+    title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
+    date: '', start_time: '', end_time: '',
     location: '', city: user?.city || '', hourly_rate: '', required_workers: 1, required_skill: ''
   });
   const [saving, setSaving] = useState(false);
@@ -38,6 +39,10 @@ export default function CreateShift() {
       const shift = await base44.entities.Shift.create({
         title: form.title,
         description: form.description,
+        tasks_text: form.tasks_text || undefined,
+        important_notes_text: form.important_notes_text || undefined,
+        requirements_text: form.requirements_text || undefined,
+        dress_code_text: form.dress_code_text || undefined,
         date: form.date,
         start_time: form.start_time,
         end_time: form.end_time,
@@ -137,6 +142,26 @@ export default function CreateShift() {
           <div className="sm:col-span-2">
             <Field label={t('shift.description')}>
               <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field label={t('sdetail.tasksLabel')} hint="Har bir qator alohida vazifa sifatida ko'rinadi">
+              <Textarea rows={4} value={form.tasks_text} onChange={e => setForm({ ...form, tasks_text: e.target.value })} placeholder={"Mijozlarni kutib olish\nMahsulotlarni javonga joylash\nHisobot tayyorlash"} />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field label={t('sdetail.importantLabel')}>
+              <Textarea rows={3} value={form.important_notes_text} onChange={e => setForm({ ...form, important_notes_text: e.target.value })} placeholder="Vaqtida kelish, aloqa uchun telefon raqami" />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field label={t('sdetail.requirementsLabel')}>
+              <Textarea rows={3} value={form.requirements_text} onChange={e => setForm({ ...form, requirements_text: e.target.value })} placeholder="Joyga kelganda davomat varaqasini imzolang" />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field label={t('sdetail.dressCodeLabel')}>
+              <Input value={form.dress_code_text} onChange={e => setForm({ ...form, dress_code_text: e.target.value })} placeholder="Qora shim, oq ko'ylak, qora poyabzal" />
             </Field>
           </div>
         </div>

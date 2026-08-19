@@ -10,6 +10,30 @@
       "type": "string",
       "title": "Tavsif"
     },
+    "tasks_text": {
+      "type": "string",
+      "title": "Vazifalar"
+    },
+    "important_notes_text": {
+      "type": "string",
+      "title": "Muhim eslatmalar"
+    },
+    "requirements_text": {
+      "type": "string",
+      "title": "Talablar"
+    },
+    "dress_code_text": {
+      "type": "string",
+      "title": "Kiyinish tartibi"
+    },
+    "geo_lat": {
+      "type": "number",
+      "title": "Kenglik (latitude)"
+    },
+    "geo_lng": {
+      "type": "number",
+      "title": "Uzunlik (longitude)"
+    },
     "date": {
       "type": "string",
       "format": "date",

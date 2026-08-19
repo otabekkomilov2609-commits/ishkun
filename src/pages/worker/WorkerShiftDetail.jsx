@@ -5,7 +5,7 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { queryClientInstance } from '@/lib/query-client';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt } from 'lucide-react';
 import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/format';
 import { getWorkerShiftState, STATE_STYLES } from '@/lib/shiftStatus';
 import { cn } from '@/lib/utils';
@@ -79,29 +79,84 @@ export default function WorkerShiftDetail() {
 
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-64 w-full" /></div>;
 
+  const mapUrl = (shift.geo_lat != null && shift.geo_lng != null)
+    ? `https://yandex.com/maps/?pt=${shift.geo_lng},${shift.geo_lat}&z=16&l=map`
+    : `https://yandex.com/maps/?text=${encodeURIComponent([shift.location, shift.city].filter(Boolean).join(', '))}`;
+
+  const tasksList = (shift.tasks_text || '').split('\n').map(s => s.trim()).filter(Boolean);
+
   return (
     <div className="max-w-2xl mx-auto">
       <button onClick={() => navigate('/worker')} className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors mb-4" aria-label={t('back')}>
         <ArrowLeft className="h-5 w-5" />
       </button>
 
-      <Card className="p-5 mb-4">
-        <h1 className="text-xl font-display font-bold text-foreground mb-1">{shift.title}</h1>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
-          <MapPin className="h-3.5 w-3.5" /> {shift.location || shift.city}
+      <h1 className="text-xl font-display font-bold text-foreground mb-4">{shift.title}</h1>
+
+      {/* Manzil */}
+      <SectionCard icon={MapPin} title={t('sdetail.address')}>
+        <div className="text-sm text-foreground">{[shift.location, shift.city].filter(Boolean).join(', ')}</div>
+        <a href={mapUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex">
+          <Button variant="soft" size="sm"><Navigation className="h-4 w-4" /> {t('sdetail.viewMap')}</Button>
+        </a>
+      </SectionCard>
+
+      {/* Narx va vaqt */}
+      <SectionCard icon={Wallet} title={t('sdetail.payTime')}>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-emerald-700 font-extrabold text-lg">{pay.total != null ? formatSom(pay.total) : '—'}</span>
+          {pay.hourlyRate != null && <span className="text-xs text-muted-foreground">· {formatSom(pay.hourlyRate)}/{t('shift.hourShort')}</span>}
         </div>
-        {shift.description && <p className="text-sm text-muted-foreground mb-4">{shift.description}</p>}
         <div className="grid grid-cols-2 gap-3 text-sm">
           <Info icon={Calendar} label={t('shift.date')} value={formatDateDMY(shift.date)} />
+          <Info icon={Clock} label={t('shift.duration')} value={`${durLabel} ${t('shift.durationShort')}`} />
           <Info icon={Clock} label={t('shift.startTime')} value={shift.start_time} />
           <Info icon={Clock} label={t('shift.endTime')} value={shift.end_time} />
-          <Info icon={Clock} label={t('shift.duration')} value={`${durLabel} ${t('shift.durationShort')}`} />
-          <Info icon={Wallet} label={t('shift.hourlyRate')} value={pay.hourlyRate != null ? formatSom(pay.hourlyRate) : '—'} />
-          <Info icon={Wallet} label={t('shift.totalAmount')} value={pay.total != null ? formatSom(pay.total) : '—'} />
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
-      </Card>
+      </SectionCard>
 
+      {/* Tavsif */}
+      {(shift.description || tasksList.length > 0) && (
+        <SectionCard icon={ClipboardCheck} title={t('sdetail.description')}>
+          {shift.description && <p className="text-sm text-muted-foreground whitespace-pre-line">{shift.description}</p>}
+          {tasksList.length > 0 && (
+            <div className={shift.description ? 'mt-4' : ''}>
+              <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-foreground"><ListChecks className="h-4 w-4 text-primary" /> {t('sdetail.tasksHeading')}</div>
+              <ul className="space-y-1.5">
+                {tasksList.map((task, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    <span>{task}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </SectionCard>
+      )}
+
+      {/* Muhim eslatmalar */}
+      {shift.important_notes_text && (
+        <SectionCard icon={AlertCircle} title={t('sdetail.important')}>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{shift.important_notes_text}</p>
+        </SectionCard>
+      )}
+
+      {/* Talablar */}
+      {(shift.requirements_text || shift.dress_code_text) && (
+        <SectionCard icon={ClipboardCheck} title={t('sdetail.requirements')}>
+          {shift.requirements_text && <p className="text-sm text-muted-foreground whitespace-pre-line">{shift.requirements_text}</p>}
+          {shift.dress_code_text && (
+            <div className={shift.requirements_text ? 'mt-4' : ''}>
+              <div className="flex items-center gap-1.5 mb-1.5 text-sm font-semibold text-foreground"><Shirt className="h-4 w-4 text-primary" /> {t('sdetail.dressCode')}</div>
+              <p className="text-sm text-muted-foreground">{shift.dress_code_text}</p>
+            </div>
+          )}
+        </SectionCard>
+      )}
+
+      {/* Kompaniya */}
       {company && (
         <Card className="p-4 mb-4">
           <div className="flex items-center gap-3">
@@ -134,6 +189,18 @@ export default function WorkerShiftDetail() {
         )}
       </div>
     </div>
+  );
+}
+
+function SectionCard({ icon: Icon, title, children }) {
+  return (
+    <Card className="p-4 mb-4">
+      <div className="flex items-center gap-1.5 mb-3">
+        <Icon className="h-4 w-4 text-primary" />
+        <h2 className="text-sm font-bold text-foreground">{title}</h2>
+      </div>
+      {children}
+    </Card>
   );
 }
 
