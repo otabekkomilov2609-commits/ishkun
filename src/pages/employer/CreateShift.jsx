@@ -15,7 +15,7 @@ export default function CreateShift() {
   const [company, setCompany] = useState(undefined);
   const [form, setForm] = useState({
     title: '', description: '', date: '', start_time: '', end_time: '',
-    location: '', city: user?.city || '', payment_amount: '', required_workers: 1
+    location: '', city: user?.city || '', hourly_rate: '', required_workers: 1, required_skill: ''
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -29,7 +29,7 @@ export default function CreateShift() {
   }, [user]);
 
   const submit = async () => {
-    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.payment_amount || !form.city) {
+    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.hourly_rate || !form.city) {
       toast({ title: t('required'), variant: 'destructive' });
       return;
     }

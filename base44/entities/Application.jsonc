@@ -21,7 +21,8 @@
         "approved",
         "rejected",
         "completed",
-        "no_show"
+        "no_show",
+        "cancelled"
       ],
       "default": "pending",
       "title": "Holati"

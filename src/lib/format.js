@@ -17,6 +17,44 @@ export const CITIES = [
   "Qo'qon"
 ];
 
+export function formatDateDMY(dateStr) {
+  if (!dateStr) return '';
+  const p = dateStr.split('T')[0].split('-');
+  if (p.length !== 3) return dateStr;
+  return `${p[2]}.${p[1]}.${p[0]}`;
+}
+
+export function parseTime(t) {
+  if (!t) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+export function shiftDurationHours(shift) {
+  if (!shift || !shift.start_time || !shift.end_time) return 0;
+  let mins = parseTime(shift.end_time) - parseTime(shift.start_time);
+  if (mins < 0) mins += 24 * 60;
+  return Math.round((mins / 60) * 10) / 10;
+}
+
+export function shiftPay(shift) {
+  const duration = shiftDurationHours(shift);
+  let hourly = Number(shift?.hourly_rate);
+  let total = null;
+  if (hourly) {
+    total = Math.round(hourly * duration);
+  } else if (shift?.payment_amount != null && shift.payment_amount !== '') {
+    total = Number(shift.payment_amount);
+    hourly = duration > 0 ? Math.round(total / duration) : null;
+  }
+  return { duration, hourlyRate: hourly || null, total };
+}
+
+export function timeRange(shift) {
+  if (!shift?.start_time) return '';
+  return `${shift.start_time}–${shift.end_time}`;
+}
+
 export function timeAgo(dateStr, lang = 'uz') {
   if (!dateStr) return '';
   const diff = Date.now() - new Date(dateStr).getTime();

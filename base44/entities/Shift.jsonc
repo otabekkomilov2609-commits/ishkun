@@ -31,6 +31,10 @@
       "type": "string",
       "title": "Shahar"
     },
+    "hourly_rate": {
+      "type": "number",
+      "title": "Soatlik stavka (so'm)"
+    },
     "payment_amount": {
       "type": "number",
       "title": "To'lov miqdori (so'm)"
@@ -39,6 +43,19 @@
       "type": "number",
       "default": 1,
       "title": "Kerakli ishchilar soni"
+    },
+    "required_skill": {
+      "type": "string",
+      "enum": [
+        "warehouse",
+        "waiter",
+        "cashier",
+        "courier",
+        "promoter",
+        "event_staff",
+        "cleaner"
+      ],
+      "title": "Lavozim turi"
     },
     "status": {
       "type": "string",
@@ -70,7 +87,7 @@
     "date",
     "start_time",
     "end_time",
-    "payment_amount",
+    "hourly_rate",
     "city"
   ],
   "rls": {

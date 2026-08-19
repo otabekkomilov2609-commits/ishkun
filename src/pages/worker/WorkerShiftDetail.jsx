@@ -4,8 +4,10 @@ import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, CheckCircle2 } from 'lucide-react';
-import { formatSom } from '@/lib/format';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2 } from 'lucide-react';
+import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/format';
+import { getWorkerShiftState, STATE_STYLES } from '@/lib/shiftStatus';
+import { cn } from '@/lib/utils';
 
 export default function WorkerShiftDetail() {
   const { id } = useParams();
@@ -14,7 +16,7 @@ export default function WorkerShiftDetail() {
   const navigate = useNavigate();
   const [shift, setShift] = useState(null);
   const [company, setCompany] = useState(null);
-  const [applied, setApplied] = useState(false);
+  const [myApp, setMyApp] = useState(null);
   const [applying, setApplying] = useState(false);
   const [sameDayConflict, setSameDayConflict] = useState(null);
 
@@ -27,11 +29,11 @@ export default function WorkerShiftDetail() {
       }
       if (user) {
         const a = await base44.entities.Application.filter({ worker_id: user.id, shift_id: id });
-        setApplied(a.length > 0);
-        // Check for same-day conflicts: any active application (pending/approved) on the same date
-        const activeApps = await base44.entities.Application.filter({ worker_id: user.id });
-        const active = activeApps.filter(x => x.status === 'approved');
-        const otherShiftIds = [...new Set(active.map(x => x.shift_id).filter(sid => sid !== id))];
+        const active = a.find(x => x.status !== 'cancelled') || a[0] || null;
+        setMyApp(active);
+        const allApps = await base44.entities.Application.filter({ worker_id: user.id });
+        const approvedApps = allApps.filter(x => x.status === 'approved');
+        const otherShiftIds = [...new Set(approvedApps.map(x => x.shift_id).filter(sid => sid !== id))];
         const otherShifts = await Promise.all(otherShiftIds.map(async sid => {
           try { return await base44.entities.Shift.get(sid); } catch { return null; }
         }));
@@ -42,11 +44,15 @@ export default function WorkerShiftDetail() {
   }, [id, user]);
 
   const verified = user?.verification_status === 'verified';
+  const state = getWorkerShiftState(myApp, shift);
+  const pay = shift ? shiftPay(shift) : null;
+  const dur = shift ? shiftDurationHours(shift) : 0;
+  const durLabel = Number.isInteger(dur) ? dur : dur.toFixed(1);
 
   const apply = async () => {
     if (!verified || sameDayConflict) return;
     setApplying(true);
-    setApplied(true);
+    setMyApp({ status: 'pending', worker_id: user.id, shift_id: id });
     try {
       await base44.entities.Application.create({
         worker_id: user.id,
@@ -63,7 +69,7 @@ export default function WorkerShiftDetail() {
         link: `/employer/shifts/${id}`
       });
     } catch (e) {
-      setApplied(false);
+      setMyApp(null);
       console.error(e);
     }
     setApplying(false);
@@ -73,8 +79,8 @@ export default function WorkerShiftDetail() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <button onClick={() => navigate('/worker')} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4" /> {t('wrk.backToShifts')}
+      <button onClick={() => navigate('/worker')} className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors mb-4" aria-label={t('back')}>
+        <ArrowLeft className="h-5 w-5" />
       </button>
 
       <Card className="p-5 mb-4">
@@ -84,9 +90,12 @@ export default function WorkerShiftDetail() {
         </div>
         {shift.description && <p className="text-sm text-muted-foreground mb-4">{shift.description}</p>}
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <Info icon={Calendar} label={t('shift.date')} value={shift.date} />
-          <Info icon={Clock} label={t('shift.startTime')} value={`${shift.start_time} — ${shift.end_time}`} />
-          <Info icon={Wallet} label={t('shift.payment')} value={formatSom(shift.payment_amount)} />
+          <Info icon={Calendar} label={t('shift.date')} value={formatDateDMY(shift.date)} />
+          <Info icon={Clock} label={t('shift.startTime')} value={shift.start_time} />
+          <Info icon={Clock} label={t('shift.endTime')} value={shift.end_time} />
+          <Info icon={Clock} label={t('shift.duration')} value={`${durLabel} ${t('shift.durationShort')}`} />
+          <Info icon={Wallet} label={t('shift.hourlyRate')} value={pay.hourlyRate != null ? formatSom(pay.hourlyRate) : '—'} />
+          <Info icon={Wallet} label={t('shift.totalAmount')} value={pay.total != null ? formatSom(pay.total) : '—'} />
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
       </Card>
@@ -105,24 +114,20 @@ export default function WorkerShiftDetail() {
       )}
 
       <div className="sticky bottom-20">
-        {applied ? (
-          <Button size="lg" className="w-full" disabled>
-            <CheckCircle2 className="h-5 w-5" /> {t('wrk.applied')}
-          </Button>
-        ) : sameDayConflict ? (
-          <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">
-            {t('wrk.sameDayConflict')}
-          </div>
-        ) : verified ? (
+        {state.key === 'apply' && verified && !sameDayConflict ? (
           <Button size="lg" className="w-full" disabled={applying} onClick={apply}>
-            {t('wrk.applyNow')}
+            {t('wstat.apply')}
           </Button>
-        ) : (
+        ) : state.key === 'apply' && !verified ? (
           <div className="space-y-2">
             <div className="rounded-xl bg-amber-50 text-amber-700 text-sm font-medium px-4 py-3 text-center">{t('kyc.mustVerify')}</div>
-            <Button size="lg" className="w-full" onClick={() => navigate('/verification')}>
-              {t('kyc.verifyNow')}
-            </Button>
+            <Button size="lg" className="w-full" onClick={() => navigate('/verification')}>{t('kyc.verifyNow')}</Button>
+          </div>
+        ) : state.key === 'apply' && sameDayConflict ? (
+          <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">{t('wrk.sameDayConflict')}</div>
+        ) : (
+          <div className={cn('rounded-xl px-4 py-3 text-center text-sm font-semibold', STATE_STYLES[state.kind])}>
+            {state.key === 'completed' ? <span className="inline-flex items-center gap-1.5 justify-center">✓ {t(state.labelKey)}</span> : t(state.labelKey)}
           </div>
         )}
       </div>
