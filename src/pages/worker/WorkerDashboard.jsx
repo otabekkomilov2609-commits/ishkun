@@ -14,6 +14,7 @@ export default function WorkerDashboard() {
   const { t } = useLang();
   const [shifts, setShifts] = useState(null);
   const [apps, setApps] = useState([]);
+  const [busyDates, setBusyDates] = useState(new Set());
   const [q, setQ] = useState('');
   const [city, setCity] = useState(user?.city || '');
   const [date, setDate] = useState('');
@@ -25,6 +26,12 @@ export default function WorkerDashboard() {
       if (user) {
         const a = await base44.entities.Application.filter({ worker_id: user.id }, '-created_date', 200);
         setApps(a);
+        const active = a.filter(x => x.status === 'pending' || x.status === 'approved');
+        const ids = [...new Set(active.map(x => x.shift_id))];
+        const otherShifts = await Promise.all(ids.map(async sid => {
+          try { return await base44.entities.Shift.get(sid); } catch { return null; }
+        }));
+        setBusyDates(new Set(otherShifts.filter(Boolean).map(os => os.date)));
       }
     })();
   }, [user]);
@@ -32,6 +39,7 @@ export default function WorkerDashboard() {
   const filtered = useMemo(() => {
     if (!shifts) return [];
     return shifts.filter(s => {
+      if (busyDates.has(s.date)) return false;
       if (user && s.created_by_id === user.id) return false;
       if (city && s.city !== city) return false;
       if (date && s.date !== date) return false;
@@ -41,7 +49,7 @@ export default function WorkerDashboard() {
       }
       return true;
     });
-  }, [shifts, city, date, q, user]);
+  }, [shifts, city, date, q, user, busyDates]);
 
   const appliedIds = new Set(apps.map(a => a.shift_id));
 
