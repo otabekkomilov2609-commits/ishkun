@@ -26,7 +26,7 @@ export default function WorkerDashboard() {
       if (user) {
         const a = await base44.entities.Application.filter({ worker_id: user.id }, '-created_date', 200);
         setApps(a);
-        const active = a.filter(x => x.status === 'pending' || x.status === 'approved');
+        const active = a.filter(x => x.status === 'approved');
         const ids = [...new Set(active.map(x => x.shift_id))];
         const otherShifts = await Promise.all(ids.map(async sid => {
           try { return await base44.entities.Shift.get(sid); } catch { return null; }

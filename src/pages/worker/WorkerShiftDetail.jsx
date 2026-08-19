@@ -30,7 +30,7 @@ export default function WorkerShiftDetail() {
         setApplied(a.length > 0);
         // Check for same-day conflicts: any active application (pending/approved) on the same date
         const activeApps = await base44.entities.Application.filter({ worker_id: user.id });
-        const active = activeApps.filter(x => x.status === 'pending' || x.status === 'approved');
+        const active = activeApps.filter(x => x.status === 'approved');
         const otherShiftIds = [...new Set(active.map(x => x.shift_id).filter(sid => sid !== id))];
         const otherShifts = await Promise.all(otherShiftIds.map(async sid => {
           try { return await base44.entities.Shift.get(sid); } catch { return null; }
