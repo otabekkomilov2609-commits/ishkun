@@ -17,7 +17,7 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-base">
+            <div className="inline-flex items-center gap-1.5 text-emerald-700 font-extrabold text-lg">
               <Wallet className="h-4 w-4" />
               {pay.total != null ? formatSom(pay.total) : '—'}
             </div>
