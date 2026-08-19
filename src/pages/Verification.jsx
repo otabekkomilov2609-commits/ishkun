@@ -11,7 +11,7 @@ export default function Verification() {
   const { t } = useLang();
   const [form, setForm] = useState({
     phone_number: '', jshshir: '', date_of_birth: '', address: '',
-    passport_front: '', passport_back: '', liveness_selfie: '', student_id: '',
+    passport_front: '', passport_back: '',
     bank_card_number: '', self_employed: false, self_employed_cert: ''
   });
   const [saving, setSaving] = useState(false);
@@ -25,7 +25,6 @@ export default function Verification() {
         phone_number: user.phone_number || '',
         jshshir: user.jshshir || '', date_of_birth: user.date_of_birth || '', address: user.address || '',
         passport_front: user.passport_front || '', passport_back: user.passport_back || '',
-        liveness_selfie: user.liveness_selfie || '', student_id: user.student_id || '',
         bank_card_number: user.bank_card_number || '', self_employed: user.self_employed || false,
         self_employed_cert: user.self_employed_cert || ''
       }));
@@ -38,7 +37,7 @@ export default function Verification() {
     setError('');
     if (!/^\d{14}$/.test(form.jshshir)) { setError(t('kyc.jshshirError')); return; }
     if (!form.phone_number.trim() || !form.date_of_birth || !form.address.trim()) { setError(t('kyc.requiredError')); return; }
-    if (!form.passport_front || !form.passport_back || !form.liveness_selfie || !form.student_id) { setError(t('kyc.docsError')); return; }
+    if (!form.passport_front || !form.passport_back) { setError(t('kyc.docsError')); return; }
     if (!form.bank_card_number || form.bank_card_number.replace(/\s/g, '').length < 16) { setError(t('kyc.cardError')); return; }
     setSaving(true);
     try {
@@ -49,8 +48,6 @@ export default function Verification() {
         address: form.address,
         passport_front: form.passport_front,
         passport_back: form.passport_back,
-        liveness_selfie: form.liveness_selfie,
-        student_id: form.student_id,
         bank_card_number: form.bank_card_number,
         self_employed: form.self_employed,
         self_employed_cert: form.self_employed ? form.self_employed_cert : '',
@@ -129,8 +126,7 @@ export default function Verification() {
               <FileUploadField label={t('kyc.passportFront')} value={form.passport_front} onChange={v => setForm({ ...form, passport_front: v })} />
               <FileUploadField label={t('kyc.passportBack')} value={form.passport_back} onChange={v => setForm({ ...form, passport_back: v })} />
             </div>
-            <FileUploadField label={t('kyc.liveness')} hint={t('kyc.livenessHint')} value={form.liveness_selfie} onChange={v => setForm({ ...form, liveness_selfie: v })} />
-            <FileUploadField label={t('kyc.studentId')} value={form.student_id} onChange={v => setForm({ ...form, student_id: v })} />
+            <p className="text-sm text-muted-foreground">{t('kyc.passportHint')}</p>
           </Card>
 
           <Card className="p-5 space-y-4">
