@@ -30,7 +30,7 @@ export default function CreateShift() {
   }, [user]);
 
   const submit = async () => {
-    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.hourly_rate || !form.city) {
+    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.hourly_rate || !form.city || !form.location) {
       toast({ title: t('required'), variant: 'destructive' });
       return;
     }
@@ -111,7 +111,7 @@ export default function CreateShift() {
           <Field label={t('shift.endTime')} required>
             <Input type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
           </Field>
-          <Field label={t('shift.location')}>
+          <Field label={t('shift.location')} required>
             <Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Chilonzor tumani" />
           </Field>
           <Field label={t('city')} required>
