@@ -6,6 +6,7 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { Users, CalendarDays, Building2, ClipboardList, Shield, ShieldCheck, ShieldOff, ShieldAlert, Bell, UserX } from 'lucide-react';
+import AdminKycReview from '@/components/AdminKycReview';
 import { formatSom } from '@/lib/format';
 
 export default function AdminPanel() {
@@ -49,6 +50,7 @@ export default function AdminPanel() {
 
   const tabs = [
     { id: 'overview', label: t('adm.overview') },
+    { id: 'kyc', label: t('kyc.tab') },
     { id: 'shifts', label: t('adm.allShifts') },
     { id: 'users', label: t('adm.allUsers') },
     { id: 'notifications', label: t('adm.notifications') }
@@ -86,6 +88,10 @@ export default function AdminPanel() {
             );
           })}
         </div>
+      )}
+
+      {tab === 'kyc' && (
+        <AdminKycReview />
       )}
 
       {tab === 'shifts' && (

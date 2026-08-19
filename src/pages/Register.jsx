@@ -12,6 +12,9 @@ import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Register() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,13 +26,21 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("Ism va familiyani kiriting");
+      return;
+    }
+    if (!phone.trim()) {
+      setError("Telefon raqamini kiriting");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
     setLoading(true);
     try {
-      await base44.auth.register({ email, password });
+      await base44.auth.register({ email, password, full_name: `${firstName} ${lastName}`.trim() });
       setShowOtp(true);
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -45,6 +56,18 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+        try {
+          await base44.auth.updateMe({ phone_number: phone, verification_status: "pending" });
+          const me = await base44.auth.me();
+          if (me?.id) {
+            await base44.entities.Notification.create({
+              user_id: me.id,
+              title: "Ro'yxatdan o'tdingiz",
+              body: "Siz ro'yxatdan o'tdingiz. Ishga ariza berish uchun profilni to'liq verifikatsiyadan o'tkazing.",
+              type: "registration"
+            });
+          }
+        } catch (e) { console.error(e); }
       }
       window.location.href = safeReturnTo();
     } catch (err) {
@@ -167,6 +190,20 @@ export default function Register() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">Ism</Label>
+            <Input id="firstName" type="text" autoComplete="given-name" autoFocus placeholder="Ali" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-12" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Familiya</Label>
+            <Input id="lastName" type="text" autoComplete="family-name" placeholder="Valiyev" value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-12" required />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone">Telefon raqami</Label>
+          <Input id="phone" type="tel" autoComplete="tel" placeholder="+998 90 123 45 67" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-12" required />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">

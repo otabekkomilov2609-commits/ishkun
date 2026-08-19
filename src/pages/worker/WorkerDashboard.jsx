@@ -7,6 +7,7 @@ import { Input, Select, Skeleton } from '@/components/ui';
 import ShiftCard from '@/components/ShiftCard';
 import EmptyState from '@/components/EmptyState';
 import { Search, CalendarDays } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function WorkerDashboard() {
   const { user } = useAuth();
@@ -50,6 +51,12 @@ export default function WorkerDashboard() {
         <h1 className="text-2xl font-display font-bold tracking-tight text-primary">{t('wrk.browseTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t('tagline')}</p>
       </div>
+
+      {user?.account_type === 'worker' && user.verification_status !== 'verified' && (
+        <Link to="/verification" className="block mb-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 hover:bg-amber-100 transition-colors">
+          {user.verification_status === 'rejected' ? t('kyc.rejected') : user.verification_status === 'submitted' ? t('kyc.submitted') : t('kyc.mustVerify')} → {t('kyc.verifyNow')}
+        </Link>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="relative flex-1">

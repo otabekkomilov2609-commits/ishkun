@@ -35,6 +35,63 @@
       "type": "boolean",
       "default": false,
       "title": "Onboarding o'tgan"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "submitted",
+        "verified",
+        "rejected"
+      ],
+      "default": "pending",
+      "title": "Verifikatsiya holati"
+    },
+    "verification_note": {
+      "type": "string",
+      "title": "Verifikatsiya izohi"
+    },
+    "jshshir": {
+      "type": "string",
+      "title": "JSHSHIR"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "title": "Tug'ilgan sana"
+    },
+    "address": {
+      "type": "string",
+      "title": "Joriy manzil"
+    },
+    "passport_front": {
+      "type": "string",
+      "title": "Pasport oldi rasm"
+    },
+    "passport_back": {
+      "type": "string",
+      "title": "Pasport orqa rasm"
+    },
+    "liveness_selfie": {
+      "type": "string",
+      "title": "Liveness selfi"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Talabalar ID rasm"
+    },
+    "bank_card_number": {
+      "type": "string",
+      "title": "Bank karta raqami"
+    },
+    "self_employed": {
+      "type": "boolean",
+      "default": false,
+      "title": "Self-employed"
+    },
+    "self_employed_cert": {
+      "type": "string",
+      "title": "Self-employed guvohnoma"
     }
   }
 }

@@ -22,7 +22,10 @@
         "new_application",
         "shift_completed",
         "worker_no_show",
-        "shift_created"
+        "shift_created",
+        "registration",
+        "verification_approved",
+        "verification_rejected"
       ],
       "title": "Turi"
     },

@@ -31,7 +31,10 @@ export default function WorkerShiftDetail() {
     })();
   }, [id, user]);
 
+  const verified = user?.verification_status === 'verified';
+
   const apply = async () => {
+    if (!verified) return;
     setApplying(true);
     try {
       await base44.entities.Application.create({
@@ -93,10 +96,17 @@ export default function WorkerShiftDetail() {
           <Button size="lg" className="w-full" disabled>
             <CheckCircle2 className="h-5 w-5" /> {t('wrk.applied')}
           </Button>
-        ) : (
+        ) : verified ? (
           <Button size="lg" className="w-full" disabled={applying} onClick={apply}>
             {t('wrk.applyNow')}
           </Button>
+        ) : (
+          <div className="space-y-2">
+            <div className="rounded-xl bg-amber-50 text-amber-700 text-sm font-medium px-4 py-3 text-center">{t('kyc.mustVerify')}</div>
+            <Button size="lg" className="w-full" onClick={() => navigate('/verification')}>
+              {t('kyc.verifyNow')}
+            </Button>
+          </div>
         )}
       </div>
     </div>

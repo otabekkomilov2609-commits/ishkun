@@ -28,6 +28,7 @@ import EmployerShiftDetail from '@/pages/employer/EmployerShiftDetail';
 import WorkerDashboard from '@/pages/worker/WorkerDashboard';
 import WorkerShiftDetail from '@/pages/worker/WorkerShiftDetail';
 import MyApplications from '@/pages/worker/MyApplications';
+import Verification from '@/pages/Verification';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin" element={<RoleGuard allowAdmin><AdminPanel /></RoleGuard>} />
           {/* Shared */}
           <Route path="/profile" element={<Profile />} />
+          <Route path="/verification" element={<Verification />} />
         </Route>
       </Route>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, Link } from 'react-router-dom';
-import { Search, ClipboardList, LayoutDashboard, CalendarDays, PlusCircle, User, Shield, LogOut } from 'lucide-react';
+import { Search, ClipboardList, LayoutDashboard, CalendarDays, PlusCircle, User, Shield, ShieldCheck, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import Brand from './Brand';
@@ -23,6 +23,7 @@ export default function Layout() {
     worker: [
       { to: '/worker', key: 'nav.browse', icon: Search, end: true },
       { to: '/worker/applications', key: 'nav.applications', icon: ClipboardList },
+      { to: '/verification', key: 'nav.verification', icon: ShieldCheck },
       { to: '/profile', key: 'profile', icon: User }
     ],
     employer: [
