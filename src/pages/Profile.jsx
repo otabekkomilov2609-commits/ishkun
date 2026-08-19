@@ -6,11 +6,15 @@ import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
-import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet } from 'lucide-react';
+import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet, Trash2, AlertTriangle } from 'lucide-react';
 import { formatSom } from '@/lib/format';
+import {
+  AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel
+} from '@/components/ui/alert-dialog';
 
 export default function Profile() {
-  const { user, checkUserAuth } = useAuth();
+  const { user, checkUserAuth, logout } = useAuth();
   const { t, lang, setLang } = useLang();
   const navigate = useNavigate();
   const [form, setForm] = useState({ phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
@@ -18,6 +22,7 @@ export default function Profile() {
   const [saved, setSaved] = useState(false);
   const [completedApps, setCompletedApps] = useState(null);
   const [completedShifts, setCompletedShifts] = useState({});
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -62,6 +67,17 @@ export default function Profile() {
       setTimeout(() => setSaved(false), 2000);
     } catch (e) { console.error(e); }
     setSaving(false);
+  };
+
+  const deleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await base44.functions.invoke('deleteMyAccount', {});
+      await logout();
+    } catch (e) {
+      console.error(e);
+      setDeleting(false);
+    }
   };
 
   const switchRole = async () => {
@@ -136,6 +152,36 @@ export default function Profile() {
           </span>
         </div>
       </Card>
+
+      <div className="mt-4">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="w-full flex items-center justify-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10">
+              <Trash2 className="h-4 w-4" />
+              {t('prf.deleteAccount')}
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+                {t('prf.deleteAccountConfirm')}
+              </AlertDialogTitle>
+              <AlertDialogDescription>{t('prf.deleteAccountDesc')}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>{t('cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => { e.preventDefault(); deleteAccount(); }}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? t('prf.deleting') : t('prf.deleteAccountConfirmBtn')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
 
       {form.account_type === 'worker' && (
         <div className="mt-4">

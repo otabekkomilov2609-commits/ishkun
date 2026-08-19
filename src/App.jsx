@@ -10,6 +10,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
 import RoleGuard from '@/components/RoleGuard';
 import { LanguageProvider } from '@/lib/i18n';
+import { ThemeProvider } from 'next-themes';
 // Auth pages
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -96,13 +97,15 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <LanguageProvider>
-            <ScrollToTop />
-            <AuthenticatedApp />
-          </LanguageProvider>
-        </Router>
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Router>
+            <LanguageProvider>
+              <ScrollToTop />
+              <AuthenticatedApp />
+            </LanguageProvider>
+          </Router>
+          <Toaster />
+        </ThemeProvider>
       </QueryClientProvider>
     </AuthProvider>
   )

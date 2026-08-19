@@ -86,7 +86,29 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     @apply bg-background text-foreground font-body;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  button,
+  nav,
+  header,
+  a,
+  select,
+  summary,
+  [role="tab"],
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
   }
 }

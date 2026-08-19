@@ -43,7 +43,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between gap-3">
           <Brand />
           <div className="flex items-center gap-1.5">
@@ -62,7 +62,7 @@ export default function Layout() {
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/90 backdrop-blur-md">
+      <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/90 backdrop-blur-md" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="mx-auto max-w-5xl px-2 flex items-stretch justify-around">
           {nav.map(item => {
             const Icon = item.icon;
