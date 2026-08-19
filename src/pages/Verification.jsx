@@ -10,7 +10,7 @@ export default function Verification() {
   const { user, checkUserAuth } = useAuth();
   const { t } = useLang();
   const [form, setForm] = useState({
-    jshshir: '', date_of_birth: '', address: '',
+    phone_number: '', jshshir: '', date_of_birth: '', address: '',
     passport_front: '', passport_back: '', liveness_selfie: '', student_id: '',
     bank_card_number: '', self_employed: false, self_employed_cert: ''
   });
@@ -22,6 +22,7 @@ export default function Verification() {
     if (user) {
       setForm(f => ({
         ...f,
+        phone_number: user.phone_number || '',
         jshshir: user.jshshir || '', date_of_birth: user.date_of_birth || '', address: user.address || '',
         passport_front: user.passport_front || '', passport_back: user.passport_back || '',
         liveness_selfie: user.liveness_selfie || '', student_id: user.student_id || '',
@@ -36,12 +37,13 @@ export default function Verification() {
   const submit = async () => {
     setError('');
     if (!/^\d{14}$/.test(form.jshshir)) { setError(t('kyc.jshshirError')); return; }
-    if (!form.date_of_birth || !form.address.trim()) { setError(t('kyc.requiredError')); return; }
+    if (!form.phone_number.trim() || !form.date_of_birth || !form.address.trim()) { setError(t('kyc.requiredError')); return; }
     if (!form.passport_front || !form.passport_back || !form.liveness_selfie || !form.student_id) { setError(t('kyc.docsError')); return; }
     if (!form.bank_card_number || form.bank_card_number.replace(/\s/g, '').length < 16) { setError(t('kyc.cardError')); return; }
     setSaving(true);
     try {
       await base44.auth.updateMe({
+        phone_number: form.phone_number,
         jshshir: form.jshshir,
         date_of_birth: form.date_of_birth,
         address: form.address,
@@ -107,6 +109,9 @@ export default function Verification() {
 
           <Card className="p-5 space-y-4">
             <h2 className="font-display font-bold text-foreground">{t('kyc.personalInfo')}</h2>
+            <Field label={t('kyc.phone')} required hint={t('kyc.phoneHint')}>
+              <Input value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} placeholder="+998 90 123 45 67" />
+            </Field>
             <Field label={t('kyc.jshshir')} required hint={t('kyc.jshshirHint')}>
               <Input value={form.jshshir} onChange={e => setForm({ ...form, jshshir: e.target.value.replace(/\D/g, '').slice(0, 14) })} placeholder="12345678901234" />
             </Field>
