@@ -46,7 +46,7 @@ export default function MyShifts() {
               <div key={s.id} className="relative">
                 <ShiftCard shift={s} to={`/employer/shifts/${s.id}`} showStatus statusLabel={t(`shift.${s.status}`)} />
                 {count > 0 && (
-                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5">
+                  <span className="absolute top-11 right-3 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5">
                     <ClipboardList className="h-3 w-3" /> {count} {t('shift.applicants')}
                   </span>
                 )}
