@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Wallet } from 'lucide-react';
+import { MapPin, Wallet, CalendarDays } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { formatSom, formatDateWeekDay, shiftPay } from '@/lib/format';
 import StatusBadge from './StatusBadge';
@@ -26,14 +26,22 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
           {workerState ? <WorkerShiftBadge state={workerState} /> : showStatus ? <StatusBadge status={shift.status} label={statusLabel} /> : null}
         </div>
 
-        <div className="mt-2.5 text-xs text-muted-foreground">
-          {formatDateWeekDay(shift.date, lang)}
+        <div className="mt-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
+            <CalendarDays className="h-3.5 w-3.5" />
+            {formatDateWeekDay(shift.date, lang)}
+          </span>
         </div>
 
         <div className="mt-3 flex items-end justify-between">
-          <div className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-base">
-            <Wallet className="h-4 w-4" />
-            {pay.total != null ? formatSom(pay.total) : '—'}
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-base">
+              <Wallet className="h-4 w-4" />
+              {pay.total != null ? formatSom(pay.total) : '—'}
+            </div>
+            {pay.hourlyRate != null && (
+              <div className="text-xs text-muted-foreground mt-0.5">{formatSom(pay.hourlyRate)}/{t('shift.hourShort')}</div>
+            )}
           </div>
         </div>
       </div>
