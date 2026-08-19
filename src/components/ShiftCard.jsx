@@ -2,13 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Wallet, CalendarDays } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
-import { StarsDisplay } from '@/components/RatingStars';
 import { formatSom, formatDateWeekDay, shiftPay } from '@/lib/format';
 import StatusBadge from './StatusBadge';
 import WorkerShiftBadge from './WorkerShiftBadge';
 import { cn } from '@/lib/utils';
 
-export default function ShiftCard({ shift, to, showStatus = false, statusLabel, workerState, company }) {
+export default function ShiftCard({ shift, to, showStatus = false, statusLabel, workerState }) {
   const { t, lang } = useLang();
   const link = to || (shift.id ? `/worker/shifts/${shift.id}` : '#');
   const pay = shiftPay(shift);
@@ -35,12 +34,6 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
             <MapPin className="h-3.5 w-3.5" />
             <span className="truncate">{shift.location || shift.city}</span>
           </div>
-          {company && (
-            <div className="mt-1.5 flex items-center gap-2 text-xs">
-              <span className="text-muted-foreground truncate">{company.name}</span>
-              <StarsDisplay avg={company.rating_avg} count={company.rating_count} />
-            </div>
-          )}
         </div>
 
         <div className="mt-2.5">

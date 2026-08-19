@@ -159,7 +159,7 @@ export default function WorkerDashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {filtered.map(s => (
-              <ShiftCard key={s.id} shift={s} workerState={getWorkerShiftState(appByShift[s.id], s)} company={companyById[s.company_id]} />
+              <ShiftCard key={s.id} shift={s} workerState={getWorkerShiftState(appByShift[s.id], s)} />
             ))}
           </div>
         )}
