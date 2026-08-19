@@ -7,6 +7,7 @@ import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { Users, CalendarDays, Building2, ClipboardList, Shield, ShieldCheck, ShieldOff, ShieldAlert, Bell, UserX } from 'lucide-react';
 import AdminKycReview from '@/components/AdminKycReview';
+import AdminInvite from '@/components/AdminInvite';
 import { formatSom } from '@/lib/format';
 
 export default function AdminPanel() {
@@ -53,6 +54,7 @@ export default function AdminPanel() {
     { id: 'kyc', label: t('kyc.tab') },
     { id: 'shifts', label: t('adm.allShifts') },
     { id: 'users', label: t('adm.allUsers') },
+    { id: 'invite', label: t('adm.inviteTab') },
     { id: 'notifications', label: t('adm.notifications') }
   ];
 
@@ -151,6 +153,10 @@ export default function AdminPanel() {
             </Card>
           )}
         </div>
+      )}
+
+      {tab === 'invite' && (
+        <AdminInvite />
       )}
 
       {tab === 'notifications' && (
