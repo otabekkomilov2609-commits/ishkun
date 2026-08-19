@@ -35,13 +35,20 @@ export default function CreateShift() {
     }
     setSaving(true);
     try {
-      await base44.entities.Shift.create({
+      const shift = await base44.entities.Shift.create({
         ...form,
         payment_amount: Number(form.payment_amount),
         required_workers: Number(form.required_workers) || 1,
         company_id: company.id,
         status: 'open',
         moderation: 'approved'
+      });
+      await base44.entities.Notification.create({
+        user_id: user.id,
+        title: "E'lon qilindi",
+        body: `Sizning '${form.title}' bo'yicha e'loningiz muvaffaqiyatli e'lon qilindi.`,
+        type: 'shift_created',
+        link: `/employer/shifts/${shift.id}`
       });
       toast({ title: t('shift.created') });
       navigate('/employer/shifts');

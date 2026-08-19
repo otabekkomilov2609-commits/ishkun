@@ -43,8 +43,8 @@ export default function WorkerShiftDetail() {
       });
       await base44.entities.Notification.create({
         user_id: shift.created_by_id,
-        title: t('notif.newApp'),
-        body: shift.title,
+        title: 'Yangi arizachi',
+        body: `${user.full_name || 'Ishchi'} sizning '${shift.title}' e'loningizga ariza topshirdi.`,
         type: 'new_application',
         link: `/employer/shifts/${id}`
       });

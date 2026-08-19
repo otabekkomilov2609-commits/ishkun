@@ -21,7 +21,8 @@
         "application_rejected",
         "new_application",
         "shift_completed",
-        "worker_no_show"
+        "worker_no_show",
+        "shift_created"
       ],
       "title": "Turi"
     },
