@@ -36,9 +36,16 @@ export default function CreateShift() {
     setSaving(true);
     try {
       const shift = await base44.entities.Shift.create({
-        ...form,
-        payment_amount: Number(form.payment_amount),
+        title: form.title,
+        description: form.description,
+        date: form.date,
+        start_time: form.start_time,
+        end_time: form.end_time,
+        location: form.location,
+        city: form.city,
+        hourly_rate: Number(form.hourly_rate),
         required_workers: Number(form.required_workers) || 1,
+        required_skill: form.required_skill || undefined,
         company_id: company.id,
         status: 'open',
         moderation: 'approved'
@@ -90,8 +97,8 @@ export default function CreateShift() {
           <Field label={t('shift.date')} required>
             <Input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
           </Field>
-          <Field label={t('shift.payment')} required>
-            <Input type="number" value={form.payment_amount} onChange={e => setForm({ ...form, payment_amount: e.target.value })} placeholder="150000" />
+          <Field label={t('shift.hourlyRate')} required hint={t('shift.hourlyRateHint')}>
+            <Input type="number" value={form.hourly_rate} onChange={e => setForm({ ...form, hourly_rate: e.target.value })} placeholder="25000" />
           </Field>
           <Field label={t('shift.startTime')} required>
             <Input type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
@@ -108,6 +115,20 @@ export default function CreateShift() {
               {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
           </Field>
+          <div className="sm:col-span-2">
+            <Field label={t('shift.skill')}>
+              <Select value={form.required_skill} onChange={e => setForm({ ...form, required_skill: e.target.value })}>
+                <option value="">{t('shift.skillAny')}</option>
+                <option value="warehouse">{t('skill.warehouse')}</option>
+                <option value="waiter">{t('skill.waiter')}</option>
+                <option value="cashier">{t('skill.cashier')}</option>
+                <option value="courier">{t('skill.courier')}</option>
+                <option value="promoter">{t('skill.promoter')}</option>
+                <option value="event_staff">{t('skill.event_staff')}</option>
+                <option value="cleaner">{t('skill.cleaner')}</option>
+              </Select>
+            </Field>
+          </div>
           <div className="sm:col-span-2">
             <Field label={t('shift.workers')}>
               <Input type="number" min="1" value={form.required_workers} onChange={e => setForm({ ...form, required_workers: e.target.value })} />

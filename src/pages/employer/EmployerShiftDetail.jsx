@@ -7,7 +7,7 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User } from 'lucide-react';
-import { formatSom } from '@/lib/format';
+import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 
 export default function EmployerShiftDetail() {
   const { id } = useParams();
@@ -109,6 +109,10 @@ export default function EmployerShiftDetail() {
 
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-48 w-full" /></div>;
 
+  const pay = shiftPay(shift);
+  const dur = shiftDurationHours(shift);
+  const durLabel = Number.isInteger(dur) ? dur : dur.toFixed(1);
+
   return (
     <div className="max-w-2xl mx-auto">
       <button onClick={() => navigate('/employer/shifts')} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
@@ -124,8 +128,10 @@ export default function EmployerShiftDetail() {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <Info icon={Calendar} label={t('shift.date')} value={shift.date} />
           <Info icon={Clock} label={t('shift.startTime')} value={`${shift.start_time} — ${shift.end_time}`} />
+          <Info icon={Clock} label={t('shift.duration')} value={`${durLabel} ${t('shift.durationShort')}`} />
           <Info icon={MapPin} label={t('shift.location')} value={shift.location || shift.city} />
-          <Info icon={Wallet} label={t('shift.payment')} value={formatSom(shift.payment_amount)} />
+          <Info icon={Wallet} label={t('shift.hourlyRate')} value={pay.hourlyRate != null ? formatSom(pay.hourlyRate) : '—'} />
+          <Info icon={Wallet} label={t('shift.totalAmount')} value={pay.total != null ? formatSom(pay.total) : '—'} />
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
         {shift.status !== 'completed' && (
