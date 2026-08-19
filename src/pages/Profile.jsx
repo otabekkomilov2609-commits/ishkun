@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
-import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet, Trash2, AlertTriangle } from 'lucide-react';
+import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight } from 'lucide-react';
 import { formatSom } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
@@ -152,6 +152,26 @@ export default function Profile() {
           </span>
         </div>
       </Card>
+
+      {user.role !== 'admin' && (
+        <Link to="/verification" className="mt-4 block">
+          <Card className="p-4 flex items-center gap-3 transition-colors hover:bg-muted/50">
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm">{t('kyc.title')}</h3>
+              <p className="text-xs text-muted-foreground">
+                {user.verification_status === 'verified' ? t('kyc.verified')
+                  : user.verification_status === 'submitted' ? t('kyc.submitted')
+                  : user.verification_status === 'rejected' ? t('kyc.rejected')
+                  : t('kyc.pending')}
+              </p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </Card>
+        </Link>
+      )}
 
       <div className="mt-4">
         <AlertDialog>

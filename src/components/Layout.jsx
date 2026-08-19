@@ -23,7 +23,6 @@ export default function Layout() {
     worker: [
       { to: '/worker', key: 'nav.browse', icon: Search, end: true },
       { to: '/worker/applications', key: 'nav.applications', icon: ClipboardList },
-      { to: '/verification', key: 'nav.verification', icon: ShieldCheck },
       { to: '/profile', key: 'profile', icon: User }
     ],
     employer: [
