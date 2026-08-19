@@ -24,6 +24,25 @@ export function formatDateDMY(dateStr) {
   return `${p[2]}.${p[1]}.${p[0]}`;
 }
 
+const WEEKDAYS = {
+  uz: ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'],
+  ru: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
+};
+const MONTHS = {
+  uz: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekaber'],
+  ru: ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря']
+};
+
+export function formatDateWeekDay(dateStr, lang = 'uz') {
+  if (!dateStr) return '';
+  const p = dateStr.split('T')[0].split('-');
+  if (p.length !== 3) return dateStr;
+  const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  const wd = WEEKDAYS[lang] || WEEKDAYS.uz;
+  const mn = MONTHS[lang] || MONTHS.uz;
+  return `${wd[d.getDay()]} ${Number(p[2])}.${mn[Number(p[1]) - 1]}`;
+}
+
 export function parseTime(t) {
   if (!t) return 0;
   const [h, m] = t.split(':').map(Number);

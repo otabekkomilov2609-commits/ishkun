@@ -1,18 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Wallet, Users } from 'lucide-react';
+import { MapPin, Wallet } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
-import { formatSom, formatDateDMY, timeRange, shiftPay, shiftDurationHours } from '@/lib/format';
+import { formatSom, formatDateWeekDay, shiftPay } from '@/lib/format';
 import StatusBadge from './StatusBadge';
 import WorkerShiftBadge from './WorkerShiftBadge';
 import { cn } from '@/lib/utils';
 
 export default function ShiftCard({ shift, to, showStatus = false, statusLabel, workerState }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const link = to || (shift.id ? `/worker/shifts/${shift.id}` : '#');
   const pay = shiftPay(shift);
-  const dur = shiftDurationHours(shift);
-  const durLabel = Number.isInteger(dur) ? dur : dur.toFixed(1);
 
   return (
     <Link to={link} className="block group">
@@ -29,22 +27,14 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
         </div>
 
         <div className="mt-2.5 text-xs text-muted-foreground">
-          {formatDateDMY(shift.date)}, {timeRange(shift)} ({durLabel} {t('shift.durationShort')})
+          {formatDateWeekDay(shift.date, lang)}
         </div>
 
         <div className="mt-3 flex items-end justify-between">
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-base">
-              <Wallet className="h-4 w-4" />
-              {pay.total != null ? formatSom(pay.total) : '—'}
-            </div>
-            {pay.hourlyRate != null && (
-              <div className="text-xs text-muted-foreground mt-0.5">{formatSom(pay.hourlyRate)}/{t('shift.hourShort')}</div>
-            )}
+          <div className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-base">
+            <Wallet className="h-4 w-4" />
+            {pay.total != null ? formatSom(pay.total) : '—'}
           </div>
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Users className="h-3.5 w-3.5" /> {shift.required_workers} {t('wrk.perWorker')}
-          </span>
         </div>
       </div>
     </Link>
