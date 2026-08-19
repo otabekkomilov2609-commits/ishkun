@@ -1,0 +1,62 @@
+{
+  "name": "Rating",
+  "type": "object",
+  "properties": {
+    "application_id": {
+      "type": "string",
+      "title": "Ariza"
+    },
+    "shift_id": {
+      "type": "string",
+      "title": "Shift"
+    },
+    "worker_id": {
+      "type": "string",
+      "title": "Ishchi"
+    },
+    "company_id": {
+      "type": "string",
+      "title": "Kompaniya"
+    },
+    "employer_id": {
+      "type": "string",
+      "title": "Ish beruvchi"
+    },
+    "rated_by": {
+      "type": "string",
+      "enum": [
+        "worker",
+        "company"
+      ],
+      "title": "Kim baholadi"
+    },
+    "score": {
+      "type": "number",
+      "title": "Baho"
+    },
+    "comment": {
+      "type": "string",
+      "title": "Izoh"
+    }
+  },
+  "required": [
+    "application_id",
+    "shift_id",
+    "rated_by",
+    "score"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -27,6 +27,15 @@
     "logo": {
       "type": "string",
       "title": "Logotip"
+    },
+    "rating_avg": {
+      "type": "number",
+      "title": "O'rtacha baho"
+    },
+    "rating_count": {
+      "type": "number",
+      "default": 0,
+      "title": "Baholar soni"
     }
   },
   "required": [

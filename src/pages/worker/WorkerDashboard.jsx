@@ -74,14 +74,14 @@ export default function WorkerDashboard() {
         try { return await base44.entities.Company.get(cid); } catch { return null; }
       }));
       const map = {};
-      res.forEach(c => { if (c) map[c.id] = c.name; });
+      res.forEach(c => { if (c) map[c.id] = c; });
       return map;
     },
     enabled: companyIds.length > 0,
     staleTime: 60_000,
   });
-  const companyNameById = companiesQ.data || {};
-  const companyNames = useMemo(() => [...new Set(Object.values(companyNameById))].sort(), [companyNameById]);
+  const companyById = companiesQ.data || {};
+  const companyNames = useMemo(() => [...new Set(Object.values(companyById).map(c => c.name))].sort(), [companyById]);
 
   const appByShift = useMemo(() => {
     const m = {};
@@ -102,7 +102,7 @@ export default function WorkerDashboard() {
         if (f.dateTo && s.date > f.dateTo) return false;
       }
       if (f.skills.length > 0 && !f.skills.includes(s.required_skill)) return false;
-      if (f.companies.length > 0 && !f.companies.includes(companyNameById[s.company_id])) return false;
+      if (f.companies.length > 0 && !f.companies.includes(companyById[s.company_id]?.name)) return false;
       if (q) {
         const hay = `${s.title} ${s.description || ''} ${s.location || ''} ${s.city || ''}`.toLowerCase();
         if (!hay.includes(q.toLowerCase())) return false;
@@ -111,7 +111,7 @@ export default function WorkerDashboard() {
     });
   };
 
-  const filtered = useMemo(() => matchFilters(shifts, filters), [shifts, filters, city, q, user, busyDates, companyNameById]);
+  const filtered = useMemo(() => matchFilters(shifts, filters), [shifts, filters, city, q, user, busyDates, companyById]);
 
   const countFor = (draft) => matchFilters(shifts, draft).length;
 
@@ -159,7 +159,7 @@ export default function WorkerDashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {filtered.map(s => (
-              <ShiftCard key={s.id} shift={s} workerState={getWorkerShiftState(appByShift[s.id], s)} />
+              <ShiftCard key={s.id} shift={s} workerState={getWorkerShiftState(appByShift[s.id], s)} company={companyById[s.company_id]} />
             ))}
           </div>
         )}

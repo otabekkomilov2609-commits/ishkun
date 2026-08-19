@@ -5,8 +5,10 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { queryClientInstance } from '@/lib/query-client';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, Star } from 'lucide-react';
 import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/format';
+import RatingPrompt from '@/components/RatingPrompt';
+import { StarsDisplay } from '@/components/RatingStars';
 import { getWorkerShiftState, STATE_STYLES } from '@/lib/shiftStatus';
 import { cn } from '@/lib/utils';
 
@@ -164,10 +166,27 @@ export default function WorkerShiftDetail() {
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div>
             <div>
               <div className="text-xs text-muted-foreground">{t('wrk.company')}</div>
-              <div className="font-semibold text-foreground">{company.name}</div>
+              <div className="font-semibold text-foreground flex items-center gap-2">{company.name} <StarsDisplay avg={company.rating_avg} count={company.rating_count} /></div>
               {company.address && <div className="text-xs text-muted-foreground">{company.address}</div>}
             </div>
           </div>
+        </Card>
+      )}
+
+      {state.key === 'completed' && myApp && (
+        <Card className="p-4 mb-4">
+          <div className="flex items-center gap-1.5 mb-3">
+            <Star className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-bold text-foreground">{t('rating.rateCompany')}</h2>
+          </div>
+          <RatingPrompt
+            applicationId={myApp.id}
+            shiftId={shift.id}
+            workerId={user.id}
+            companyId={shift.company_id}
+            employerId={shift.created_by_id}
+            ratedBy="worker"
+          />
         </Card>
       )}
 

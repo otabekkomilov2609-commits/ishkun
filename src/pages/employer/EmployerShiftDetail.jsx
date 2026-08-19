@@ -6,8 +6,10 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
+import RatingPrompt from '@/components/RatingPrompt';
+import { StarsDisplay } from '@/components/RatingStars';
 
 export default function EmployerShiftDetail() {
   const { id } = useParams();
@@ -17,6 +19,7 @@ export default function EmployerShiftDetail() {
   const [shift, setShift] = useState(null);
   const [apps, setApps] = useState(null);
   const [users, setUsers] = useState({});
+  const [completedCounts, setCompletedCounts] = useState({});
 
   const load = async () => {
     const s = await base44.entities.Shift.get(id);
@@ -27,6 +30,10 @@ export default function EmployerShiftDetail() {
     const map = {};
     u.forEach(x => { map[x.id] = x; });
     setUsers(map);
+    const comp = await base44.entities.Application.filter({ status: 'completed' }, '-created_date', 500);
+    const cc = {};
+    comp.forEach(a => { cc[a.worker_id] = (cc[a.worker_id] || 0) + 1; });
+    setCompletedCounts(cc);
   };
 
   useEffect(() => { load(); }, [id]);
@@ -157,9 +164,26 @@ export default function EmployerShiftDetail() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">{w?.full_name || '—'}</p>
                     <p className="text-xs text-muted-foreground">{w?.phone_number || w?.email}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <StarsDisplay avg={w?.rating_avg} count={w?.rating_count} />
+                      <span className="text-xs text-muted-foreground">{completedCounts[a.worker_id] || 0} {t('rating.completedShifts')}</span>
+                    </div>
                   </div>
                   <StatusBadge status={a.status} label={t(`app.status${a.status.charAt(0).toUpperCase()}${a.status.slice(1)}`)} />
                 </div>
+                {a.status === 'completed' && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-foreground"><Star className="h-4 w-4 text-primary" /> {t('rating.rateWorker')}</div>
+                    <RatingPrompt
+                      applicationId={a.id}
+                      shiftId={shift.id}
+                      workerId={a.worker_id}
+                      companyId={shift.company_id}
+                      employerId={user.id}
+                      ratedBy="company"
+                    />
+                  </div>
+                )}
                 {a.status === 'pending' && (
                   <div className="flex gap-2 mt-3">
                     <Button size="sm" onClick={() => setStatus(a, 'approved')}><CheckCircle2 className="h-4 w-4" /> {t('app.approve')}</Button>
