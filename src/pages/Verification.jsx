@@ -73,9 +73,10 @@ export default function Verification() {
     <div className="max-w-2xl mx-auto">
       <button
         onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+        className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors mb-4"
+        aria-label={t('back')}
       >
-        <ArrowLeft className="h-4 w-4" /> {t('back')}
+        <ArrowLeft className="h-5 w-5" />
       </button>
       <div className="flex items-center gap-2 mb-5">
         <ShieldCheck className="h-6 w-6 text-primary" />
