@@ -7,7 +7,10 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import WorkerShiftBadge from '@/components/WorkerShiftBadge';
 import EmptyState from '@/components/EmptyState';
 import TabsNav from '@/components/TabsNav';
+import AttendanceBanner from '@/components/AttendanceBanner';
 import { getWorkerShiftState } from '@/lib/shiftStatus';
+import { isMismatch } from '@/lib/shiftTime';
+import { AlertTriangle } from 'lucide-react';
 import { shiftPay } from '@/lib/format';
 import {
   AlertDialog,
@@ -74,6 +77,8 @@ export default function MyApplications() {
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-display font-bold tracking-tight text-primary mb-4">{t('wrk.myAppsTitle')}</h1>
 
+      <AttendanceBanner apps={apps} onRefresh={load} />
+
       <TabsNav tabs={tabs} active={tab} onChange={setTab} className="mb-4" />
 
       {apps === null ? (
@@ -103,7 +108,10 @@ export default function MyApplications() {
                       <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {pay?.total != null ? formatSom(pay.total) : ''}</span>
                     </div>
                   </div>
-                  <WorkerShiftBadge state={state} />
+                  <div className="flex flex-col items-end gap-1">
+                    {isMismatch(a) && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
+                    <WorkerShiftBadge state={state} />
+                  </div>
                 </div>
                 {(a.status === 'pending' || a.status === 'approved') && (
                   <div className="mt-3">

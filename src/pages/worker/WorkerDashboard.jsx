@@ -9,6 +9,7 @@ import ShiftCard from '@/components/ShiftCard';
 import EmptyState from '@/components/EmptyState';
 import PullToRefresh from '@/components/PullToRefresh';
 import ShiftFilterSheet from '@/components/ShiftFilterSheet';
+import AttendanceBanner from '@/components/AttendanceBanner';
 import { getWorkerShiftState } from '@/lib/shiftStatus';
 import { Search, CalendarDays, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -83,6 +84,14 @@ export default function WorkerDashboard() {
   const companyById = companiesQ.data || {};
   const companyNames = useMemo(() => [...new Set(Object.values(companyById).map(c => c.name))].sort(), [companyById]);
 
+  const likedQ = useQuery({
+    queryKey: ['likedCompanies', user?.id],
+    queryFn: () => base44.entities.Rating.filter({ rated_by: 'worker', worker_id: user.id }, '-created_date', 200),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+  const likedCompanies = useMemo(() => new Set((likedQ.data || []).filter(r => r.score >= 4).map(r => r.company_id)), [likedQ.data]);
+
   const appByShift = useMemo(() => {
     const m = {};
     apps.forEach(a => { if (a.status !== 'cancelled' && !m[a.shift_id]) m[a.shift_id] = a; });
@@ -111,7 +120,10 @@ export default function WorkerDashboard() {
     });
   };
 
-  const filtered = useMemo(() => matchFilters(shifts, filters), [shifts, filters, city, q, user, busyDates, companyById]);
+  const filtered = useMemo(() => {
+    const list = matchFilters(shifts, filters);
+    return [...list].sort((a, b) => (likedCompanies.has(b.company_id) ? 1 : 0) - (likedCompanies.has(a.company_id) ? 1 : 0));
+  }, [shifts, filters, city, q, user, busyDates, companyById, likedCompanies]);
 
   const countFor = (draft) => matchFilters(shifts, draft).length;
 
@@ -133,6 +145,8 @@ export default function WorkerDashboard() {
           {user.verification_status === 'rejected' ? t('kyc.rejected') : user.verification_status === 'submitted' ? t('kyc.submitted') : t('kyc.mustVerify')} → {t('kyc.verifyNow')}
         </Link>
       )}
+
+      <AttendanceBanner apps={apps} onRefresh={refresh} />
 
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
@@ -159,7 +173,7 @@ export default function WorkerDashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {filtered.map(s => (
-              <ShiftCard key={s.id} shift={s} workerState={getWorkerShiftState(appByShift[s.id], s)} />
+              <ShiftCard key={s.id} shift={s} workerState={getWorkerShiftState(appByShift[s.id], s)} liked={likedCompanies.has(s.company_id)} />
             ))}
           </div>
         )}

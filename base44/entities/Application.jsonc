@@ -19,6 +19,7 @@
       "enum": [
         "pending",
         "approved",
+        "in_progress",
         "rejected",
         "completed",
         "no_show",
@@ -31,6 +32,35 @@
       "type": "string",
       "format": "date-time",
       "title": "Ariza sanasi"
+    },
+    "check_in_time": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Kelish vaqti"
+    },
+    "check_out_time": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Ketish vaqti"
+    },
+    "actual_hours": {
+      "type": "number",
+      "title": "Haqiqiy soatlar"
+    },
+    "company_attendance_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed_present",
+        "confirmed_absent"
+      ],
+      "default": "pending",
+      "title": "Kompaniya tasdiqi"
+    },
+    "company_confirmed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Kompaniya tasdiqlagan vaqt"
     }
   },
   "required": [

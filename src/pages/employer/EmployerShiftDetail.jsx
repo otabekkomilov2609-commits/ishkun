@@ -6,10 +6,11 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import { StarsDisplay } from '@/components/RatingStars';
+import { isShiftStarted, isMismatch, attendanceLabel } from '@/lib/shiftTime';
 
 export default function EmployerShiftDetail() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function EmployerShiftDetail() {
   const [apps, setApps] = useState(null);
   const [users, setUsers] = useState({});
   const [completedCounts, setCompletedCounts] = useState({});
+  const [preferredWorkers, setPreferredWorkers] = useState(new Set());
 
   const load = async () => {
     const s = await base44.entities.Shift.get(id);
@@ -30,10 +32,12 @@ export default function EmployerShiftDetail() {
     const map = {};
     u.forEach(x => { map[x.id] = x; });
     setUsers(map);
-    const comp = await base44.entities.Application.filter({ status: 'completed' }, '-created_date', 500);
+    const comp = await base44.entities.Application.filter({ status: 'completed', company_attendance_status: 'confirmed_present' }, '-created_date', 500);
     const cc = {};
     comp.forEach(a => { cc[a.worker_id] = (cc[a.worker_id] || 0) + 1; });
     setCompletedCounts(cc);
+    const ratings = await base44.entities.Rating.filter({ rated_by: 'company', employer_id: user.id }, '-created_date', 500);
+    setPreferredWorkers(new Set(ratings.filter(r => r.score >= 4).map(r => r.worker_id)));
   };
 
   useEffect(() => { load(); }, [id]);
@@ -114,6 +118,14 @@ export default function EmployerShiftDetail() {
     }
   };
 
+  const confirmAttendance = async (app, status) => {
+    const now = new Date().toISOString();
+    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, company_attendance_status: status, company_confirmed_at: now } : a));
+    try {
+      await base44.entities.Application.update(app.id, { company_attendance_status: status, company_confirmed_at: now });
+    } catch (e) { console.error(e); }
+  };
+
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-48 w-full" /></div>;
 
   const pay = shiftPay(shift);
@@ -153,8 +165,14 @@ export default function EmployerShiftDetail() {
         <EmptyState icon={User} title={t('app.noApps')} />
       ) : (
         <div className="space-y-3">
-          {apps.map(a => {
+          {[...apps].sort((a, b) => (preferredWorkers.has(b.worker_id) ? 1 : 0) - (preferredWorkers.has(a.worker_id) ? 1 : 0)).map(a => {
             const w = users[a.worker_id];
+            const booked = a.status === 'approved' || a.status === 'in_progress';
+            const attLabel = attendanceLabel(a, shift);
+            const mismatch = isMismatch(a);
+            const preferred = preferredWorkers.has(a.worker_id);
+            const attPending = booked && a.company_attendance_status === 'pending' && isShiftStarted(shift);
+            const rateEligible = a.company_attendance_status === 'confirmed_present' && (a.status === 'completed' || a.check_out_time);
             return (
               <Card key={a.id} className="p-4">
                 <div className="flex items-center gap-3">
@@ -162,26 +180,37 @@ export default function EmployerShiftDetail() {
                     {(w?.full_name || '?').trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()).join('')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">{w?.full_name || '—'}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground truncate">{w?.full_name || '—'}</p>
+                      {preferred && <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5"><Heart className="h-3 w-3" /> {t('att.goodWorker')}</span>}
+                    </div>
                     <p className="text-xs text-muted-foreground">{w?.phone_number || w?.email}</p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <StarsDisplay avg={w?.rating_avg} count={w?.rating_count} />
                       <span className="text-xs text-muted-foreground">{completedCounts[a.worker_id] || 0} {t('rating.completedShifts')}</span>
                     </div>
                   </div>
-                  <StatusBadge status={a.status} label={t(`app.status${a.status.charAt(0).toUpperCase()}${a.status.slice(1)}`)} />
+                  <div className="flex flex-col items-end gap-1">
+                    <StatusBadge status={a.status} label={t(`app.status${a.status.charAt(0).toUpperCase()}${a.status.slice(1)}`)} />
+                    {mismatch && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
+                  </div>
                 </div>
-                {a.status === 'completed' && (
+                {booked && (
+                  <div className="flex items-center gap-2 mt-2 text-xs">
+                    <span className="text-muted-foreground">{t('att.attendance')}:</span>
+                    <span className="font-semibold text-foreground">{t(`att.${attLabel}`)}</span>
+                  </div>
+                )}
+                {attPending && (
+                  <div className="flex gap-2 mt-3">
+                    <Button size="sm" variant="soft" onClick={() => confirmAttendance(a, 'confirmed_present')}><CheckCircle2 className="h-4 w-4" /> {t('att.came')}</Button>
+                    <Button size="sm" variant="outline" onClick={() => confirmAttendance(a, 'confirmed_absent')}><XCircle className="h-4 w-4" /> {t('att.notCame')}</Button>
+                  </div>
+                )}
+                {rateEligible && (
                   <div className="mt-3 border-t border-border pt-3">
                     <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-foreground"><Star className="h-4 w-4 text-primary" /> {t('rating.rateWorker')}</div>
-                    <RatingPrompt
-                      applicationId={a.id}
-                      shiftId={shift.id}
-                      workerId={a.worker_id}
-                      companyId={shift.company_id}
-                      employerId={user.id}
-                      ratedBy="company"
-                    />
+                    <RatingPrompt applicationId={a.id} shiftId={shift.id} workerId={a.worker_id} companyId={shift.company_id} employerId={user.id} ratedBy="company" />
                   </div>
                 )}
                 {a.status === 'pending' && (

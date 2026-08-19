@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Wallet, CalendarDays } from 'lucide-react';
+import { MapPin, Wallet, CalendarDays, Heart } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { formatSom, formatDateWeekDay, shiftPay } from '@/lib/format';
 import StatusBadge from './StatusBadge';
 import WorkerShiftBadge from './WorkerShiftBadge';
 import { cn } from '@/lib/utils';
 
-export default function ShiftCard({ shift, to, showStatus = false, statusLabel, workerState }) {
+export default function ShiftCard({ shift, to, showStatus = false, statusLabel, workerState, liked }) {
   const { t, lang } = useLang();
   const link = to || (shift.id ? `/worker/shifts/${shift.id}` : '#');
   const pay = shiftPay(shift);
@@ -36,11 +36,16 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
           </div>
         </div>
 
-        <div className="mt-2.5">
+        <div className="mt-2.5 flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
             <CalendarDays className="h-3.5 w-3.5" />
             {formatDateWeekDay(shift.date, lang)}
           </span>
+          {liked && (
+            <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-1">
+              <Heart className="h-3 w-3" /> {t('att.likedCompany')}
+            </span>
+          )}
         </div>
       </div>
     </Link>

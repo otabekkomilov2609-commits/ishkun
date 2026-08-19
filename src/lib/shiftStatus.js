@@ -23,6 +23,8 @@ export function getWorkerShiftState(app, shift) {
       return { key: 'completed', labelKey: 'wstat.completed', kind: 'completed' };
     case 'no_show':
       return { key: 'noShow', labelKey: 'wstat.noShow', kind: 'rejected' };
+    case 'in_progress':
+      return { key: 'inProgress', labelKey: 'wstat.inProgress', kind: 'active' };
     case 'approved':
       if (shift && shift.status === 'completed') {
         return { key: 'completed', labelKey: 'wstat.completed', kind: 'completed' };
