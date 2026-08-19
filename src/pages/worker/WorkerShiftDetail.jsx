@@ -16,6 +16,7 @@ export default function WorkerShiftDetail() {
   const [company, setCompany] = useState(null);
   const [applied, setApplied] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [sameDayConflict, setSameDayConflict] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -27,6 +28,15 @@ export default function WorkerShiftDetail() {
       if (user) {
         const a = await base44.entities.Application.filter({ worker_id: user.id, shift_id: id });
         setApplied(a.length > 0);
+        // Check for same-day conflicts: any active application (pending/approved) on the same date
+        const activeApps = await base44.entities.Application.filter({ worker_id: user.id });
+        const active = activeApps.filter(x => x.status === 'pending' || x.status === 'approved');
+        const otherShiftIds = [...new Set(active.map(x => x.shift_id).filter(sid => sid !== id))];
+        const otherShifts = await Promise.all(otherShiftIds.map(async sid => {
+          try { return await base44.entities.Shift.get(sid); } catch { return null; }
+        }));
+        const conflict = otherShifts.find(os => os && os.date === s.date);
+        setSameDayConflict(conflict || null);
       }
     })();
   }, [id, user]);
@@ -34,7 +44,7 @@ export default function WorkerShiftDetail() {
   const verified = user?.verification_status === 'verified';
 
   const apply = async () => {
-    if (!verified) return;
+    if (!verified || sameDayConflict) return;
     setApplying(true);
     try {
       await base44.entities.Application.create({
@@ -96,6 +106,10 @@ export default function WorkerShiftDetail() {
           <Button size="lg" className="w-full" disabled>
             <CheckCircle2 className="h-5 w-5" /> {t('wrk.applied')}
           </Button>
+        ) : sameDayConflict ? (
+          <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">
+            {t('wrk.sameDayConflict')}
+          </div>
         ) : verified ? (
           <Button size="lg" className="w-full" disabled={applying} onClick={apply}>
             {t('wrk.applyNow')}
