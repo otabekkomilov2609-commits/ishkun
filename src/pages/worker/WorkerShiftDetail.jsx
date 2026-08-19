@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
+import { queryClientInstance } from '@/lib/query-client';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2 } from 'lucide-react';
 import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/format';
 import { getWorkerShiftState, STATE_STYLES } from '@/lib/shiftStatus';
@@ -68,6 +69,7 @@ export default function WorkerShiftDetail() {
         type: 'new_application',
         link: `/employer/shifts/${id}`
       });
+      queryClientInstance.invalidateQueries({ queryKey: ['myApps'] });
     } catch (e) {
       setMyApp(null);
       console.error(e);
