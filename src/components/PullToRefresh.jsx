@@ -11,6 +11,8 @@ export default function PullToRefresh({ onRefresh, children }) {
   const startY = useRef(null);
   const pullRef = useRef(0);
   const refreshingRef = useRef(false);
+  const onRefreshRef = useRef(onRefresh);
+  onRefreshRef.current = onRefresh;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -42,7 +44,7 @@ export default function PullToRefresh({ onRefresh, children }) {
         setPull(0);
         pullRef.current = 0;
         try {
-          await onRefresh?.();
+          await onRefreshRef.current?.();
         } finally {
           refreshingRef.current = false;
           setRefreshing(false);
@@ -62,7 +64,7 @@ export default function PullToRefresh({ onRefresh, children }) {
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
     };
-  }, [onRefresh]);
+  }, []);
 
   const h = refreshing ? 44 : pull;
 
