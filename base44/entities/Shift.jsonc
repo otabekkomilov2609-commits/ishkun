@@ -90,7 +90,8 @@
       "enum": [
         "open",
         "filled",
-        "completed"
+        "completed",
+        "cancelled"
       ],
       "default": "open",
       "title": "Holati"

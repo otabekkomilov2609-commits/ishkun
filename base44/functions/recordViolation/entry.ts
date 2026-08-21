@@ -128,7 +128,7 @@ export default async function(req) {
     // logic so every path (self-cancel, AbsentReasonDialog, markWorkerNoShow) is covered.
     try {
       const shift = await base44.asServiceRole.entities.Shift.get(app.shift_id);
-      if (shift && shift.status !== 'completed') {
+      if (shift && shift.status !== 'completed' && shift.status !== 'cancelled') {
         const shiftApps = await base44.asServiceRole.entities.Application.filter({ shift_id: app.shift_id }, '-created_date', 500);
         const remainingApproved = shiftApps.filter(
           a => a.id !== application_id && a.status === 'approved' && a.company_attendance_status !== 'confirmed_absent'

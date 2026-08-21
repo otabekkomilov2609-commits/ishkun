@@ -30,7 +30,8 @@
         "application_cancelled",
         "shift_reminder_24h",
         "shift_reminder_1h",
-        "urgent_replacement_needed"
+        "urgent_replacement_needed",
+        "shift_cancelled_by_employer"
       ],
       "title": "Turi"
     },

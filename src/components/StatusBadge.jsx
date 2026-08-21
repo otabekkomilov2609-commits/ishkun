@@ -11,6 +11,7 @@ const map = {
   pending_mod: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   blocked: 'bg-rose-50 text-rose-700 ring-rose-600/20',
   no_show: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+  cancelled: 'bg-rose-50 text-rose-700 ring-rose-600/20',
   approved_mod: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
 };
 

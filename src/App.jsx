@@ -27,11 +27,13 @@ import CompanyProfile from '@/pages/employer/CompanyProfile';
 import CreateShift from '@/pages/employer/CreateShift';
 import MyShifts from '@/pages/employer/MyShifts';
 import EmployerShiftDetail from '@/pages/employer/EmployerShiftDetail';
+import EditShift from '@/pages/employer/EditShift';
 import WorkerDashboard from '@/pages/worker/WorkerDashboard';
 import WorkerShiftDetail from '@/pages/worker/WorkerShiftDetail';
 import MyApplications from '@/pages/worker/MyApplications';
 import Verification from '@/pages/Verification';
 import PageTransition from '@/components/PageTransition';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -80,6 +82,7 @@ const AuthenticatedApp = () => {
           <Route path="/employer/shifts" element={<RoleGuard roles={['employer']}><MyShifts /></RoleGuard>} />
           <Route path="/employer/shifts/new" element={<RoleGuard roles={['employer']}><CreateShift /></RoleGuard>} />
           <Route path="/employer/shifts/:id" element={<RoleGuard roles={['employer']}><EmployerShiftDetail /></RoleGuard>} />
+          <Route path="/employer/shifts/:id/edit" element={<RoleGuard roles={['employer']}><EditShift /></RoleGuard>} />
           <Route path="/employer/company" element={<RoleGuard roles={['employer']}><CompanyProfile /></RoleGuard>} />
           {/* Admin */}
           <Route path="/admin" element={<RoleGuard allowAdmin><AdminPanel /></RoleGuard>} />
@@ -104,7 +107,9 @@ function App() {
           <Router>
             <LanguageProvider>
               <ScrollToTop />
-              <AuthenticatedApp />
+              <ErrorBoundary>
+                <AuthenticatedApp />
+              </ErrorBoundary>
             </LanguageProvider>
           </Router>
           <Toaster />

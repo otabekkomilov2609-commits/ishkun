@@ -7,10 +7,11 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
+import CancelShiftDialog from '@/components/CancelShiftDialog';
 import { StarsDisplay } from '@/components/RatingStars';
 import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen } from '@/lib/shiftTime';
 
@@ -26,6 +27,7 @@ export default function EmployerShiftDetail() {
   const [completedCounts, setCompletedCounts] = useState({});
   const [preferredWorkers, setPreferredWorkers] = useState(new Set());
   const [absentApp, setAbsentApp] = useState(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const load = async () => {
     const s = await base44.entities.Shift.get(id);
@@ -178,10 +180,18 @@ export default function EmployerShiftDetail() {
           <Info icon={Wallet} label={t('shift.totalAmount')} value={pay.total != null ? formatSom(pay.total) : '—'} />
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
-        {shift.status !== 'completed' && (
-          <Button variant="soft" className="mt-4" onClick={markCompleted}>
-            <CheckCircle2 className="h-4 w-4" /> {t('shift.markCompleted')}
-          </Button>
+        {shift.status !== 'completed' && shift.status !== 'cancelled' && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Button variant="soft" onClick={markCompleted}>
+              <CheckCircle2 className="h-4 w-4" /> {t('shift.markCompleted')}
+            </Button>
+            <Button variant="outline" onClick={() => navigate(`/employer/shifts/${id}/edit`)}>
+              <Pencil className="h-4 w-4" /> {t('edit')}
+            </Button>
+            <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => setCancelOpen(true)}>
+              <Ban className="h-4 w-4" /> {t('shift.cancelShift')}
+            </Button>
+          </div>
         )}
       </Card>
 
@@ -265,6 +275,12 @@ export default function EmployerShiftDetail() {
         shift={shift}
         workerName={users[absentApp?.worker_id]?.full_name}
         onConfirmed={(appId) => setApps(prev => prev.map(x => x.id === appId ? { ...x, company_attendance_status: 'confirmed_absent' } : x))}
+      />
+      <CancelShiftDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        shift={shift}
+        onCancelled={() => setShift(prev => ({ ...prev, status: 'cancelled', urgent_replacement: false }))}
       />
     </div>
   );
