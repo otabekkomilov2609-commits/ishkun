@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES, shiftDurationHours } from '@/lib/format';
+import { CITIES } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import { PlusCircle, Check, Building2 } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function CreateShift() {
     }
     setSaving(true);
     try {
-      const shift = await base44.entities.Shift.create({
+      const res = await base44.functions.invoke('createShift', {
         title: form.title,
         description: form.description,
         tasks_text: form.tasks_text || undefined,
@@ -51,13 +51,10 @@ export default function CreateShift() {
         location: form.location,
         city: form.city,
         hourly_rate: Number(form.hourly_rate),
-        payment_amount: Math.round(Number(form.hourly_rate) * shiftDurationHours({ start_time: form.start_time, end_time: form.end_time })),
         required_workers: Number(form.required_workers) || 1,
-        required_skill: form.required_skill || undefined,
-        company_id: company.id,
-        status: 'open',
-        moderation: 'approved'
+        required_skill: form.required_skill || undefined
       });
+      const shift = res?.data?.shift;
       await base44.entities.Notification.create({
         user_id: user.id,
         title: "E'lon qilindi",

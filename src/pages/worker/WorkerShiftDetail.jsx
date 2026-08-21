@@ -68,12 +68,14 @@ export default function WorkerShiftDetail() {
         status: 'pending',
         application_date: new Date().toISOString()
       });
-      await base44.entities.Notification.create({
-        user_id: shift.created_by_id,
-        title: 'Yangi arizachi',
-        body: `${user.full_name || 'Ishchi'} sizning '${shift.title}' e'loningizga ariza topshirdi.`,
-        type: 'new_application',
-        link: `/employer/shifts/${id}`
+      await base44.functions.invoke('createNotificationFor', {
+        notifications: [{
+          user_id: shift.created_by_id,
+          title: 'Yangi arizachi',
+          body: `${user.full_name || 'Ishchi'} sizning '${shift.title}' e'loningizga ariza topshirdi.`,
+          type: 'new_application',
+          link: `/employer/shifts/${id}`
+        }]
       });
       queryClientInstance.invalidateQueries({ queryKey: ['myApps'] });
     } catch (e) {

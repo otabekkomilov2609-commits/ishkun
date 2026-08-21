@@ -23,25 +23,13 @@ export default function AdminKycReview() {
 
   const approve = async (u) => {
     setActing(true);
-    await base44.entities.User.update(u.id, { verification_status: 'verified', verification_note: '' });
-    await base44.entities.Notification.create({
-      user_id: u.id,
-      title: 'Profilingiz tasdiqlandi',
-      body: "Tabriklaymiz! Profilingiz tasdiqlandi, endi siz ishlarga ariza topshirishingiz mumkin.",
-      type: 'verification_approved'
-    });
+    await base44.functions.invoke('reviewVerification', { user_id: u.id, approved: true });
     setActing(false); setSelected(null); setNote(''); load();
   };
 
   const reject = async (u) => {
     setActing(true);
-    await base44.entities.User.update(u.id, { verification_status: 'rejected', verification_note: note });
-    await base44.entities.Notification.create({
-      user_id: u.id,
-      title: 'Verifikatsiya rad etildi',
-      body: `Profilni verifikatsiyadan o'tkazishda xatolik aniqlandi. Iltimos, ma'lumotlarni tekshiring: ${note || '—'}`,
-      type: 'verification_rejected'
-    });
+    await base44.functions.invoke('reviewVerification', { user_id: u.id, approved: false, note });
     setActing(false); setSelected(null); setNote(''); load();
   };
 

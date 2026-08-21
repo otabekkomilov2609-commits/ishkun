@@ -52,10 +52,9 @@ export default function Verification() {
         passport_back: form.passport_back,
         bank_card_number: form.bank_card_number,
         self_employed: form.self_employed,
-        self_employed_cert: form.self_employed ? form.self_employed_cert : '',
-        verification_status: 'submitted',
-        verification_note: ''
+        self_employed_cert: form.self_employed ? form.self_employed_cert : ''
       });
+      await base44.functions.invoke('submitVerification', {});
       await checkUserAuth();
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);

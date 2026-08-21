@@ -30,7 +30,7 @@ export default function AttendanceReminderSection() {
   });
   const usersQ = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list('-created_date', 200),
+    queryFn: () => base44.entities.User.list('-created_date', 200, 0, ['id', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']),
     staleTime: 60_000,
   });
 

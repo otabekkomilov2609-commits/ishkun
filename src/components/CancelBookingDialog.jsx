@@ -54,12 +54,14 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
           try { await checkUserAuth(); } catch {}
         }
       } else {
-        await base44.entities.Notification.create({
-          user_id: app.employer_id || shift.created_by_id,
-          title: 'Ishchi arizani bekor qildi',
-          body: `Ishchi ${workerName || 'Ishchi'} arizani bekor qildi.`,
-          type: 'worker_no_show',
-          link: `/employer/shifts/${shift.id}`
+        await base44.functions.invoke('createNotificationFor', {
+          notifications: [{
+            user_id: app.employer_id || shift.created_by_id,
+            title: 'Ishchi arizani bekor qildi',
+            body: `Ishchi ${workerName || 'Ishchi'} arizani bekor qildi.`,
+            type: 'worker_no_show',
+            link: `/employer/shifts/${shift.id}`
+          }]
         });
       }
       queryClientInstance.invalidateQueries({ queryKey: ['myApps'] });

@@ -30,7 +30,7 @@ export default function EmployerShiftDetail() {
     setShift(s);
     const a = await base44.entities.Application.filter({ shift_id: id }, '-created_date', 200);
     setApps(a);
-    const u = await base44.entities.User.list('-created_date', 200);
+    const u = await base44.entities.User.list('-created_date', 200, 0, ['id', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']);
     const map = {};
     u.forEach(x => { map[x.id] = x; });
     setUsers(map);
@@ -49,12 +49,14 @@ export default function EmployerShiftDetail() {
     setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status } : a));
     try {
       await base44.entities.Application.update(app.id, { status });
-      await base44.entities.Notification.create({
-        user_id: app.worker_id,
-        title: status === 'approved' ? t('notif.approved') : t('notif.rejected'),
-        body: shift.title,
-        type: status === 'approved' ? 'application_approved' : 'application_rejected',
-        link: `/worker/applications`
+      await base44.functions.invoke('createNotificationFor', {
+        notifications: [{
+          user_id: app.worker_id,
+          title: status === 'approved' ? t('notif.approved') : t('notif.rejected'),
+          body: shift.title,
+          type: status === 'approved' ? 'application_approved' : 'application_rejected',
+          link: `/worker/applications`
+        }]
       });
     } catch (e) {
       setApps(prev);
@@ -68,9 +70,11 @@ export default function EmployerShiftDetail() {
     try {
       await base44.entities.Shift.update(id, { status: 'completed' });
       const approved = apps.filter(a => a.status === 'approved');
-      await base44.entities.Notification.bulkCreate(approved.map(a => ({
-        user_id: a.worker_id, title: t('notif.shiftDone'), body: shift.title, type: 'shift_completed', link: '/worker/applications'
-      })));
+      await base44.functions.invoke('createNotificationFor', {
+        notifications: approved.map(a => ({
+          user_id: a.worker_id, title: t('notif.shiftDone'), body: shift.title, type: 'shift_completed', link: '/worker/applications'
+        }))
+      });
     } catch (e) {
       setShift({ ...shift, status: prevStatus });
       console.error(e);
@@ -82,12 +86,14 @@ export default function EmployerShiftDetail() {
     setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status: 'completed' } : a));
     try {
       await base44.entities.Application.update(app.id, { status: 'completed' });
-      await base44.entities.Notification.create({
-        user_id: app.worker_id,
-        title: t('notif.shiftDone'),
-        body: shift.title,
-        type: 'shift_completed',
-        link: '/worker/applications'
+      await base44.functions.invoke('createNotificationFor', {
+        notifications: [{
+          user_id: app.worker_id,
+          title: t('notif.shiftDone'),
+          body: shift.title,
+          type: 'shift_completed',
+          link: '/worker/applications'
+        }]
       });
     } catch (e) {
       setApps(prev);
