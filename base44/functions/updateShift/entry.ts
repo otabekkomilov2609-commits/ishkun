@@ -55,6 +55,38 @@ export default async function(req) {
       return Response.json({ error: 'Cannot reduce required_workers below the current approved count' }, { status: 400 });
     }
 
+    // Once a worker is approved, the shift's core terms are locked — changing
+    // them would alter what the worker already agreed to.
+    if (approvedCount > 0) {
+      const lockedChanged =
+        String(date) !== String(shift.date) ||
+        String(start_time) !== String(shift.start_time) ||
+        String(end_time) !== String(shift.end_time) ||
+        Number(hourly_rate) !== Number(shift.hourly_rate) ||
+        String(location) !== String(shift.location) ||
+        String(city) !== String(shift.city) ||
+        String(required_skill || '') !== String(shift.required_skill || '');
+      if (lockedChanged) {
+        return Response.json({ error: "Ishchi tasdiqlangan smenada asosiy shartlarni o'zgartirib bo'lmaydi" }, { status: 400 });
+      }
+    }
+
+    // Detect actual changes to the still-editable fields, so approved workers are
+    // notified only when something they care about really changed (not on a no-op
+    // re-save). Empty/undefined and '' are treated as equal; whitespace trimmed.
+    const norm = (v) => (v == null ? '' : String(v).trim());
+    const editableFields = [
+      { label: 'Sarlavha', val: title, old: shift.title },
+      { label: 'Tavsif', val: description, old: shift.description },
+      { label: 'Vazifalar', val: tasks_text, old: shift.tasks_text },
+      { label: 'Muhim eslatmalar', val: important_notes_text, old: shift.important_notes_text },
+      { label: 'Talablar', val: requirements_text, old: shift.requirements_text },
+      { label: 'Kiyim kodi', val: dress_code_text, old: shift.dress_code_text },
+      { label: 'Xarita havolasi', val: map_link, old: shift.map_link },
+      { label: 'Kerakli ishchilar soni', val: String(newRequired), old: String(shift.required_workers) }
+    ];
+    const changedLabels = editableFields.filter(f => norm(f.val) !== norm(f.old)).map(f => f.label);
+
     const hours = durationHours(start_time, end_time);
     const payment_amount = Math.round(rate * hours);
 
@@ -67,6 +99,22 @@ export default async function(req) {
       required_workers: newRequired,
       required_skill: required_skill || undefined
     });
+
+    // Notify approved workers when an editable field actually changed.
+    if (approvedCount > 0 && changedLabels.length > 0) {
+      const approvedApps = apps.filter(a => a.status === 'approved');
+      const notifBody = `"${updated.title || ''}" smenasida quyidagilar yangilandi: ${changedLabels.join(', ')}.`;
+      await base44.asServiceRole.entities.Notification.bulkCreate(
+        approvedApps.map(a => ({
+          user_id: a.worker_id,
+          title: 'Smena tafsilotlari yangilandi',
+          body: notifBody,
+          type: 'shift_updated',
+          link: '/worker/applications',
+          read: false
+        }))
+      );
+    }
 
     return Response.json({ shift: updated });
   } catch (error) {

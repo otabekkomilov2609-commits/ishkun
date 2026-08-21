@@ -19,6 +19,7 @@ export default function EditShift() {
   const [shift, setShift] = useState(undefined);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [approvedCount, setApprovedCount] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -42,6 +43,8 @@ export default function EditShift() {
           required_workers: s.required_workers || 1,
           required_skill: s.required_skill || ''
         });
+        const apps = await base44.entities.Application.filter({ shift_id: id });
+        setApprovedCount(apps.filter(a => a.status === 'approved').length);
       } catch (e) {
         console.error(e);
         setShift(null);
@@ -103,6 +106,11 @@ export default function EditShift() {
       </div>
 
       <Card className="p-5">
+        {approvedCount > 0 && (
+          <div className="mb-4 rounded-xl bg-amber-50 text-amber-800 text-sm px-4 py-3">
+            Bu smenaga {approvedCount} ta ishchi allaqachon tasdiqlangan, shuning uchun sana, vaqt, narx, manzil va shaharni o'zgartirib bo'lmaydi. O'zgartirilsa, tasdiqlangan ishchilarga xabar boradi. Agar asosiy shartlarni tubdan o'zgartirish kerak bo'lsa, smenani bekor qilib, 'Nusxalash' orqali qayta e'lon qiling.
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
             <Field label={t('shift.titleLabel')} required>
@@ -110,22 +118,22 @@ export default function EditShift() {
             </Field>
           </div>
           <Field label={t('shift.date')} required>
-            <Input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            <Input type="date" value={form.date} disabled={approvedCount > 0} onChange={e => setForm({ ...form, date: e.target.value })} />
           </Field>
           <Field label={t('shift.hourlyRate')} required hint={t('shift.hourlyRateHint')}>
-            <Input type="number" value={form.hourly_rate} onChange={e => setForm({ ...form, hourly_rate: e.target.value })} placeholder="25000" />
+            <Input type="number" value={form.hourly_rate} disabled={approvedCount > 0} onChange={e => setForm({ ...form, hourly_rate: e.target.value })} placeholder="25000" />
           </Field>
           <Field label={t('shift.startTime')} required>
-            <Input type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
+            <Input type="time" value={form.start_time} disabled={approvedCount > 0} onChange={e => setForm({ ...form, start_time: e.target.value })} />
           </Field>
           <Field label={t('shift.endTime')} required>
-            <Input type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
+            <Input type="time" value={form.end_time} disabled={approvedCount > 0} onChange={e => setForm({ ...form, end_time: e.target.value })} />
           </Field>
           <Field label={t('shift.location')} required>
-            <Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Chilonzor tumani" />
+            <Input value={form.location} disabled={approvedCount > 0} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Chilonzor tumani" />
           </Field>
           <Field label={t('city')} required>
-            <Select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}>
+            <Select value={form.city} disabled={approvedCount > 0} onChange={e => setForm({ ...form, city: e.target.value })}>
               <option value="">{t('allCities')}</option>
               {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
@@ -137,7 +145,7 @@ export default function EditShift() {
           </div>
           <div className="sm:col-span-2">
             <Field label={t('shift.skill')}>
-              <Select value={form.required_skill} onChange={e => setForm({ ...form, required_skill: e.target.value })}>
+              <Select value={form.required_skill} disabled={approvedCount > 0} onChange={e => setForm({ ...form, required_skill: e.target.value })}>
                 <option value="">{t('shift.skillAny')}</option>
                 <option value="warehouse">{t('skill.warehouse')}</option>
                 <option value="waiter">{t('skill.waiter')}</option>
