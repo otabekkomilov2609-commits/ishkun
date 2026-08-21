@@ -212,7 +212,7 @@ export default function WorkerShiftDetail() {
 
       {myApp && myApp.status === 'approved' && !myApp.check_in_time && (
         <Button variant="outline" className="w-full mb-4" onClick={() => setCancelOpen(true)}>
-          {afterEnd ? t('cancel.cannotComePast') : t('cancel.cannotCome')}
+          {afterEnd ? t('cancelDialog.cannotComePast') : t('cancelDialog.cannotCome')}
         </Button>
       )}
       <CancelBookingDialog
@@ -227,7 +227,7 @@ export default function WorkerShiftDetail() {
       <div className="sticky bottom-20">
         {state.key === 'apply' && verified && !sameDayConflict ? (
           user?.account_status === 'blocked' ? (
-            <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">{t('cancel.blockedMsg')}</div>
+            <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">{t('cancelDialog.blockedMsg')}</div>
           ) : (
             <Button size="lg" className="w-full" disabled={applying} onClick={apply}>
               {t('wstat.apply')}

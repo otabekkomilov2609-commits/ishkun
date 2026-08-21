@@ -21,7 +21,7 @@ export default function UpcomingShiftBanner({ apps, shifts }) {
   if (upcoming.length === 0) return null;
   const { shift, start } = upcoming[0];
   const hoursLeft = Math.max(1, Math.round((start.getTime() - now) / (60 * 60 * 1000)));
-  const text = t('cancel.upcomingReminder').replace('{title}', shift.title).replace('{hours}', String(hoursLeft));
+  const text = t('cancelDialog.upcomingReminder').replace('{title}', shift.title).replace('{hours}', String(hoursLeft));
   return (
     <div className="mb-4 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 flex items-start gap-2">
       <Bell className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />

@@ -38,14 +38,14 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
     try {
       await base44.entities.Application.update(app.id, {
         status: 'cancelled',
-        ...(isLate && reason ? { cancellation_reason: t('cancel.reason.' + reason) } : {})
+        ...(isLate && reason ? { cancellation_reason: t('cancelDialog.reason.' + reason) } : {})
       });
       if (isLate) {
         const res = await base44.functions.invoke('recordViolation', {
           application_id: app.id,
           worker_id: app.worker_id,
           source: 'late_cancel',
-          reason: t('cancel.reason.' + reason),
+          reason: t('cancelDialog.reason.' + reason),
           shift_title: shift.title,
           worker_name: workerName,
           employer_id: app.employer_id || shift.created_by_id
@@ -75,12 +75,12 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
     <AlertDialog open={open} onOpenChange={(o) => { if (!submitting) onOpenChange(o); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{isLate ? t('cancel.lateTitle') : t('cancel.title')}</AlertDialogTitle>
+          <AlertDialogTitle>{isLate ? t('cancelDialog.lateTitle') : t('cancelDialog.title')}</AlertDialogTitle>
           {isLate ? (
             <>
-              <AlertDialogDescription>{t('cancel.lateWarning')}</AlertDialogDescription>
+              <AlertDialogDescription>{t('cancelDialog.lateWarning')}</AlertDialogDescription>
               <div className="mt-3">
-                <p className="text-sm font-semibold text-foreground mb-2">{t('cancel.reasonLabel')}</p>
+                <p className="text-sm font-semibold text-foreground mb-2">{t('cancelDialog.reasonLabel')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {REASONS.map(r => (
                     <button
@@ -92,14 +92,14 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
                         reason === r ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-foreground hover:bg-muted'
                       )}
                     >
-                      {t('cancel.reason.' + r)}
+                      {t('cancelDialog.reason.' + r)}
                     </button>
                   ))}
                 </div>
               </div>
             </>
           ) : (
-            <AlertDialogDescription>{t('cancel.confirmDesc')}</AlertDialogDescription>
+            <AlertDialogDescription>{t('cancelDialog.confirmDesc')}</AlertDialogDescription>
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -109,7 +109,7 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
             disabled={submitting || (isLate && !reason)}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {submitting ? t('loading') : t('cancel.confirmBtn')}
+            {submitting ? t('loading') : t('cancelDialog.confirmBtn')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
