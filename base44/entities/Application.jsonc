@@ -61,6 +61,11 @@
       "type": "string",
       "format": "date-time",
       "title": "Kompaniya tasdiqlagan vaqt"
+    },
+    "violation_recorded": {
+      "type": "boolean",
+      "default": false,
+      "title": "Qoida buzarlik qayd etilgan"
     }
   },
   "required": [

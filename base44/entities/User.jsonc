@@ -10,6 +10,20 @@
       ],
       "title": "Hisob turi"
     },
+    "account_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "blocked"
+      ],
+      "default": "active",
+      "title": "Hisob holati"
+    },
+    "violation_count": {
+      "type": "number",
+      "default": 0,
+      "title": "Qoida buzarliklar soni"
+    },
     "phone_number": {
       "type": "string",
       "title": "Telefon raqami"

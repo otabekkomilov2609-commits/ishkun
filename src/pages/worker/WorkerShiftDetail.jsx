@@ -8,6 +8,7 @@ import { queryClientInstance } from '@/lib/query-client';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, Star, AlertTriangle } from 'lucide-react';
 import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
+import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { StarsDisplay } from '@/components/RatingStars';
 import { isMismatch } from '@/lib/shiftTime';
 import { getWorkerShiftState, STATE_STYLES } from '@/lib/shiftStatus';
@@ -23,6 +24,7 @@ export default function WorkerShiftDetail() {
   const [myApp, setMyApp] = useState(null);
   const [applying, setApplying] = useState(false);
   const [sameDayConflict, setSameDayConflict] = useState(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -201,11 +203,29 @@ export default function WorkerShiftDetail() {
         </Card>
       )}
 
+      {myApp && myApp.status === 'approved' && !myApp.check_in_time && (
+        <Button variant="outline" className="w-full mb-4" onClick={() => setCancelOpen(true)}>
+          {t('cancel.cannotCome')}
+        </Button>
+      )}
+      <CancelBookingDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        app={myApp}
+        shift={shift}
+        workerName={user?.full_name}
+        onCancelled={() => setMyApp(prev => prev ? { ...prev, status: 'cancelled' } : prev)}
+      />
+
       <div className="sticky bottom-20">
         {state.key === 'apply' && verified && !sameDayConflict ? (
-          <Button size="lg" className="w-full" disabled={applying} onClick={apply}>
-            {t('wstat.apply')}
-          </Button>
+          user?.account_status === 'blocked' ? (
+            <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">{t('cancel.blockedMsg')}</div>
+          ) : (
+            <Button size="lg" className="w-full" disabled={applying} onClick={apply}>
+              {t('wstat.apply')}
+            </Button>
+          )
         ) : state.key === 'apply' && !verified ? (
           <div className="space-y-2">
             <div className="rounded-xl bg-amber-50 text-amber-700 text-sm font-medium px-4 py-3 text-center">{t('kyc.mustVerify')}</div>

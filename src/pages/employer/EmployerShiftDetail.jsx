@@ -123,6 +123,15 @@ export default function EmployerShiftDetail() {
     setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, company_attendance_status: status, company_confirmed_at: now } : a));
     try {
       await base44.entities.Application.update(app.id, { company_attendance_status: status, company_confirmed_at: now });
+      if (status === 'confirmed_absent' && !app.violation_recorded) {
+        await base44.functions.invoke('recordViolation', {
+          application_id: app.id,
+          worker_id: app.worker_id,
+          source: 'no_show',
+          shift_title: shift.title,
+          employer_id: app.employer_id || shift.created_by_id
+        });
+      }
     } catch (e) { console.error(e); }
   };
 
