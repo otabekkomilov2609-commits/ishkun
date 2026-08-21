@@ -122,6 +122,60 @@ export default async function(req) {
       );
     }
 
+    // --- Guaranteed replacement: reopen the shift & notify matching workers ---
+    // Runs for both late_cancel and no_show, since either means an approved worker
+    // just vacated a confirmed slot. recordViolation is the single owner of this
+    // logic so every path (self-cancel, AbsentReasonDialog, markWorkerNoShow) is covered.
+    try {
+      const shift = await base44.asServiceRole.entities.Shift.get(app.shift_id);
+      if (shift && shift.status !== 'completed') {
+        const shiftApps = await base44.asServiceRole.entities.Application.filter({ shift_id: app.shift_id }, '-created_date', 500);
+        const remainingApproved = shiftApps.filter(
+          a => a.id !== application_id && a.status === 'approved' && a.company_attendance_status !== 'confirmed_absent'
+        ).length;
+        if (remainingApproved < (shift.required_workers || 1)) {
+          if (shift.status !== 'open' || !shift.urgent_replacement) {
+            await base44.asServiceRole.entities.Shift.update(app.shift_id, { status: 'open', urgent_replacement: true });
+          }
+          try {
+            const alreadyApplied = new Set(
+              shiftApps.filter(a => a.status !== 'cancelled' && a.status !== 'rejected').map(a => a.worker_id)
+            );
+            alreadyApplied.add(worker_id);
+            let candidates = [];
+            if (shift.city) {
+              candidates = await base44.asServiceRole.entities.User.filter(
+                { account_type: 'worker', account_status: 'active', verification_status: 'verified', city: shift.city },
+                '-rating_avg',
+                100
+              );
+            }
+            const eligible = candidates
+              .filter(c => c.id !== worker_id && !alreadyApplied.has(c.id))
+              .sort((a, b) => (b.rating_avg || 0) - (a.rating_avg || 0))
+              .slice(0, 20);
+            if (eligible.length > 0) {
+              const link = `/worker/shifts/${app.shift_id}`;
+              await base44.asServiceRole.entities.Notification.bulkCreate(
+                eligible.map(c => ({
+                  user_id: c.id,
+                  title: 'Zudlik bilan ishchi kerak!',
+                  body: `"${shift.title || ''}" smenasiga zudlik bilan ishchi kerak. Tezroq ariza bering!`,
+                  type: 'urgent_replacement_needed',
+                  link,
+                  read: false
+                }))
+              );
+            }
+          } catch (e2) {
+            console.error('replacement candidates error', e2);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('replacement error', e);
+    }
+
     return Response.json({ violation_count: nextCount, blocked, already_recorded: false });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

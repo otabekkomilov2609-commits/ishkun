@@ -95,6 +95,11 @@
       "default": "open",
       "title": "Holati"
     },
+    "urgent_replacement": {
+      "type": "boolean",
+      "default": false,
+      "title": "Zudlik bilan almashtirish kerak"
+    },
     "company_id": {
       "type": "string",
       "title": "Kompaniya"

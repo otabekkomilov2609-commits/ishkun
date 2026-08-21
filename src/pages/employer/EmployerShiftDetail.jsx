@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
+import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
@@ -17,6 +18,7 @@ export default function EmployerShiftDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const { t } = useLang();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [shift, setShift] = useState(null);
   const [apps, setApps] = useState(null);
@@ -45,6 +47,11 @@ export default function EmployerShiftDetail() {
   useEffect(() => { load(); }, [id]);
 
   const setStatus = async (app, status) => {
+    const currentApproved = (apps || []).filter(a => a.status === 'approved' && a.id !== app.id).length;
+    if (status === 'approved' && currentApproved >= (shift.required_workers || 1)) {
+      toast({ title: t('app.positionFull'), variant: 'destructive' });
+      return;
+    }
     const prev = apps;
     setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status } : a));
     try {
@@ -58,6 +65,10 @@ export default function EmployerShiftDetail() {
           link: `/worker/applications`
         }]
       });
+      if (status === 'approved' && currentApproved + 1 >= (shift.required_workers || 1)) {
+        setShift(prev => ({ ...prev, status: 'filled', urgent_replacement: false }));
+        await base44.entities.Shift.update(shift.id, { status: 'filled', urgent_replacement: false });
+      }
     } catch (e) {
       setApps(prev);
       console.error(e);
@@ -103,17 +114,9 @@ export default function EmployerShiftDetail() {
 
   const markWorkerNoShow = async (app) => {
     const prev = apps;
-    const prevStatus = shift.status;
     setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status: 'no_show' } : a));
-    const remainingApproved = apps.filter(a => a.id !== app.id && a.status === 'approved');
-    if (remainingApproved.length < shift.required_workers && shift.status !== 'open') {
-      setShift({ ...shift, status: 'open' });
-    }
     try {
       await base44.entities.Application.update(app.id, { status: 'no_show' });
-      if (remainingApproved.length < shift.required_workers && prevStatus !== 'open') {
-        await base44.entities.Shift.update(id, { status: 'open' });
-      }
       if (!app.violation_recorded) {
         await base44.functions.invoke('recordViolation', {
           application_id: app.id,
@@ -123,9 +126,10 @@ export default function EmployerShiftDetail() {
           employer_id: app.employer_id || shift.created_by_id
         });
       }
+      // recordViolation now owns shift reopening + urgent replacement notifications.
+      setShift(await base44.entities.Shift.get(id));
     } catch (e) {
       setApps(prev);
-      setShift({ ...shift, status: prevStatus });
       console.error(e);
     }
   };

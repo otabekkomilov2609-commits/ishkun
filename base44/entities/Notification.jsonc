@@ -29,7 +29,8 @@
         "rating_received",
         "application_cancelled",
         "shift_reminder_24h",
-        "shift_reminder_1h"
+        "shift_reminder_1h",
+        "urgent_replacement_needed"
       ],
       "title": "Turi"
     },
