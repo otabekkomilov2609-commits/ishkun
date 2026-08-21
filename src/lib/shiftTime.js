@@ -39,3 +39,16 @@ export function attendanceLabel(app, shift) {
   if (shift && isShiftStarted(shift)) return 'late';
   return 'notArrived';
 }
+
+// Unresolved: 3+ days after shift end, company hasn't confirmed attendance
+// AND the worker hasn't self-reported (no check-in, booking not cancelled).
+// No automatic violation — for manual admin follow-up.
+export function isUnresolved(app, shift) {
+  if (!app || !shift) return false;
+  if (app.company_attendance_status !== 'pending') return false;
+  if (app.check_in_time) return false;
+  if (app.status && app.status !== 'approved') return false;
+  const end = shiftEndDateTime(shift);
+  if (!end) return false;
+  return Date.now() - end.getTime() > 3 * 24 * 60 * 60 * 1000;
+}

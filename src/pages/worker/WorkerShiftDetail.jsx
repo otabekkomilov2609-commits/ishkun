@@ -10,7 +10,7 @@ import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/fo
 import RatingPrompt from '@/components/RatingPrompt';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { StarsDisplay } from '@/components/RatingStars';
-import { isMismatch } from '@/lib/shiftTime';
+import { isMismatch, isShiftEnded } from '@/lib/shiftTime';
 import { getWorkerShiftState, STATE_STYLES } from '@/lib/shiftStatus';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +54,7 @@ export default function WorkerShiftDetail() {
   const pay = shift ? shiftPay(shift) : null;
   const dur = shift ? shiftDurationHours(shift) : 0;
   const durLabel = Number.isInteger(dur) ? dur : dur.toFixed(1);
+  const afterEnd = shift ? isShiftEnded(shift) : false;
 
   const apply = async () => {
     if (!verified || sameDayConflict) return;
@@ -205,7 +206,7 @@ export default function WorkerShiftDetail() {
 
       {myApp && myApp.status === 'approved' && !myApp.check_in_time && (
         <Button variant="outline" className="w-full mb-4" onClick={() => setCancelOpen(true)}>
-          {t('cancel.cannotCome')}
+          {afterEnd ? t('cancel.cannotComePast') : t('cancel.cannotCome')}
         </Button>
       )}
       <CancelBookingDialog

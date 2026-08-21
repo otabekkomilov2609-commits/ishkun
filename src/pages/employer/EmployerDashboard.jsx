@@ -6,6 +6,7 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import ShiftCard from '@/components/ShiftCard';
+import AttendanceReminderSection from '@/components/AttendanceReminderSection';
 import EmptyState from '@/components/EmptyState';
 import { PlusCircle, Building2, CalendarDays, ClipboardList, CheckCircle2 } from 'lucide-react';
 
@@ -86,6 +87,8 @@ export default function EmployerDashboard() {
           );
         })}
       </div>
+
+      <AttendanceReminderSection />
 
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-display font-bold text-lg text-foreground">{t('emp.recentShifts')}</h2>
