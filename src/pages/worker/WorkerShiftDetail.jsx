@@ -57,7 +57,7 @@ export default function WorkerShiftDetail() {
   const afterEnd = shift ? isShiftEnded(shift) : false;
 
   const apply = async () => {
-    if (!verified || sameDayConflict) return;
+    if (!verified || sameDayConflict || user?.account_status === 'blocked') return;
     setApplying(true);
     setMyApp({ status: 'pending', worker_id: user.id, shift_id: id });
     try {

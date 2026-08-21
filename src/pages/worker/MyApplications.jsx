@@ -13,16 +13,7 @@ import { getWorkerShiftState } from '@/lib/shiftStatus';
 import { isMismatch } from '@/lib/shiftTime';
 import { AlertTriangle } from 'lucide-react';
 import { shiftPay } from '@/lib/format';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel
-} from '@/components/ui/alert-dialog';
+import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { ClipboardList, Calendar, Clock, Wallet, XCircle } from 'lucide-react';
 import { formatSom, formatDateDMY } from '@/lib/format';
 
@@ -33,8 +24,7 @@ export default function MyApplications() {
   const [apps, setApps] = useState(null);
   const [shifts, setShifts] = useState({});
   const [tab, setTab] = useState('pending');
-  const [cancelTarget, setCancelTarget] = useState(null);
-  const [canceling, setCanceling] = useState(false);
+  const [cancelApp, setCancelApp] = useState(null);
 
   const load = async () => {
     if (!user) return;
@@ -50,16 +40,7 @@ export default function MyApplications() {
 
   useEffect(() => { load(); }, [user]);
 
-  const doCancel = async () => {
-    if (!cancelTarget) return;
-    setCanceling(true);
-    try {
-      await base44.entities.Application.update(cancelTarget, { status: 'cancelled' });
-      setCancelTarget(null);
-      await load();
-    } catch (e) { console.error(e); }
-    setCanceling(false);
-  };
+  // Cancellation is handled by <CancelBookingDialog /> below (single code path).
 
   const activeApps = (apps || []).filter(a => a.status !== 'cancelled');
 
@@ -117,9 +98,13 @@ export default function MyApplications() {
                 </div>
                 {(a.status === 'pending' || a.status === 'approved') && (
                   <div className="mt-3">
-                    <Button size="sm" variant="outline" onClick={() => setCancelTarget(a.id)}>
-                      <XCircle className="h-4 w-4" /> {t('wrk.cancelApp')}
-                    </Button>
+                    {user?.account_status === 'blocked' ? (
+                      <p className="text-xs text-rose-700 font-medium">{t('cancelDialog.blockedMsg')}</p>
+                    ) : (
+                      <Button size="sm" variant="outline" onClick={() => setCancelApp(a)}>
+                        <XCircle className="h-4 w-4" /> {t('wrk.cancelApp')}
+                      </Button>
+                    )}
                   </div>
                 )}
               </Card>
@@ -128,24 +113,14 @@ export default function MyApplications() {
         </div>
       )}
 
-      <AlertDialog open={!!cancelTarget} onOpenChange={(o) => !o && setCancelTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('wrk.confirmCancel')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('wrk.confirmCancelDesc')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={canceling}>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); doCancel(); }}
-              disabled={canceling}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {canceling ? t('loading') : t('confirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CancelBookingDialog
+        open={!!cancelApp}
+        onOpenChange={(o) => { if (!o) setCancelApp(null); }}
+        app={cancelApp}
+        shift={cancelApp ? shifts[cancelApp.shift_id] : null}
+        workerName={user?.full_name}
+        onCancelled={load}
+      />
     </div>
   );
 }

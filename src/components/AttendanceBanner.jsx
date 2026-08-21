@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLang } from '@/lib/i18n';
+import { useAuth } from '@/lib/AuthContext';
 import { Button, Card } from '@/components/ui';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
@@ -8,6 +9,7 @@ import { isShiftStarted, isShiftEnded } from '@/lib/shiftTime';
 
 export default function AttendanceBanner({ apps, onRefresh }) {
   const { t } = useLang();
+  const { user } = useAuth();
   const [shiftsById, setShiftsById] = useState({});
   const [busy, setBusy] = useState(false);
   const [rateApp, setRateApp] = useState(null);
@@ -63,10 +65,18 @@ export default function AttendanceBanner({ apps, onRefresh }) {
   }
 
   if (!target) return null;
+  if (user?.account_status === 'blocked') {
+    return (
+      <Card className="p-4 mb-4">
+        <p className="text-sm text-rose-700 font-medium">{t('cancelDialog.blockedMsg')}</p>
+      </Card>
+    );
+  }
   const shift = shiftsById[target.shift_id];
   const isCheckOut = !!checkOutTarget;
 
   const handle = async () => {
+    if (user?.account_status === 'blocked') return;
     setBusy(true);
     try {
       if (isCheckOut) {

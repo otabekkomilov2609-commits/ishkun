@@ -113,6 +113,15 @@ export default function EmployerShiftDetail() {
         shift_title: shift.title,
         employer_name: user?.full_name || ''
       });
+      if (!app.violation_recorded) {
+        await base44.functions.invoke('recordViolation', {
+          application_id: app.id,
+          worker_id: app.worker_id,
+          source: 'no_show',
+          shift_title: shift.title,
+          employer_id: app.employer_id || shift.created_by_id
+        });
+      }
     } catch (e) {
       setApps(prev);
       setShift({ ...shift, status: prevStatus });
