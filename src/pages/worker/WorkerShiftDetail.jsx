@@ -57,7 +57,7 @@ export default function WorkerShiftDetail() {
   const afterEnd = shift ? isShiftEnded(shift) : false;
 
   const apply = async () => {
-    if (!verified || sameDayConflict || user?.account_status === 'blocked') return;
+    if (!verified || sameDayConflict || ['blocked', 'paused'].includes(user?.account_status)) return;
     setApplying(true);
     setMyApp({ status: 'pending', worker_id: user.id, shift_id: id });
     try {
@@ -228,7 +228,7 @@ export default function WorkerShiftDetail() {
 
       <div className="sticky bottom-20">
         {state.key === 'apply' && verified && !sameDayConflict ? (
-          user?.account_status === 'blocked' ? (
+          ['blocked', 'paused'].includes(user?.account_status) ? (
             <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">{t('cancelDialog.blockedMsg')}</div>
           ) : (
             <Button size="lg" className="w-full" disabled={applying} onClick={apply}>

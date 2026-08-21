@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { queryClientInstance } from '@/lib/query-client';
-import { Textarea } from '@/components/ui';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,10 +19,7 @@ import {
 // EmployerShiftDetail and the employer dashboard attendance reminder.
 export default function AbsentReasonDialog({ open, onOpenChange, app, shift, workerName, onConfirmed }) {
   const { t } = useLang();
-  const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => { if (open) setReason(''); }, [open]);
 
   if (!app || !shift) return null;
 
@@ -33,8 +29,7 @@ export default function AbsentReasonDialog({ open, onOpenChange, app, shift, wor
       const now = new Date().toISOString();
       await base44.entities.Application.update(app.id, {
         company_attendance_status: 'confirmed_absent',
-        company_confirmed_at: now,
-        ...(reason ? { cancellation_reason: reason } : {})
+        company_confirmed_at: now
       });
       if (!app.violation_recorded) {
         await base44.functions.invoke('recordViolation', {
@@ -60,10 +55,6 @@ export default function AbsentReasonDialog({ open, onOpenChange, app, shift, wor
         <AlertDialogHeader>
           <AlertDialogTitle>{t('att.absentTitle')}</AlertDialogTitle>
           <AlertDialogDescription>{t('att.absentDesc').replace('{name}', workerName || '—')}</AlertDialogDescription>
-          <div className="mt-3">
-            <p className="text-sm font-semibold text-foreground mb-2">{t('att.absentReasonLabel')}</p>
-            <Textarea rows={3} value={reason} onChange={e => setReason(e.target.value)} placeholder={t('att.absentReasonPh')} />
-          </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={submitting}>{t('cancel')}</AlertDialogCancel>

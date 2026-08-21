@@ -98,7 +98,7 @@ export default function MyApplications() {
                 </div>
                 {(a.status === 'pending' || a.status === 'approved') && (
                   <div className="mt-3">
-                    {user?.account_status === 'blocked' ? (
+                    {['blocked', 'paused'].includes(user?.account_status) ? (
                       <p className="text-xs text-rose-700 font-medium">{t('cancelDialog.blockedMsg')}</p>
                     ) : (
                       <Button size="sm" variant="outline" onClick={() => setCancelApp(a)}>

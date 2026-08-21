@@ -67,7 +67,7 @@ export default function AttendanceBanner({ apps, onRefresh }) {
   }
 
   if (!target) return null;
-  if (user?.account_status === 'blocked') {
+  if (['blocked', 'paused'].includes(user?.account_status)) {
     return (
       <Card className="p-4 mb-4">
         <p className="text-sm text-rose-700 font-medium">{t('cancelDialog.blockedMsg')}</p>
@@ -78,7 +78,7 @@ export default function AttendanceBanner({ apps, onRefresh }) {
   const isCheckOut = !!checkOutTarget;
 
   const handle = async () => {
-    if (user?.account_status === 'blocked') return;
+    if (['blocked', 'paused'].includes(user?.account_status)) return;
     setBusy(true);
     try {
       if (isCheckOut) {

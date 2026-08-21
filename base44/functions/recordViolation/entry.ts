@@ -57,7 +57,7 @@ export default async function(req) {
 
     await base44.asServiceRole.entities.User.update(worker_id, {
       violation_count: nextCount,
-      ...(blocked ? { account_status: 'blocked' } : {})
+      ...(blocked ? { account_status: 'paused' } : {})
     });
 
     await base44.asServiceRole.entities.Application.update(application_id, { violation_recorded: true });
@@ -68,7 +68,7 @@ export default async function(req) {
       workerNotifs.push({
         user_id: worker_id,
         title: 'Bekor qilish qoida buzarlik sifatida qayd etildi',
-        body: `"${shift_title || ''}" smenasi uchun bekor qilishingiz jiddiy qoida buzarlik sifatida hisobingizga yozildi (${nextCount}/3). 3 ta buzilishdan keyin hisob avtomatik bloklanadi.`,
+        body: `"${shift_title || ''}" smenasi uchun bekor qilishingiz jiddiy qoida buzarlik sifatida hisobingizga yozildi (${nextCount}/3). 3 ta buzilishdan keyin hisobingiz vaqtincha to'xtatiladi va admin tekshiruviga yuboriladi.`,
         type: 'worker_no_show',
         link: '/worker/applications'
       });
@@ -86,7 +86,7 @@ export default async function(req) {
       workerNotifs.push({
         user_id: worker_id,
         title: 'Smenaga kelmadingiz',
-        body: `Siz "${shift_title || ''}" smenasiga kelmadingiz deb belgilandi. Bu jiddiy qoida buzarlik sifatida hisobingizga yozildi (${nextCount}/3). 3 ta buzilishdan keyin hisob avtomatik bloklanadi.`,
+        body: `Siz "${shift_title || ''}" smenasiga kelmadingiz deb belgilandi. Bu jiddiy qoida buzarlik sifatida hisobingizga yozildi (${nextCount}/3). 3 ta buzilishdan keyin hisobingiz vaqtincha to'xtatiladi va admin tekshiruviga yuboriladi.`,
         type: 'worker_no_show',
         link: '/worker/applications'
       });
@@ -95,8 +95,8 @@ export default async function(req) {
     if (blocked) {
       workerNotifs.push({
         user_id: worker_id,
-        title: 'Hisobingiz bloklandi',
-        body: "3 ta qoida buzarlik to'planganligi sababli hisobingiz bloklandi. Iltimos, qo'llab-quvvatlash xizmati bilan bog'laning.",
+        title: "Hisobingiz vaqtincha to'xtatildi",
+        body: "3 ta qoida buzarlik to'planganligi sababli hisobingiz vaqtincha to'xtatildi va ishlaringiz yashirildi. Admin tekshiruvdan so'ng yakuniy qaror (bloklash yoki qayta faollashtirish) chiqariladi.",
         type: 'worker_no_show',
         link: '/profile'
       });
@@ -109,7 +109,7 @@ export default async function(req) {
     const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' }, '-created_date', 50);
     if (admins.length > 0) {
       const adminTitle = source === 'late_cancel' ? 'Bekor qilish: qoida buzarlik' : 'Ishchi kelmadi: qoida buzarlik';
-      const adminBody = `${worker_name || 'Ishchi'} "${shift_title || ''}" uchun ${source === 'late_cancel' ? 'kech bekor qildi' : 'kelmadi'}. Jami buzilishlar: ${nextCount}${blocked ? ' (hisob bloklandi)' : ''}.`;
+      const adminBody = `${worker_name || 'Ishchi'} "${shift_title || ''}" uchun ${source === 'late_cancel' ? 'kech bekor qildi' : 'kelmadi'}. Jami buzilishlar: ${nextCount}${blocked ? " (3 ta — hisob vaqtincha to'xtatildi, bloklashni tasdiqlash uchun ko'rib chiqing)" : ''}.`;
       await base44.asServiceRole.entities.Notification.bulkCreate(
         admins.map(a => ({
           user_id: a.id,
