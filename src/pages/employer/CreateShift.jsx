@@ -1,25 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
-import { PlusCircle, Check, Building2 } from 'lucide-react';
+import { PlusCircle, Check, Building2, X, CalendarPlus } from 'lucide-react';
 
 export default function CreateShift() {
   const { user } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
+  const location = useLocation();
+  const duplicateFrom = location.state?.duplicateFrom;
   const [company, setCompany] = useState(undefined);
-  const [form, setForm] = useState({
-    title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
-    map_link: '',
-    date: '', start_time: '', end_time: '',
-    location: '', city: user?.city || '', hourly_rate: '', required_workers: 1, required_skill: ''
+  const [form, setForm] = useState(() => {
+    if (duplicateFrom) {
+      return {
+        title: duplicateFrom.title || '',
+        description: duplicateFrom.description || '',
+        tasks_text: duplicateFrom.tasks_text || '',
+        important_notes_text: duplicateFrom.important_notes_text || '',
+        requirements_text: duplicateFrom.requirements_text || '',
+        dress_code_text: duplicateFrom.dress_code_text || '',
+        map_link: duplicateFrom.map_link || '',
+        date: '',
+        start_time: duplicateFrom.start_time || '',
+        end_time: duplicateFrom.end_time || '',
+        location: duplicateFrom.location || '',
+        city: duplicateFrom.city || user?.city || '',
+        hourly_rate: duplicateFrom.hourly_rate != null ? String(duplicateFrom.hourly_rate) : '',
+        required_workers: duplicateFrom.required_workers || 1,
+        required_skill: duplicateFrom.required_skill || ''
+      };
+    }
+    return {
+      title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
+      map_link: '',
+      date: '', start_time: '', end_time: '',
+      location: '', city: user?.city || '', hourly_rate: '', required_workers: 1, required_skill: ''
+    };
   });
   const [saving, setSaving] = useState(false);
+  const [posted, setPosted] = useState(false);
+  const [dupHintDismissed, setDupHintDismissed] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,13 +87,19 @@ export default function CreateShift() {
         type: 'shift_created',
         link: `/employer/shifts/${shift.id}`
       });
-      toast({ title: t('shift.created') });
-      navigate('/employer/shifts');
+      setSaving(false);
+      setPosted(true);
     } catch (e) {
       console.error(e);
       toast({ title: e?.message || 'Xatolik', description: 'Shift e\'lon qilinmadi', variant: 'destructive' });
       setSaving(false);
     }
+  };
+
+  const postAnotherDay = () => {
+    setForm(prev => ({ ...prev, date: '' }));
+    setPosted(false);
+    setSaving(false);
   };
 
   if (company === undefined) return null;
@@ -85,12 +116,37 @@ export default function CreateShift() {
     );
   }
 
+  if (posted) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Card className="p-6 text-center">
+          <div className="grid h-12 w-12 mx-auto place-items-center rounded-xl bg-emerald-50 text-emerald-600 mb-3"><Check className="h-6 w-6" /></div>
+          <h2 className="font-semibold text-foreground">{t('shift.created')}</h2>
+          <p className="text-sm text-muted-foreground mt-1 mb-4">{t('shift.postedSuccessDesc')}</p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button onClick={() => navigate('/employer/shifts')}>{t('shift.backToList')}</Button>
+            <Button variant="outline" onClick={postAnotherDay}><CalendarPlus className="h-4 w-4" /> {t('shift.postAnotherDay')}</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-2 mb-5">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><PlusCircle className="h-5 w-5" /></div>
         <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{t('shift.create')}</h1>
       </div>
+
+      {duplicateFrom && !dupHintDismissed && (
+        <div className="mb-4 flex items-start gap-3 rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">
+          <p className="flex-1">{t('shift.duplicatedHint')}</p>
+          <button type="button" onClick={() => setDupHintDismissed(true)} className="shrink-0 text-primary/70 hover:text-primary" aria-label={t('cancel')}>
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <Card className="p-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

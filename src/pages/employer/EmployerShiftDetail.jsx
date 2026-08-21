@@ -7,7 +7,7 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Copy } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
@@ -180,19 +180,24 @@ export default function EmployerShiftDetail() {
           <Info icon={Wallet} label={t('shift.totalAmount')} value={pay.total != null ? formatSom(pay.total) : '—'} />
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
-        {shift.status !== 'completed' && shift.status !== 'cancelled' && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Button variant="soft" onClick={markCompleted}>
-              <CheckCircle2 className="h-4 w-4" /> {t('shift.markCompleted')}
-            </Button>
-            <Button variant="outline" onClick={() => navigate(`/employer/shifts/${id}/edit`)}>
-              <Pencil className="h-4 w-4" /> {t('edit')}
-            </Button>
-            <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => setCancelOpen(true)}>
-              <Ban className="h-4 w-4" /> {t('shift.cancelShift')}
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2 mt-4">
+          <Button variant="outline" onClick={() => navigate('/employer/shifts/new', { state: { duplicateFrom: shift } })}>
+            <Copy className="h-4 w-4" /> {t('shift.duplicate')}
+          </Button>
+          {shift.status !== 'completed' && shift.status !== 'cancelled' && (
+            <>
+              <Button variant="soft" onClick={markCompleted}>
+                <CheckCircle2 className="h-4 w-4" /> {t('shift.markCompleted')}
+              </Button>
+              <Button variant="outline" onClick={() => navigate(`/employer/shifts/${id}/edit`)}>
+                <Pencil className="h-4 w-4" /> {t('edit')}
+              </Button>
+              <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => setCancelOpen(true)}>
+                <Ban className="h-4 w-4" /> {t('shift.cancelShift')}
+              </Button>
+            </>
+          )}
+        </div>
       </Card>
 
       <h2 className="font-display font-bold text-lg text-foreground mb-3">{t('app.title')} ({apps?.length || 0})</h2>
