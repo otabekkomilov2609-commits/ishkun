@@ -36,7 +36,10 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
   const doCancel = async () => {
     setSubmitting(true);
     try {
-      await base44.entities.Application.update(app.id, { status: 'cancelled' });
+      await base44.entities.Application.update(app.id, {
+        status: 'cancelled',
+        ...(isLate && reason ? { cancellation_reason: t('cancel.reason.' + reason) } : {})
+      });
       if (isLate) {
         const res = await base44.functions.invoke('recordViolation', {
           application_id: app.id,

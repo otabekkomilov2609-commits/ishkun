@@ -66,6 +66,10 @@
       "type": "boolean",
       "default": false,
       "title": "Qoida buzarlik qayd etilgan"
+    },
+    "cancellation_reason": {
+      "type": "string",
+      "title": "Bekor qilish sababi"
     }
   },
   "required": [

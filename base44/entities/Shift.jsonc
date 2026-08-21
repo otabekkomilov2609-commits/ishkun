@@ -118,7 +118,8 @@
     "hourly_rate",
     "city",
     "location",
-    "map_link"
+    "map_link",
+    "company_id"
   ],
   "rls": {
     "create": true,

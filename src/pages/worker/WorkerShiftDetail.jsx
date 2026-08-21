@@ -106,6 +106,12 @@ export default function WorkerShiftDetail() {
         </div>
       )}
 
+      {myApp?.status === 'cancelled' && myApp?.cancellation_reason && (
+        <Card className="p-4 mb-4">
+          <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground">{t('att.cancellationReason')}:</span> {myApp.cancellation_reason}</p>
+        </Card>
+      )}
+
       {/* Manzil */}
       <SectionCard icon={MapPin} title={t('sdetail.address')}>
         <div className="text-sm text-foreground">{[shift.location, shift.city].filter(Boolean).join(', ')}</div>

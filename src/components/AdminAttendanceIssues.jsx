@@ -60,6 +60,9 @@ export default function AdminAttendanceIssues() {
                   {t('adm.unresolved')}
                 </span>
               </div>
+              {a.cancellation_reason && (
+                <p className="text-xs text-muted-foreground mt-2"><span className="font-semibold">{t('att.cancellationReason')}:</span> {a.cancellation_reason}</p>
+              )}
             </Card>
           ))}
         </div>

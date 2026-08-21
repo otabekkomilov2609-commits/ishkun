@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card } from '@/components/ui';
 import { AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { isShiftEnded } from '@/lib/shiftTime';
+import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 
 // Persistent reminder on the employer dashboard: shifts that ended but the
 // company still hasn't confirmed whether the worker came or not.
@@ -13,6 +14,7 @@ export default function AttendanceReminderSection() {
   const { user } = useAuth();
   const { t } = useLang();
   const [hidden, setHidden] = useState(new Set());
+  const [absentApp, setAbsentApp] = useState(null);
 
   const appsQ = useQuery({
     queryKey: ['employerApps', user?.id],
@@ -49,21 +51,11 @@ export default function AttendanceReminderSection() {
 
   if (reminders.length === 0) return null;
 
-  const confirm = async (app, status) => {
+  const confirm = async (app) => {
     setHidden(prev => new Set([...prev, app.id]));
     const now = new Date().toISOString();
     try {
-      await base44.entities.Application.update(app.id, { company_attendance_status: status, company_confirmed_at: now });
-      if (status === 'confirmed_absent' && !app.violation_recorded) {
-        const s = shiftById[app.shift_id];
-        await base44.functions.invoke('recordViolation', {
-          application_id: app.id,
-          worker_id: app.worker_id,
-          source: 'no_show',
-          shift_title: s?.title,
-          employer_id: app.employer_id || s?.created_by_id
-        });
-      }
+      await base44.entities.Application.update(app.id, { company_attendance_status: 'confirmed_present', company_confirmed_at: now });
       await appsQ.refetch();
     } catch (e) {
       console.error(e);
@@ -86,12 +78,20 @@ export default function AttendanceReminderSection() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="soft" onClick={() => confirm(a, 'confirmed_present')}><CheckCircle2 className="h-4 w-4" /> {t('att.came')}</Button>
-              <Button size="sm" variant="outline" onClick={() => confirm(a, 'confirmed_absent')}><XCircle className="h-4 w-4" /> {t('att.notCame')}</Button>
+              <Button size="sm" variant="soft" onClick={() => confirm(a)}><CheckCircle2 className="h-4 w-4" /> {t('att.came')}</Button>
+              <Button size="sm" variant="outline" onClick={() => setAbsentApp(a)}><XCircle className="h-4 w-4" /> {t('att.notCame')}</Button>
             </div>
           </Card>
         );
       })}
+      <AbsentReasonDialog
+        open={!!absentApp}
+        onOpenChange={(o) => { if (!o) setAbsentApp(null); }}
+        app={absentApp}
+        shift={absentApp ? shiftById[absentApp.shift_id] : null}
+        workerName={absentApp ? userById[absentApp.worker_id]?.full_name : null}
+        onConfirmed={(appId) => setHidden(prev => new Set([...prev, appId]))}
+      />
     </div>
   );
 }

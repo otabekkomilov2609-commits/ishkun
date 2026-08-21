@@ -4,7 +4,6 @@ import { useLang } from '@/lib/i18n';
 import { Button, Textarea } from '@/components/ui';
 import { StarSelector } from '@/components/RatingStars';
 import { Star } from 'lucide-react';
-import { recalcWorkerRating, recalcCompanyRating } from '@/lib/ratingUtils';
 
 export default function RatingPrompt({ applicationId, shiftId, workerId, companyId, employerId, ratedBy, onDone }) {
   const { t } = useLang();
@@ -30,21 +29,13 @@ export default function RatingPrompt({ applicationId, shiftId, workerId, company
     if (score < 1 || submitting) return;
     setSubmitting(true);
     try {
-      await base44.entities.Rating.create({
+      await base44.functions.invoke('submitRating', {
         application_id: applicationId,
         shift_id: shiftId,
-        worker_id: workerId,
-        company_id: companyId,
-        employer_id: employerId,
         rated_by: ratedBy,
         score,
         comment: comment || undefined
       });
-      if (ratedBy === 'worker') {
-        await recalcCompanyRating(companyId);
-      } else {
-        await recalcWorkerRating(workerId);
-      }
       setExisting({ score });
       onDone?.();
     } catch (e) {

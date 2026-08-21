@@ -9,6 +9,7 @@ import EmptyState from '@/components/EmptyState';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
+import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import { StarsDisplay } from '@/components/RatingStars';
 import { isShiftStarted, isMismatch, attendanceLabel } from '@/lib/shiftTime';
 
@@ -22,6 +23,7 @@ export default function EmployerShiftDetail() {
   const [users, setUsers] = useState({});
   const [completedCounts, setCompletedCounts] = useState({});
   const [preferredWorkers, setPreferredWorkers] = useState(new Set());
+  const [absentApp, setAbsentApp] = useState(null);
 
   const load = async () => {
     const s = await base44.entities.Shift.get(id);
@@ -210,10 +212,13 @@ export default function EmployerShiftDetail() {
                     <span className="font-semibold text-foreground">{t(`att.${attLabel}`)}</span>
                   </div>
                 )}
+                {a.cancellation_reason && (
+                  <p className="text-xs text-muted-foreground mt-2"><span className="font-semibold">{t('att.cancellationReason')}:</span> {a.cancellation_reason}</p>
+                )}
                 {attPending && (
                   <div className="flex gap-2 mt-3">
                     <Button size="sm" variant="soft" onClick={() => confirmAttendance(a, 'confirmed_present')}><CheckCircle2 className="h-4 w-4" /> {t('att.came')}</Button>
-                    <Button size="sm" variant="outline" onClick={() => confirmAttendance(a, 'confirmed_absent')}><XCircle className="h-4 w-4" /> {t('att.notCame')}</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAbsentApp(a)}><XCircle className="h-4 w-4" /> {t('att.notCame')}</Button>
                   </div>
                 )}
                 {rateEligible && (
@@ -239,6 +244,14 @@ export default function EmployerShiftDetail() {
           })}
         </div>
       )}
+      <AbsentReasonDialog
+        open={!!absentApp}
+        onOpenChange={(o) => { if (!o) setAbsentApp(null); }}
+        app={absentApp}
+        shift={shift}
+        workerName={users[absentApp?.worker_id]?.full_name}
+        onConfirmed={(appId) => setApps(prev => prev.map(x => x.id === appId ? { ...x, company_attendance_status: 'confirmed_absent' } : x))}
+      />
     </div>
   );
 }
