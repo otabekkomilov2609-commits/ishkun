@@ -11,7 +11,7 @@ import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import { StarsDisplay } from '@/components/RatingStars';
-import { isShiftStarted, isMismatch, attendanceLabel } from '@/lib/shiftTime';
+import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen } from '@/lib/shiftTime';
 
 export default function EmployerShiftDetail() {
   const { id } = useParams();
@@ -197,7 +197,7 @@ export default function EmployerShiftDetail() {
             const attLabel = attendanceLabel(a, shift);
             const mismatch = isMismatch(a);
             const preferred = preferredWorkers.has(a.worker_id);
-            const attPending = booked && a.company_attendance_status === 'pending' && isShiftStarted(shift);
+            const attPending = booked && a.company_attendance_status === 'pending' && isCheckInWindowOpen(shift);
             const rateEligible = a.company_attendance_status === 'confirmed_present' && (a.status === 'completed' || a.check_out_time);
             return (
               <Card key={a.id} className="p-4">

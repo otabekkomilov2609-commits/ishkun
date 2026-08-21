@@ -5,7 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button, Card } from '@/components/ui';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
-import { isShiftStarted, isShiftEnded } from '@/lib/shiftTime';
+import { isShiftStarted, isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
+import CancelBookingDialog from '@/components/CancelBookingDialog';
 
 export default function AttendanceBanner({ apps, onRefresh }) {
   const { t } = useLang();
@@ -13,6 +14,7 @@ export default function AttendanceBanner({ apps, onRefresh }) {
   const [shiftsById, setShiftsById] = useState({});
   const [busy, setBusy] = useState(false);
   const [rateApp, setRateApp] = useState(null);
+  const [cancelApp, setCancelApp] = useState(null);
 
   const list = apps || [];
   const needIds = [...new Set(
@@ -35,7 +37,7 @@ export default function AttendanceBanner({ apps, onRefresh }) {
   }, [needKey]);
 
   const checkOutTarget = list.find(a => a.check_in_time && !a.check_out_time && shiftsById[a.shift_id] && isShiftEnded(shiftsById[a.shift_id]));
-  const checkInTarget = list.find(a => a.status === 'approved' && !a.check_in_time && shiftsById[a.shift_id] && isShiftStarted(shiftsById[a.shift_id]));
+  const checkInTarget = list.find(a => a.status === 'approved' && !a.check_in_time && shiftsById[a.shift_id] && isCheckInWindowOpen(shiftsById[a.shift_id]));
   const target = checkOutTarget || checkInTarget;
 
   if (rateApp) {
@@ -94,16 +96,33 @@ export default function AttendanceBanner({ apps, onRefresh }) {
   };
 
   return (
-    <Card className="p-4 mb-4 border-primary/30 bg-primary/5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">{isCheckOut ? t('att.checkOutTitle') : t('att.checkInTitle')}</p>
-          <p className="text-xs text-muted-foreground mt-0.5 truncate">{shift?.title}</p>
+    <>
+      <Card className="p-4 mb-4 border-primary/30 bg-primary/5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">{isCheckOut ? t('att.checkOutTitle') : t('att.checkInTitle')}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">{shift?.title}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isCheckOut && (
+              <Button size="sm" variant="outline" disabled={busy} onClick={() => setCancelApp(target)}>
+                {t('cancelDialog.cannotCome')}
+              </Button>
+            )}
+            <Button size="sm" disabled={busy} onClick={handle}>
+              {isCheckOut ? t('att.checkOutBtn') : t('att.checkInBtn')}
+            </Button>
+          </div>
         </div>
-        <Button size="sm" disabled={busy} onClick={handle}>
-          {isCheckOut ? t('att.checkOutBtn') : t('att.checkInBtn')}
-        </Button>
-      </div>
-    </Card>
+      </Card>
+      <CancelBookingDialog
+        open={!!cancelApp}
+        onOpenChange={(o) => { if (!o) setCancelApp(null); }}
+        app={cancelApp}
+        shift={cancelApp ? shiftsById[cancelApp.shift_id] : null}
+        workerName={user?.full_name}
+        onCancelled={() => { setCancelApp(null); onRefresh?.(); }}
+      />
+    </>
   );
 }

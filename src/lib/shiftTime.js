@@ -17,6 +17,14 @@ export function isShiftStarted(shift) {
   return !!s && Date.now() >= s.getTime();
 }
 
+// Check-in/attendance window: opens `leadMinutes` (default 10) before start_time,
+// so the "did you arrive?" / "did the worker come?" prompts surface slightly ahead
+// of the shift instead of only once it has already started.
+export function isCheckInWindowOpen(shift, leadMinutes = 10) {
+  const s = shiftStartDateTime(shift);
+  return !!s && Date.now() >= s.getTime() - leadMinutes * 60000;
+}
+
 export function isShiftEnded(shift) {
   const e = shiftEndDateTime(shift);
   return !!e && Date.now() >= e.getTime();
