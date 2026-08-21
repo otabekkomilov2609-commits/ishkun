@@ -55,6 +55,18 @@ export default async function(req) {
       comment: comment || undefined
     });
 
+    // Notify the rated party that they received a rating (includes the score).
+    const ratedPartyId = rated_by === 'worker' ? employer_id : worker_id;
+    if (ratedPartyId) {
+      await base44.asServiceRole.entities.Notification.create({
+        user_id: ratedPartyId,
+        title: rated_by === 'worker' ? 'Siz baholandingiz' : 'Sizga baho qo\'yildi',
+        body: `Sizga ${score}/5 baho qo'yildi${comment ? ': ' + comment : '.'}`,
+        type: 'rating_received',
+        link: rated_by === 'worker' ? `/employer/shifts/${shift_id}` : '/worker/applications'
+      });
+    }
+
     // Recalculate the averaged rating on the target.
     if (rated_by === 'worker' && company_id) {
       const ratings = await base44.asServiceRole.entities.Rating.filter({ company_id, rated_by: 'worker' });

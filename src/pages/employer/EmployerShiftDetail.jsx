@@ -114,11 +114,6 @@ export default function EmployerShiftDetail() {
       if (remainingApproved.length < shift.required_workers && prevStatus !== 'open') {
         await base44.entities.Shift.update(id, { status: 'open' });
       }
-      await base44.functions.invoke('notifyAdminsNoShow', {
-        shift_id: id,
-        shift_title: shift.title,
-        employer_name: user?.full_name || ''
-      });
       if (!app.violation_recorded) {
         await base44.functions.invoke('recordViolation', {
           application_id: app.id,

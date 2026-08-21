@@ -25,7 +25,9 @@
         "shift_created",
         "registration",
         "verification_approved",
-        "verification_rejected"
+        "verification_rejected",
+        "rating_received",
+        "application_cancelled"
       ],
       "title": "Turi"
     },

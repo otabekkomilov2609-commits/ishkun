@@ -8,7 +8,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 const ALLOWED_TYPES = [
   'application_approved', 'application_rejected', 'new_application',
   'shift_completed', 'worker_no_show', 'shift_created',
-  'registration', 'verification_approved', 'verification_rejected'
+  'registration', 'verification_approved', 'verification_rejected',
+  'rating_received', 'application_cancelled'
 ];
 
 export default async function(req) {

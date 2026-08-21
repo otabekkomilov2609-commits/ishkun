@@ -62,7 +62,16 @@ export default async function(req) {
 
     await base44.asServiceRole.entities.Application.update(application_id, { violation_recorded: true });
 
+    // Always notify the worker that a violation was recorded against their account.
+    const workerNotifs = [];
     if (source === 'late_cancel') {
+      workerNotifs.push({
+        user_id: worker_id,
+        title: 'Bekor qilish qoida buzarlik sifatida qayd etildi',
+        body: `"${shift_title || ''}" smenasi uchun bekor qilishingiz jiddiy qoida buzarlik sifatida hisobingizga yozildi (${nextCount}/3). 3 ta buzilishdan keyin hisob avtomatik bloklanadi.`,
+        type: 'worker_no_show',
+        link: '/worker/applications'
+      });
       const target = employer_id || app.employer_id;
       if (target) {
         await base44.asServiceRole.entities.Notification.create({
@@ -74,13 +83,43 @@ export default async function(req) {
         });
       }
     } else {
-      await base44.asServiceRole.entities.Notification.create({
+      workerNotifs.push({
         user_id: worker_id,
         title: 'Smenaga kelmadingiz',
-        body: `Siz "${shift_title || ''}" smenasiga kelmadingiz deb belgilandi. Bu hisobingizga qoida buzarlik sifatida yozildi.`,
+        body: `Siz "${shift_title || ''}" smenasiga kelmadingiz deb belgilandi. Bu jiddiy qoida buzarlik sifatida hisobingizga yozildi (${nextCount}/3). 3 ta buzilishdan keyin hisob avtomatik bloklanadi.`,
         type: 'worker_no_show',
         link: '/worker/applications'
       });
+    }
+    // Distinct "account blocked" notification when the worker just hit their 3rd violation.
+    if (blocked) {
+      workerNotifs.push({
+        user_id: worker_id,
+        title: 'Hisobingiz bloklandi',
+        body: "3 ta qoida buzarlik to'planganligi sababli hisobingiz bloklandi. Iltimos, qo'llab-quvvatlash xizmati bilan bog'laning.",
+        type: 'worker_no_show',
+        link: '/profile'
+      });
+    }
+    if (workerNotifs.length) {
+      await base44.asServiceRole.entities.Notification.bulkCreate(workerNotifs);
+    }
+
+    // Notify all admins so panel visibility is consistent across both code paths.
+    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' }, '-created_date', 50);
+    if (admins.length > 0) {
+      const adminTitle = source === 'late_cancel' ? 'Bekor qilish: qoida buzarlik' : 'Ishchi kelmadi: qoida buzarlik';
+      const adminBody = `${worker_name || 'Ishchi'} "${shift_title || ''}" uchun ${source === 'late_cancel' ? 'kech bekor qildi' : 'kelmadi'}. Jami buzilishlar: ${nextCount}${blocked ? ' (hisob bloklandi)' : ''}.`;
+      await base44.asServiceRole.entities.Notification.bulkCreate(
+        admins.map(a => ({
+          user_id: a.id,
+          title: adminTitle,
+          body: adminBody,
+          type: 'worker_no_show',
+          link: `/employer/shifts/${app.shift_id}`,
+          read: false
+        }))
+      );
     }
 
     return Response.json({ violation_count: nextCount, blocked, already_recorded: false });

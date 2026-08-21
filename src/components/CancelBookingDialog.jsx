@@ -59,7 +59,7 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
             user_id: app.employer_id || shift.created_by_id,
             title: 'Ishchi arizani bekor qildi',
             body: `Ishchi ${workerName || 'Ishchi'} arizani bekor qildi.`,
-            type: 'worker_no_show',
+            type: 'application_cancelled',
             link: `/employer/shifts/${shift.id}`
           }]
         });

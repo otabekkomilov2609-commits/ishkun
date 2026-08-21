@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, CheckCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils';
 export default function NotificationsBell() {
   const { user } = useAuth();
   const { lang, t } = useLang();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,13 @@ export default function NotificationsBell() {
     if (user) load();
   }, [user]);
 
+  // Poll for new notifications every 60s while logged in.
+  useEffect(() => {
+    if (!user) return;
+    const id = setInterval(() => { load(); }, 60000);
+    return () => clearInterval(id);
+  }, [user]);
+
   useEffect(() => {
     const close = () => setOpen(false);
     if (open) {
@@ -43,6 +52,15 @@ export default function NotificationsBell() {
     if (!unread.length) return;
     await base44.entities.Notification.bulkUpdate(unread.map(i => ({ id: i.id, read: true })));
     load();
+  };
+
+  const openItem = async (n) => {
+    if (!n.read) {
+      setItems(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+      try { await base44.entities.Notification.update(n.id, { read: true }); } catch {}
+    }
+    setOpen(false);
+    if (n.link) navigate(n.link);
   };
 
   return (
@@ -77,14 +95,14 @@ export default function NotificationsBell() {
                 <p className="text-sm text-muted-foreground">{t('notif.empty')}</p>
               </div>
             ) : items.map(n => (
-              <div key={n.id} className={cn('flex gap-3 px-4 py-3 border-b border-border/60 last:border-0', !n.read && 'bg-primary/5')}>
+              <button key={n.id} onClick={() => openItem(n)} className={cn('w-full text-left flex gap-3 px-4 py-3 border-b border-border/60 last:border-0 hover:bg-muted/50 transition-colors', !n.read && 'bg-primary/5')}>
                 <div className="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground leading-snug">{n.title}</p>
                   {n.body && <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{n.body}</p>}
                   <p className="text-[10px] text-muted-foreground/70 mt-1">{timeAgo(n.created_date, lang)}</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
