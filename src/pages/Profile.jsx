@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
-import { Briefcase, Building2, Phone, MapPin, Globe, Check, ArrowLeftRight, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react';
 import { formatSom } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
@@ -58,7 +58,6 @@ export default function Profile() {
         phone_number: form.phone_number,
         city: form.city,
         profile_image: form.profile_image,
-        account_type: form.account_type,
         language: form.language
       });
       if (form.language !== lang) setLang(form.language);
@@ -78,16 +77,6 @@ export default function Profile() {
       console.error(e);
       setDeleting(false);
     }
-  };
-
-  const switchRole = async () => {
-    const next = form.account_type === 'employer' ? 'worker' : 'employer';
-    setSaving(true);
-    try {
-      await base44.auth.updateMe({ account_type: next });
-      await checkUserAuth();
-      navigate(next === 'employer' ? '/employer' : '/worker');
-    } catch (e) { console.error(e); setSaving(false); }
   };
 
   if (!user) return null;
@@ -141,14 +130,7 @@ export default function Profile() {
           <Button onClick={save} disabled={saving}>
             {saved ? <><Check className="h-4 w-4" /> {t('prf.saved')}</> : t('save')}
           </Button>
-          {user.role !== 'admin' && form.account_type && (
-            <Button variant="outline" onClick={switchRole} disabled={saving}>
-              <ArrowLeftRight className="h-4 w-4" />
-              {form.account_type === 'employer' ? <span className="inline-flex items-center gap-1"><Briefcase className="h-4 w-4" /> {t('worker')}</span> : <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" /> {t('employer')}</span>}
-            </Button>
-          )}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">{t('prf.changeRoleHint')}</p>
       </Card>
 
       <Card className="p-5">
