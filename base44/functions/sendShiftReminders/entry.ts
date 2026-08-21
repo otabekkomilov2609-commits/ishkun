@@ -8,10 +8,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // Skips shifts that have already started (hoursLeft <= 0) to avoid stale sends.
 export default async function(req) {
   try {
+    // Runs on a platform scheduler with no requesting user; all work uses the service role.
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const apps = await base44.asServiceRole.entities.Application.filter({ status: 'approved' }, '-created_date', 500);
     if (!apps || apps.length === 0) return Response.json({ ok: true, processed: 0, sent: 0 });
