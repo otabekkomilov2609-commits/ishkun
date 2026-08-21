@@ -1,0 +1,16 @@
+{
+  "name": "sendShiftReminders",
+  "entry": "entry.ts",
+  "automations": [
+    {
+      "type": "scheduled",
+      "name": "every_15_minutes",
+      "description": "Sends 24h and 1h shift reminder notifications to workers with approved upcoming applications.",
+      "is_active": true,
+      "schedule_mode": "recurring",
+      "schedule_type": "simple",
+      "repeat_unit": "minutes",
+      "repeat_interval": 15
+    }
+  ]
+}

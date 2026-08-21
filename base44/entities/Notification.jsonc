@@ -27,7 +27,9 @@
         "verification_approved",
         "verification_rejected",
         "rating_received",
-        "application_cancelled"
+        "application_cancelled",
+        "shift_reminder_24h",
+        "shift_reminder_1h"
       ],
       "title": "Turi"
     },

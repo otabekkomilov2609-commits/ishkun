@@ -70,6 +70,16 @@
     "cancellation_reason": {
       "type": "string",
       "title": "Bekor qilish sababi"
+    },
+    "reminder_24h_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "24 soatlik eslatma yuborildi"
+    },
+    "reminder_1h_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "1 soatlik eslatma yuborildi"
     }
   },
   "required": [
