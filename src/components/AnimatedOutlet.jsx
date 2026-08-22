@@ -6,16 +6,18 @@ export default function AnimatedOutlet() {
   const outlet = useOutlet();
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, x: 28 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -28 }}
-        transition={{ duration: 0.22, ease: 'easeOut' }}
-      >
-        {outlet}
-      </motion.div>
-    </AnimatePresence>
+    <div className="relative">
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, x: 28 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -28, position: 'absolute', top: 0, left: 0, width: '100%' }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+        >
+          {outlet}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
