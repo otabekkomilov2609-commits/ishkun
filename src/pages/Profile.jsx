@@ -5,6 +5,7 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
+import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
 import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react';
 import { formatSom } from '@/lib/format';
@@ -116,9 +117,9 @@ export default function Profile() {
               {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
           </Field>
-          <Field label={t('prf.image')}>
-            <Input value={form.profile_image} onChange={e => setForm({ ...form, profile_image: e.target.value })} placeholder="https://…" />
-          </Field>
+          <div className="sm:col-span-2">
+            <FileUploadField label={t('prf.image')} value={form.profile_image} onChange={v => setForm({ ...form, profile_image: v })} />
+          </div>
           <Field label={t('language')}>
             <Select value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
               <option value="uz">O'zbekcha</option>
@@ -130,15 +131,6 @@ export default function Profile() {
           <Button onClick={save} disabled={saving}>
             {saved ? <><Check className="h-4 w-4" /> {t('prf.saved')}</> : t('save')}
           </Button>
-        </div>
-      </Card>
-
-      <Card className="p-5">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{t('prf.role')}</span>
-          <span className="font-semibold text-foreground">
-            {user.role === 'admin' ? t('admin') : (form.account_type === 'employer' ? t('employer') : t('worker'))}
-          </span>
         </div>
       </Card>
 
