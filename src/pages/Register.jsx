@@ -10,6 +10,7 @@ import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { isValidUzPhone, formatUzPhoneInput } from "@/lib/format";
 
 export default function Register() {
   const [firstName, setFirstName] = useState("");
@@ -32,6 +33,10 @@ export default function Register() {
     }
     if (!phone.trim()) {
       setError("Telefon raqamini kiriting");
+      return;
+    }
+    if (!isValidUzPhone(phone)) {
+      setError("Telefon raqami noto'g'ri formatda. Namuna: +998 90 123 45 67");
       return;
     }
     if (password !== confirmPassword) {
@@ -202,7 +207,7 @@ export default function Register() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="phone">Telefon raqami</Label>
-          <Input id="phone" type="tel" autoComplete="tel" placeholder="+998 90 123 45 67" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-12" required />
+          <Input id="phone" type="tel" autoComplete="tel" placeholder="+998 90 123 45 67" value={phone} onChange={(e) => setPhone(formatUzPhoneInput(e.target.value))} className="h-12" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

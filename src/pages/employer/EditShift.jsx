@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES } from '@/lib/format';
+import { CITIES, isValidMapLink } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card, Skeleton } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import { Pencil, Check, Navigation } from 'lucide-react';
@@ -55,6 +55,10 @@ export default function EditShift() {
   const submit = async () => {
     if (!form.title || !form.date || !form.start_time || !form.end_time || !form.daily_rate || !form.city || !form.location || !form.map_link) {
       toast({ title: t('required'), variant: 'destructive' });
+      return;
+    }
+    if (!isValidMapLink(form.map_link)) {
+      toast({ title: t('shift.mapLinkFormatError'), variant: 'destructive' });
       return;
     }
     setSaving(true);

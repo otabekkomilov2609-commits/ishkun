@@ -87,3 +87,35 @@ export function timeAgo(dateStr, lang = 'uz') {
   const days = Math.floor(hrs / 24);
   return lang === 'uz' ? `${days} kun oldin` : `${days} дн назад`;
 }
+
+export function isValidUzPhone(phone) {
+  let d = String(phone || '').replace(/\D/g, '');
+  if (d.startsWith('998')) d = d.slice(3);
+  return d.length === 9;
+}
+
+export function formatUzPhoneInput(raw) {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.startsWith('998')) d = d.slice(3);
+  d = d.slice(0, 9);
+  if (!d) return '';
+  const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean);
+  return '+998 ' + parts.join(' ');
+}
+
+export function isValidCardNumber(v) {
+  return String(v || '').replace(/\s/g, '').length === 16;
+}
+
+export function formatCardInput(raw) {
+  const d = String(raw || '').replace(/\D/g, '').slice(0, 16);
+  return d.replace(/(.{4})/g, '$1 ').trim();
+}
+
+export function isValidStir(v) {
+  return /^\d{9}$/.test(v || '');
+}
+
+export function isValidMapLink(v) {
+  return /^https?:\/\/.+/.test((v || '').trim());
+}

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES } from '@/lib/format';
+import { CITIES, isValidMapLink } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import { PlusCircle, Check, Building2, X, CalendarPlus, Navigation } from 'lucide-react';
@@ -58,6 +58,10 @@ export default function CreateShift() {
   const submit = async () => {
     if (!form.title || !form.date || !form.start_time || !form.end_time || !form.daily_rate || !form.city || !form.location || !form.map_link) {
       toast({ title: t('required'), variant: 'destructive' });
+      return;
+    }
+    if (!isValidMapLink(form.map_link)) {
+      toast({ title: t('shift.mapLinkFormatError'), variant: 'destructive' });
       return;
     }
     setSaving(true);

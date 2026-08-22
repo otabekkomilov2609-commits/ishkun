@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Input, Field, Card, Skeleton } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
 import { ShieldCheck, AlertCircle, CheckCircle2, Clock, ArrowLeft } from 'lucide-react';
+import { isValidUzPhone, formatUzPhoneInput, isValidCardNumber, formatCardInput } from '@/lib/format';
 
 export default function Verification() {
   const { user, checkUserAuth } = useAuth();
@@ -39,6 +40,7 @@ export default function Verification() {
     setError('');
     if (!/^\d{14}$/.test(form.jshshir)) { setError(t('kyc.jshshirError')); return; }
     if (!form.phone_number.trim() || !form.date_of_birth || !form.address.trim()) { setError(t('kyc.requiredError')); return; }
+    if (!isValidUzPhone(form.phone_number)) { setError(t('kyc.phoneFormatError')); return; }
     {
       const dob = new Date(form.date_of_birth);
       const today = new Date();
@@ -48,7 +50,7 @@ export default function Verification() {
       if (age < 18) { setError(t('kyc.ageError')); return; }
     }
     if (!form.passport_front || !form.passport_back) { setError(t('kyc.docsError')); return; }
-    if (!form.bank_card_number || form.bank_card_number.replace(/\s/g, '').length < 16) { setError(t('kyc.cardError')); return; }
+    if (!isValidCardNumber(form.bank_card_number)) { setError(t('kyc.cardError')); return; }
     setSaving(true);
     try {
       await base44.functions.invoke('updateMyProfile', {
@@ -123,7 +125,7 @@ export default function Verification() {
           <Card className="p-5 space-y-4">
             <h2 className="font-display font-bold text-foreground">{t('kyc.personalInfo')}</h2>
             <Field label={t('kyc.phone')} required hint={t('kyc.phoneHint')}>
-              <Input value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} placeholder="+998 90 123 45 67" />
+              <Input value={form.phone_number} onChange={e => setForm({ ...form, phone_number: formatUzPhoneInput(e.target.value) })} placeholder="+998 90 123 45 67" />
             </Field>
             <Field label={t('kyc.jshshir')} required hint={t('kyc.jshshirHint')}>
               <Input value={form.jshshir} onChange={e => setForm({ ...form, jshshir: e.target.value.replace(/\D/g, '').slice(0, 14) })} placeholder="12345678901234" />
@@ -148,7 +150,7 @@ export default function Verification() {
           <Card className="p-5 space-y-4">
             <h2 className="font-display font-bold text-foreground">{t('kyc.financial')}</h2>
             <Field label={t('kyc.bankCard')} required hint={t('kyc.bankCardHint')}>
-              <Input value={form.bank_card_number} onChange={e => setForm({ ...form, bank_card_number: e.target.value })} placeholder="8600 1234 5678 9012" />
+              <Input value={form.bank_card_number} onChange={e => setForm({ ...form, bank_card_number: formatCardInput(e.target.value) })} placeholder="8600 1234 5678 9012" />
             </Field>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.self_employed} onChange={e => setForm({ ...form, self_employed: e.target.checked })} className="h-4 w-4 rounded border-border" />

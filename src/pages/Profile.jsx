@@ -8,7 +8,7 @@ import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
 import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react';
-import { formatSom } from '@/lib/format';
+import { formatSom, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
   AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel
@@ -24,6 +24,7 @@ export default function Profile() {
   const [completedApps, setCompletedApps] = useState(null);
   const [completedShifts, setCompletedShifts] = useState({});
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -53,6 +54,8 @@ export default function Profile() {
   }, [user]);
 
   const save = async () => {
+    setError('');
+    if (!isValidUzPhone(form.phone_number)) { setError(t('prf.phoneFormatError')); return; }
     setSaving(true);
     try {
       await base44.functions.invoke('updateMyProfile', {
@@ -104,11 +107,12 @@ export default function Profile() {
       </div>
 
       <Card className="p-5 mb-4">
+        {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label={t('prf.phone')}>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input className="pl-9" value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} placeholder="+998 90 123 45 67" />
+              <Input className="pl-9" value={form.phone_number} onChange={e => setForm({ ...form, phone_number: formatUzPhoneInput(e.target.value) })} placeholder="+998 90 123 45 67" />
             </div>
           </Field>
           <Field label={t('prf.city')}>

@@ -5,6 +5,7 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
+import { isValidUzPhone, formatUzPhoneInput, isValidStir, isValidMapLink } from '@/lib/format';
 import { Building2, Check, User, Navigation } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ export default function CompanyProfile() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -45,10 +47,13 @@ export default function CompanyProfile() {
   const mapPickUrl = `https://yandex.com/maps/?text=${encodeURIComponent(form.address || user?.city || '')}`;
 
   const save = async () => {
+    setError('');
     if (!form.name) return;
     if (isNew && !form.entity_type) return;
     if (!form.phone_number) return;
-    if (isLegal && (!form.stir || !form.certificate)) return;
+    if (!isValidUzPhone(form.phone_number)) { setError(t('co.phoneFormatError')); return; }
+    if (isLegal && (!isValidStir(form.stir) || !form.certificate)) { setError(t('co.stirFormatError')); return; }
+    if (form.map_link && !isValidMapLink(form.map_link)) { setError(t('co.mapLinkFormatError')); return; }
     setSaving(true);
     try {
       const payload = { ...form };
@@ -76,6 +81,7 @@ export default function CompanyProfile() {
       </div>
 
       <Card className="p-5">
+        {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
         <div className="grid grid-cols-1 gap-4">
           {isNew ? (
             <div>
@@ -129,7 +135,7 @@ export default function CompanyProfile() {
             </Select>
           </Field>
           <Field label={t('co.phoneNumber')} required>
-            <Input value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} placeholder="+998 90 123 45 67" />
+            <Input value={form.phone_number} onChange={e => setForm({ ...form, phone_number: formatUzPhoneInput(e.target.value) })} placeholder="+998 90 123 45 67" />
           </Field>
 
           {isLegal && (
