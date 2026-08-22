@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { CITIES } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card, Skeleton } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
-import { Pencil, Check } from 'lucide-react';
+import { Pencil, Check, Navigation } from 'lucide-react';
 
 // Edit an existing shift. Mirrors CreateShift's form, but loads the shift by id,
 // prefills current values, and persists through the updateShift backend function
@@ -139,9 +139,14 @@ export default function EditShift() {
             </Select>
           </Field>
           <div className="sm:col-span-2">
-            <Field label={t('shift.mapLink')} required hint={t('shift.mapLinkHint')}>
-              <Input value={form.map_link} onChange={e => setForm({ ...form, map_link: e.target.value })} placeholder="https://yandex.com/maps/..." />
-            </Field>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-foreground">{t('shift.mapLink')} <span className="text-destructive">*</span></label>
+              <a href={`https://yandex.com/maps/?text=${encodeURIComponent([form.location, form.city].filter(Boolean).join(', '))}`} target="_blank" rel="noreferrer">
+                <Button type="button" variant="soft" size="sm"><Navigation className="h-4 w-4" /> {t('shift.mapPickBtn')}</Button>
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground mb-2">{t('shift.mapHint')}</p>
+            <Input value={form.map_link} onChange={e => setForm({ ...form, map_link: e.target.value })} placeholder="https://yandex.com/maps/..." />
           </div>
           <div className="sm:col-span-2">
             <Field label={t('shift.skill')}>

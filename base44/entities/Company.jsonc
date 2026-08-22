@@ -16,9 +16,33 @@
       ],
       "title": "Soha"
     },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "legal",
+        "individual"
+      ],
+      "title": "Tashkilot turi"
+    },
+    "stir": {
+      "type": "string",
+      "title": "STIR"
+    },
+    "certificate": {
+      "type": "string",
+      "title": "Davlat ro'yxatidan o'tganlik guvohnomasi"
+    },
+    "phone_number": {
+      "type": "string",
+      "title": "Telefon raqami"
+    },
     "address": {
       "type": "string",
       "title": "Manzil"
+    },
+    "map_link": {
+      "type": "string",
+      "title": "Xarita havolasi"
     },
     "description": {
       "type": "string",
@@ -40,7 +64,9 @@
   },
   "required": [
     "name",
-    "industry"
+    "industry",
+    "entity_type",
+    "phone_number"
   ],
   "rls": {
     "create": true,
