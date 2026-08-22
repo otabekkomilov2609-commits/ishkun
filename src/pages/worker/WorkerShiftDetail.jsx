@@ -197,18 +197,14 @@ export default function WorkerShiftDetail() {
             <Star className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-bold text-foreground">{t('rating.rateCompany')}</h2>
           </div>
-          {myApp.company_attendance_status === 'confirmed_present' ? (
-            <RatingPrompt
-              applicationId={myApp.id}
-              shiftId={shift.id}
-              workerId={user.id}
-              companyId={shift.company_id}
-              employerId={shift.created_by_id}
-              ratedBy="worker"
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">{t('att.waitingConfirm')}</p>
-          )}
+          <RatingPrompt
+            applicationId={myApp.id}
+            shiftId={shift.id}
+            workerId={user.id}
+            companyId={shift.company_id}
+            employerId={shift.created_by_id}
+            ratedBy="worker"
+          />
         </Card>
       )}
 

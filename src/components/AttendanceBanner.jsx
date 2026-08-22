@@ -43,26 +43,21 @@ export default function AttendanceBanner({ apps, onRefresh }) {
 
   if (rateApp) {
     const shift = shiftsById[rateApp.shift_id];
-    const confirmed = rateApp.company_attendance_status === 'confirmed_present';
     return (
       <Card className="p-4 mb-4">
         <div className="flex items-center gap-1.5 mb-3">
           <Star className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-bold text-foreground">{t('rating.rateCompany')}</h2>
         </div>
-        {confirmed ? (
-          <RatingPrompt
-            applicationId={rateApp.id}
-            shiftId={rateApp.shift_id}
-            workerId={rateApp.worker_id}
-            companyId={shift?.company_id}
-            employerId={shift?.created_by_id}
-            ratedBy="worker"
-            onDone={onRefresh}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">{t('att.waitingConfirm')}</p>
-        )}
+        <RatingPrompt
+          applicationId={rateApp.id}
+          shiftId={rateApp.shift_id}
+          workerId={rateApp.worker_id}
+          companyId={shift?.company_id}
+          employerId={shift?.created_by_id}
+          ratedBy="worker"
+          onDone={onRefresh}
+        />
       </Card>
     );
   }

@@ -212,7 +212,7 @@ export default function EmployerShiftDetail() {
             const mismatch = isMismatch(a);
             const preferred = preferredWorkers.has(a.worker_id);
             const attPending = booked && a.company_attendance_status === 'pending' && isCheckInWindowOpen(shift);
-            const rateEligible = a.company_attendance_status === 'confirmed_present' && (a.status === 'completed' || a.check_out_time);
+            const rateEligible = a.company_attendance_status === 'confirmed_present';
             return (
               <Card key={a.id} className="p-4">
                 <div className="flex items-center gap-3">
