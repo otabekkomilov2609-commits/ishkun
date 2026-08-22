@@ -47,6 +47,14 @@
       "type": "number",
       "title": "Haqiqiy soatlar"
     },
+    "overtime_hours": {
+      "type": "number",
+      "title": "Qo'shimcha ish soatlari"
+    },
+    "final_payment_amount": {
+      "type": "number",
+      "title": "Yakuniy to'lov miqdori"
+    },
     "company_attendance_status": {
       "type": "string",
       "enum": [

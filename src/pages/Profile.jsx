@@ -213,7 +213,7 @@ export default function Profile() {
                         <h3 className="font-semibold text-foreground text-sm line-clamp-1">{s?.title || '—'}</h3>
                         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                           <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
-                          <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(s.payment_amount) : ''}</span>
+                          <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(a.final_payment_amount != null ? a.final_payment_amount : s.payment_amount) : ''}</span>
                         </div>
                       </div>
                       <StatusBadge status="completed" label={t('app.statusCompleted')} />

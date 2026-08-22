@@ -58,15 +58,17 @@ export function shiftDurationHours(shift) {
 
 export function shiftPay(shift) {
   const duration = shiftDurationHours(shift);
-  let hourly = Number(shift?.hourly_rate);
+  const daily = Number(shift?.daily_rate);
   let total = null;
-  if (hourly) {
-    total = Math.round(hourly * duration);
+  let hourly = null;
+  if (daily) {
+    total = daily;
+    hourly = duration > 0 ? Math.round(daily / duration) : null;
   } else if (shift?.payment_amount != null && shift.payment_amount !== '') {
     total = Number(shift.payment_amount);
     hourly = duration > 0 ? Math.round(total / duration) : null;
   }
-  return { duration, hourlyRate: hourly || null, total };
+  return { duration, hourlyRate: hourly, total };
 }
 
 export function timeRange(shift) {

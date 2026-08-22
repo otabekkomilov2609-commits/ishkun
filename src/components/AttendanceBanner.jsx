@@ -6,6 +6,7 @@ import { Button, Card } from '@/components/ui';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
 import { isShiftStarted, isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
+import { shiftDurationHours } from '@/lib/format';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 
 export default function AttendanceBanner({ apps, onRefresh }) {
@@ -84,8 +85,17 @@ export default function AttendanceBanner({ apps, onRefresh }) {
       if (isCheckOut) {
         const now = new Date().toISOString();
         const hrs = Math.round(((new Date(now) - new Date(target.check_in_time)) / 3600000) * 10) / 10;
-        await base44.entities.Application.update(target.id, { check_out_time: now, actual_hours: hrs, status: 'completed' });
-        setRateApp({ ...target, check_out_time: now, actual_hours: hrs, status: 'completed' });
+        const plannedHours = shiftDurationHours(shift);
+        let overtimeHours = 0;
+        let finalPayment = shift.daily_rate || 0;
+        if (hrs > plannedHours) {
+          overtimeHours = Math.round((hrs - plannedHours) * 10) / 10;
+          const overtimeRate = plannedHours > 0 ? (shift.daily_rate || 0) / plannedHours : 0;
+          const overtimePay = Math.round(overtimeHours * overtimeRate);
+          finalPayment = (shift.daily_rate || 0) + overtimePay;
+        }
+        await base44.entities.Application.update(target.id, { check_out_time: now, actual_hours: hrs, status: 'completed', overtime_hours: overtimeHours, final_payment_amount: finalPayment });
+        setRateApp({ ...target, check_out_time: now, actual_hours: hrs, status: 'completed', overtime_hours: overtimeHours, final_payment_amount: finalPayment });
       } else {
         const now = new Date().toISOString();
         await base44.entities.Application.update(target.id, { check_in_time: now, status: 'in_progress' });

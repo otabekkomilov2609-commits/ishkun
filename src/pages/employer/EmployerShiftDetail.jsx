@@ -252,6 +252,14 @@ export default function EmployerShiftDetail() {
                 )}
                 {rateEligible && (
                   <div className="mt-3 border-t border-border pt-3">
+                    {a.final_payment_amount != null && (
+                      <div className="mb-3">
+                        <p className="text-sm font-semibold text-foreground">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
+                        {a.overtime_hours > 0 && (
+                          <p className="mt-1 text-xs font-medium text-primary">{t('att.overtimePrefix')} {a.overtime_hours} {t('att.overtimeSuffix')} +{formatSom(a.final_payment_amount - (shift.daily_rate || 0))}</p>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-foreground"><Star className="h-4 w-4 text-primary" /> {t('rating.rateWorker')}</div>
                     <RatingPrompt applicationId={a.id} shiftId={shift.id} workerId={a.worker_id} companyId={shift.company_id} employerId={user.id} ratedBy="company" />
                   </div>

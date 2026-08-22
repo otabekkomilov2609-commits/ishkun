@@ -30,7 +30,7 @@ export default function CreateShift() {
         end_time: duplicateFrom.end_time || '',
         location: duplicateFrom.location || '',
         city: duplicateFrom.city || user?.city || '',
-        hourly_rate: duplicateFrom.hourly_rate != null ? String(duplicateFrom.hourly_rate) : '',
+        daily_rate: duplicateFrom.daily_rate != null ? String(duplicateFrom.daily_rate) : '',
         required_workers: duplicateFrom.required_workers || 1,
         required_skill: duplicateFrom.required_skill || ''
       };
@@ -39,7 +39,7 @@ export default function CreateShift() {
       title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
       map_link: '',
       date: '', start_time: '', end_time: '',
-      location: '', city: user?.city || '', hourly_rate: '', required_workers: 1, required_skill: ''
+      location: '', city: user?.city || '', daily_rate: '', required_workers: 1, required_skill: ''
     };
   });
   const [saving, setSaving] = useState(false);
@@ -56,7 +56,7 @@ export default function CreateShift() {
   }, [user]);
 
   const submit = async () => {
-    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.hourly_rate || !form.city || !form.location || !form.map_link) {
+    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.daily_rate || !form.city || !form.location || !form.map_link) {
       toast({ title: t('required'), variant: 'destructive' });
       return;
     }
@@ -75,7 +75,7 @@ export default function CreateShift() {
         end_time: form.end_time,
         location: form.location,
         city: form.city,
-        hourly_rate: Number(form.hourly_rate),
+        daily_rate: Number(form.daily_rate),
         required_workers: Number(form.required_workers) || 1,
         required_skill: form.required_skill || undefined
       });
@@ -158,8 +158,8 @@ export default function CreateShift() {
           <Field label={t('shift.date')} required>
             <Input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
           </Field>
-          <Field label={t('shift.hourlyRate')} required hint={t('shift.hourlyRateHint')}>
-            <Input type="number" value={form.hourly_rate} onChange={e => setForm({ ...form, hourly_rate: e.target.value })} placeholder="25000" />
+          <Field label={t('shift.dailyRate')} required hint={t('shift.dailyRateHint')}>
+            <Input type="number" value={form.daily_rate} onChange={e => setForm({ ...form, daily_rate: e.target.value })} placeholder="25000" />
           </Field>
           <Field label={t('shift.startTime')} required>
             <Input type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />

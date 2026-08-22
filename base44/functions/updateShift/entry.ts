@@ -24,15 +24,15 @@ export default async function(req) {
     const payload = await req.json();
     const {
       shift_id, title, description, tasks_text, important_notes_text, requirements_text, dress_code_text,
-      map_link, date, start_time, end_time, location, city, hourly_rate, required_workers, required_skill
+      map_link, date, start_time, end_time, location, city, daily_rate, required_workers, required_skill
     } = payload || {};
 
     if (!shift_id) return Response.json({ error: 'Missing shift_id' }, { status: 400 });
-    if (!title || !date || !start_time || !end_time || !hourly_rate || !city || !location || !map_link) {
+    if (!title || !date || !start_time || !end_time || !daily_rate || !city || !location || !map_link) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
-    const rate = Number(hourly_rate);
-    if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid hourly_rate' }, { status: 400 });
+    const rate = Number(daily_rate);
+    if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid daily_rate' }, { status: 400 });
 
     const shift = await base44.asServiceRole.entities.Shift.get(shift_id);
     if (!shift) return Response.json({ error: 'Shift not found' }, { status: 404 });
@@ -62,7 +62,7 @@ export default async function(req) {
         String(date) !== String(shift.date) ||
         String(start_time) !== String(shift.start_time) ||
         String(end_time) !== String(shift.end_time) ||
-        Number(hourly_rate) !== Number(shift.hourly_rate) ||
+        Number(daily_rate) !== Number(shift.daily_rate) ||
         String(location) !== String(shift.location) ||
         String(city) !== String(shift.city) ||
         String(required_skill || '') !== String(shift.required_skill || '');
@@ -87,14 +87,13 @@ export default async function(req) {
     ];
     const changedLabels = editableFields.filter(f => norm(f.val) !== norm(f.old)).map(f => f.label);
 
-    const hours = durationHours(start_time, end_time);
-    const payment_amount = Math.round(rate * hours);
+    const payment_amount = rate;
 
     // company_id is intentionally omitted — it can never change on edit.
     const updated = await base44.asServiceRole.entities.Shift.update(shift_id, {
       title, description, tasks_text, important_notes_text, requirements_text, dress_code_text,
       map_link, date, start_time, end_time, location, city,
-      hourly_rate: rate,
+      daily_rate: rate,
       payment_amount,
       required_workers: newRequired,
       required_skill: required_skill || undefined

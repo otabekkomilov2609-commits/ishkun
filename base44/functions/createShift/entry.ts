@@ -25,27 +25,26 @@ export default async function(req) {
     const payload = await req.json();
     const {
       title, description, tasks_text, important_notes_text, requirements_text, dress_code_text,
-      map_link, date, start_time, end_time, location, city, hourly_rate, required_workers, required_skill
+      map_link, date, start_time, end_time, location, city, daily_rate, required_workers, required_skill
     } = payload || {};
 
-    if (!title || !date || !start_time || !end_time || !hourly_rate || !city || !location || !map_link) {
+    if (!title || !date || !start_time || !end_time || !daily_rate || !city || !location || !map_link) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
-    const rate = Number(hourly_rate);
-    if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid hourly_rate' }, { status: 400 });
+    const rate = Number(daily_rate);
+    if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid daily_rate' }, { status: 400 });
 
     // company_id from the employer's own company record — never trust a client value.
     const comps = await base44.asServiceRole.entities.Company.filter({ created_by_id: user.id });
     const company = comps[0];
     if (!company) return Response.json({ error: 'No company profile' }, { status: 400 });
 
-    const hours = durationHours(start_time, end_time);
-    const payment_amount = Math.round(rate * hours);
+    const payment_amount = rate;
 
     const shift = await base44.entities.Shift.create({
       title, description, tasks_text, important_notes_text, requirements_text, dress_code_text,
       map_link, date, start_time, end_time, location, city,
-      hourly_rate: rate,
+      daily_rate: rate,
       payment_amount,
       required_workers: Number(required_workers) || 1,
       required_skill: required_skill || undefined,
