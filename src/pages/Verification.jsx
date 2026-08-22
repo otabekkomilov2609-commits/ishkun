@@ -39,6 +39,14 @@ export default function Verification() {
     setError('');
     if (!/^\d{14}$/.test(form.jshshir)) { setError(t('kyc.jshshirError')); return; }
     if (!form.phone_number.trim() || !form.date_of_birth || !form.address.trim()) { setError(t('kyc.requiredError')); return; }
+    {
+      const dob = new Date(form.date_of_birth);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      if (age < 18) { setError(t('kyc.ageError')); return; }
+    }
     if (!form.passport_front || !form.passport_back) { setError(t('kyc.docsError')); return; }
     if (!form.bank_card_number || form.bank_card_number.replace(/\s/g, '').length < 16) { setError(t('kyc.cardError')); return; }
     setSaving(true);
