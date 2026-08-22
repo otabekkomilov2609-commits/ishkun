@@ -57,7 +57,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
         try {
-          await base44.auth.updateMe({ phone_number: phone });
+          await base44.functions.invoke('updateMyProfile', { phone_number: phone });
           const me = await base44.auth.me();
           if (me?.id) {
             await base44.entities.Notification.create({

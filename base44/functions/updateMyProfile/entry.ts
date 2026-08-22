@@ -1,0 +1,71 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+
+// Authoritative self-profile update. The User entity's update RLS is admin-only,
+// so this function is the ONLY path a normal user has to edit their own row.
+// It server-side whitelists exactly which fields may change and silently ignores
+// everything else (account_status, violation_count, verification_status,
+// verification_note, rating_avg, rating_count, role — never settable here).
+// account_type is only applied on the first-ever onboarding write (when the
+// stored value is empty); once set it is locked. Editing KYC/identity fields
+// while already verified re-arms admin review (verification_status -> submitted).
+
+const WHITELIST = [
+  'phone_number', 'city', 'profile_image', 'language',
+  'jshshir', 'date_of_birth', 'address',
+  'passport_front', 'passport_back', 'liveness_selfie', 'student_id',
+  'bank_card_number', 'self_employed', 'self_employed_cert', 'onboarded'
+];
+
+const KYC_FIELDS = [
+  'jshshir', 'date_of_birth', 'address',
+  'passport_front', 'passport_back', 'liveness_selfie', 'student_id',
+  'bank_card_number', 'self_employed', 'self_employed_cert'
+];
+
+export default async function(req) {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    let body = {};
+    try { body = await req.json(); } catch { body = {}; }
+    const payload = body && typeof body === 'object' ? body : {};
+
+    const update = {};
+    for (const key of WHITELIST) {
+      if (Object.prototype.hasOwnProperty.call(payload, key)) {
+        update[key] = payload[key];
+      }
+    }
+
+    const wantsAccountType = Object.prototype.hasOwnProperty.call(payload, 'account_type');
+    const hasKyc = KYC_FIELDS.some(k => Object.prototype.hasOwnProperty.call(update, k));
+    let current = null;
+    if (wantsAccountType || hasKyc) {
+      current = await base44.asServiceRole.entities.User.get(user.id);
+    }
+
+    // account_type: only on first onboarding write (stored value empty)
+    if (wantsAccountType) {
+      if (!current || current.account_type == null || current.account_type === '') {
+        update.account_type = payload.account_type;
+      }
+    }
+
+    // re-arm admin review if verified KYC data is being changed
+    if (hasKyc && current && current.verification_status === 'verified') {
+      update.verification_status = 'submitted';
+      update.verification_note = '';
+    }
+
+    if (Object.keys(update).length === 0) {
+      return Response.json({ ok: true, updated: false });
+    }
+
+    const updated = await base44.asServiceRole.entities.User.update(user.id, update);
+    return Response.json({ ok: true, updated: true, user: updated });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}

@@ -22,7 +22,7 @@ export default function Onboarding() {
     if (!type || !city) return;
     setSaving(true);
     try {
-      await base44.auth.updateMe({ account_type: type, city, onboarded: true });
+      await base44.functions.invoke('updateMyProfile', { account_type: type, city, onboarded: true });
       await checkUserAuth();
       navigate(type === 'employer' ? '/employer' : '/worker');
     } catch (e) {

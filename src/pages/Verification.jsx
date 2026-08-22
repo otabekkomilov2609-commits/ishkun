@@ -43,7 +43,7 @@ export default function Verification() {
     if (!form.bank_card_number || form.bank_card_number.replace(/\s/g, '').length < 16) { setError(t('kyc.cardError')); return; }
     setSaving(true);
     try {
-      await base44.auth.updateMe({
+      await base44.functions.invoke('updateMyProfile', {
         phone_number: form.phone_number,
         jshshir: form.jshshir,
         date_of_birth: form.date_of_birth,

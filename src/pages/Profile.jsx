@@ -54,7 +54,7 @@ export default function Profile() {
   const save = async () => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({
+      await base44.functions.invoke('updateMyProfile', {
         phone_number: form.phone_number,
         city: form.city,
         profile_image: form.profile_image,
