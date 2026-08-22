@@ -138,7 +138,7 @@ export default function Profile() {
         </div>
       </Card>
 
-      {user.role !== 'admin' && (
+      {user.role !== 'admin' && user.verification_status !== 'verified' && (
         <Link to="/verification" className="mt-4 block">
           <Card className="p-4 flex items-center gap-3 transition-colors hover:bg-muted/50">
             <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
