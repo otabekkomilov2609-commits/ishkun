@@ -25,10 +25,10 @@ export default async function(req) {
     const payload = await req.json();
     const {
       title, description, tasks_text, important_notes_text, requirements_text, dress_code_text,
-      map_link, date, start_time, end_time, location, city, daily_rate, required_workers, required_skill
+      map_link, date, start_time, end_time, city, daily_rate, required_workers, required_skill
     } = payload || {};
 
-    if (!title || !date || !start_time || !end_time || !daily_rate || !city || !location || !map_link) {
+    if (!title || !date || !start_time || !end_time || !daily_rate || !city || !map_link) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
     const rate = Number(daily_rate);
@@ -43,7 +43,7 @@ export default async function(req) {
 
     const shift = await base44.entities.Shift.create({
       title, description, tasks_text, important_notes_text, requirements_text, dress_code_text,
-      map_link, date, start_time, end_time, location, city,
+      map_link, date, start_time, end_time, city,
       daily_rate: rate,
       payment_amount,
       required_workers: Number(required_workers) || 1,
