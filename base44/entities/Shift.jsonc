@@ -125,9 +125,7 @@
     "date",
     "start_time",
     "end_time",
-    "city",
-    "map_link",
-    "company_id"
+    "city"
   ],
   "rls": {
     "create": {

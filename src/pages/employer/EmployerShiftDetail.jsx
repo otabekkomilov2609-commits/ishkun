@@ -76,6 +76,7 @@ export default function EmployerShiftDetail() {
     } catch (e) {
       setApps(prev);
       console.error(e);
+      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
     }
   };
 
@@ -93,56 +94,19 @@ export default function EmployerShiftDetail() {
     } catch (e) {
       setShift({ ...shift, status: prevStatus });
       console.error(e);
-    }
-  };
-
-  const markWorkerDone = async (app) => {
-    const prev = apps;
-    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status: 'completed' } : a));
-    try {
-      await base44.entities.Application.update(app.id, { status: 'completed' });
-      await base44.functions.invoke('createNotificationFor', {
-        notifications: [{
-          user_id: app.worker_id,
-          title: t('notif.shiftDone'),
-          body: shift.title,
-          type: 'shift_completed',
-          link: '/worker/applications'
-        }]
-      });
-    } catch (e) {
-      setApps(prev);
-      console.error(e);
-    }
-  };
-
-  const markWorkerNoShow = async (app) => {
-    const prev = apps;
-    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, status: 'no_show' } : a));
-    try {
-      await base44.entities.Application.update(app.id, { status: 'no_show' });
-      if (!app.violation_recorded) {
-        await base44.functions.invoke('recordViolation', {
-          application_id: app.id,
-          worker_id: app.worker_id,
-          source: 'no_show',
-          shift_title: shift.title,
-          employer_id: app.employer_id || shift.created_by_id
-        });
-      }
-      // recordViolation now owns shift reopening + urgent replacement notifications.
-      setShift(await base44.entities.Shift.get(id));
-    } catch (e) {
-      setApps(prev);
-      console.error(e);
+      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
     }
   };
 
   const confirmAttendance = async (app, status) => {
     const now = new Date().toISOString();
-    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, company_attendance_status: status, company_confirmed_at: now } : a));
+    setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, company_attendance_status: status, company_confirmed_at: now, ...(status === 'confirmed_absent' ? { status: 'no_show' } : {}) } : a));
     try {
-      await base44.entities.Application.update(app.id, { company_attendance_status: status, company_confirmed_at: now });
+      await base44.entities.Application.update(app.id, {
+        company_attendance_status: status,
+        company_confirmed_at: now,
+        ...(status === 'confirmed_absent' ? { status: 'no_show' } : {})
+      });
       if (status === 'confirmed_absent' && !app.violation_recorded) {
         await base44.functions.invoke('recordViolation', {
           application_id: app.id,
@@ -152,7 +116,10 @@ export default function EmployerShiftDetail() {
           employer_id: app.employer_id || shift.created_by_id
         });
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
+    }
   }
 
   const confirmHours = async (app, action) => {
@@ -160,8 +127,11 @@ export default function EmployerShiftDetail() {
     try {
       await base44.functions.invoke('confirmHours', { application_id: app.id, action });
       load();
-    } catch (e) { console.error(e); }
-  };;
+    } catch (e) {
+      console.error(e);
+      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
+    }
+  };
 
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-48 w-full" /></div>;
 
@@ -292,12 +262,6 @@ export default function EmployerShiftDetail() {
                   <div className="flex gap-2 mt-3">
                     <Button size="sm" onClick={() => setStatus(a, 'approved')}><CheckCircle2 className="h-4 w-4" /> {t('app.approve')}</Button>
                     <Button size="sm" variant="outline" onClick={() => setStatus(a, 'rejected')}><XCircle className="h-4 w-4" /> {t('app.reject')}</Button>
-                  </div>
-                )}
-                {a.status === 'approved' && (
-                  <div className="flex gap-2 mt-3">
-                    <Button size="sm" variant="soft" onClick={() => markWorkerDone(a)}><CheckCircle2 className="h-4 w-4" /> {t('app.markDone')}</Button>
-                    <Button size="sm" variant="outline" onClick={() => markWorkerNoShow(a)}><XCircle className="h-4 w-4" /> {t('app.markNoShow')}</Button>
                   </div>
                 )}
               </Card>

@@ -11,11 +11,13 @@ import TabsNav from '@/components/TabsNav';
 import PullToRefresh from '@/components/PullToRefresh';
 import AttendanceReminderSection from '@/components/AttendanceReminderSection';
 import { PlusCircle, CalendarDays, ClipboardList, AlertCircle, Building2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function MyShifts() {
   const { user } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [tab, setTab] = useState('active');
   const [completing, setCompleting] = useState(null);
 
@@ -60,6 +62,7 @@ export default function MyShifts() {
       await shiftsQ.refetch();
     } catch (e) {
       console.error(e);
+      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
     }
     setCompleting(null);
   };
