@@ -24,6 +24,8 @@ import Profile from '@/pages/Profile';
 import AdminPanel from '@/pages/AdminPanel';
 import EmployerDashboard from '@/pages/employer/EmployerDashboard';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
+import LegalCompanyProfile from '@/pages/employer/LegalCompanyProfile';
+import IndividualCompanyProfile from '@/pages/employer/IndividualCompanyProfile';
 import CreateShift from '@/pages/employer/CreateShift';
 import MyShifts from '@/pages/employer/MyShifts';
 import EmployerShiftDetail from '@/pages/employer/EmployerShiftDetail';
@@ -84,6 +86,8 @@ const AuthenticatedApp = () => {
           <Route path="/employer/shifts/:id" element={<RoleGuard roles={['employer']}><EmployerShiftDetail /></RoleGuard>} />
           <Route path="/employer/shifts/:id/edit" element={<RoleGuard roles={['employer']}><EditShift /></RoleGuard>} />
           <Route path="/employer/company" element={<RoleGuard roles={['employer']}><CompanyProfile /></RoleGuard>} />
+          <Route path="/employer/company/legal" element={<RoleGuard roles={['employer']}><LegalCompanyProfile /></RoleGuard>} />
+          <Route path="/employer/company/individual" element={<RoleGuard roles={['employer']}><IndividualCompanyProfile /></RoleGuard>} />
           {/* Admin */}
           <Route path="/admin" element={<RoleGuard allowAdmin><AdminPanel /></RoleGuard>} />
           {/* Shared */}
