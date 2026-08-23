@@ -44,17 +44,16 @@ export function isCompletableWindowOpen(shift, leadHours = 2) {
 // Worker self-report vs company confirmation disagreement.
 export function isMismatch(app) {
   if (!app) return false;
-  const cas = app.company_attendance_status;
-  const checkedIn = !!app.check_in_time;
-  if (cas === 'confirmed_absent' && checkedIn) return true;
-  if (cas === 'confirmed_present' && !checkedIn) return true;
-  return false;
+  return app.company_attendance_status === 'confirmed_absent' && !!app.check_out_time;
 }
 
 // Live attendance label key (att.notArrived / att.late / att.working / att.done).
 export function attendanceLabel(app, shift) {
   if (app?.check_out_time) return 'done';
   if (app?.check_in_time) return 'working';
+  if (app?.company_attendance_status === 'confirmed_absent') return 'notArrived';
+  if (app?.company_attendance_status === 'confirmed_present') return 'working';
+  if (shift && isShiftEnded(shift)) return 'awaitingHours';
   if (shift && isShiftStarted(shift)) return 'late';
   return 'notArrived';
 }

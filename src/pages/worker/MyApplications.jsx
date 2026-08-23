@@ -29,20 +29,20 @@ export default function MyApplications() {
   const load = async () => {
     if (!user) return;
     const a = await base44.entities.Application.filter({ worker_id: user.id }, '-created_date', 100);
-    setApps(a);
     const ids = [...new Set(a.map(x => x.shift_id))];
     const map = {};
     await Promise.all(ids.map(async id => {
       try { map[id] = await base44.entities.Shift.get(id); } catch {}
     }));
     setShifts(map);
+    setApps(a);
   };
 
   useEffect(() => { load(); }, [user]);
 
   // Cancellation is handled by <CancelBookingDialog /> below (single code path).
 
-  const activeApps = (apps || []).filter(a => a.status !== 'cancelled');
+  const activeApps = (apps || []).filter(a => a.status !== 'cancelled' && shifts[a.shift_id]);
 
   const matchTab = (a, key) => {
     if (key === 'pending') return a.status === 'pending';
