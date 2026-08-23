@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ClipboardList, LayoutDashboard, CalendarDays, PlusCircle, User, Shield, ShieldCheck, LogOut, ArrowLeft } from 'lucide-react';
+import { Search, ClipboardList, CalendarDays, PlusCircle, User, Shield, ShieldCheck, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import Brand from './Brand';
@@ -30,8 +30,7 @@ export default function Layout() {
       { to: '/profile', key: 'profile', icon: User }
     ],
     employer: [
-      { to: '/employer', key: 'nav.dashboard', icon: LayoutDashboard, end: true },
-      { to: '/employer/shifts', key: 'nav.shifts', icon: CalendarDays },
+      { to: '/employer/shifts', key: 'nav.shifts', icon: CalendarDays, end: true },
       { to: '/employer/shifts/new', key: 'nav.newShift', icon: PlusCircle },
       { to: '/profile', key: 'profile', icon: User }
     ],

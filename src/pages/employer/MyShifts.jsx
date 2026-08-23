@@ -4,12 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { Button, Skeleton } from '@/components/ui';
+import { Button, Card, Skeleton } from '@/components/ui';
 import ShiftCard from '@/components/ShiftCard';
 import EmptyState from '@/components/EmptyState';
 import TabsNav from '@/components/TabsNav';
 import PullToRefresh from '@/components/PullToRefresh';
-import { PlusCircle, CalendarDays, ClipboardList, AlertCircle } from 'lucide-react';
+import AttendanceReminderSection from '@/components/AttendanceReminderSection';
+import { PlusCircle, CalendarDays, ClipboardList, AlertCircle, Building2 } from 'lucide-react';
 
 export default function MyShifts() {
   const { user } = useAuth();
@@ -36,6 +37,17 @@ export default function MyShifts() {
   });
 
   const apps = appsQ.data || [];
+
+  const companyQ = useQuery({
+    queryKey: ['myCompany', user?.id],
+    queryFn: async () => {
+      const comps = await base44.entities.Company.filter({ created_by_id: user.id });
+      return comps[0] || null;
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+  const company = companyQ.data;
 
   const refresh = async () => {
     await Promise.all([shiftsQ.refetch(), appsQ.refetch()]);
@@ -108,14 +120,29 @@ export default function MyShifts() {
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{t('nav.shifts')}</h1>
-        <Button size="sm" onClick={() => navigate('/employer/shifts/new')}><PlusCircle className="h-4 w-4" /> {t('nav.newShift')}</Button>
+        {company && <Button size="sm" onClick={() => navigate('/employer/shifts/new')}><PlusCircle className="h-4 w-4" /> {t('nav.newShift')}</Button>}
       </div>
+
+      {!companyQ.isLoading && company === null && (
+        <Card className="p-6 mb-5 border-primary/30 bg-primary/5">
+          <div className="flex items-start gap-4">
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground flex-shrink-0"><Building2 className="h-6 w-6" /></div>
+            <div className="flex-1">
+              <h2 className="font-semibold text-foreground">{t('emp.companyNeeded')}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t('emp.companyNeededHint')}</p>
+            </div>
+            <Button onClick={() => navigate('/employer/company')}><Building2 className="h-4 w-4" /> {t('emp.createCompany')}</Button>
+          </div>
+        </Card>
+      )}
+
+      <AttendanceReminderSection />
 
       <PullToRefresh onRefresh={refresh}>
         {shiftsQ.isLoading ? (
           <div className="space-y-3">{[0, 1, 2].map(i => <Skeleton key={i} className="h-28 w-full" />)}</div>
         ) : !shifts || shifts.length === 0 ? (
-          <EmptyState icon={CalendarDays} title={t('emp.noShifts')} action={<Button onClick={() => navigate('/employer/shifts/new')}><PlusCircle className="h-4 w-4" /> {t('emp.createFirst')}</Button>} />
+          <EmptyState icon={CalendarDays} title={t('emp.noShifts')} action={company ? <Button onClick={() => navigate('/employer/shifts/new')}><PlusCircle className="h-4 w-4" /> {t('emp.createFirst')}</Button> : null} />
         ) : (
           <>
             <TabsNav tabs={tabs} active={tab} onChange={setTab} className="mb-4" />

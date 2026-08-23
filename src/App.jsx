@@ -22,7 +22,6 @@ import Home from '@/pages/Home';
 import Onboarding from '@/pages/Onboarding';
 import Profile from '@/pages/Profile';
 import AdminPanel from '@/pages/AdminPanel';
-import EmployerDashboard from '@/pages/employer/EmployerDashboard';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import LegalCompanyProfile from '@/pages/employer/LegalCompanyProfile';
 import IndividualCompanyProfile from '@/pages/employer/IndividualCompanyProfile';
@@ -80,7 +79,7 @@ const AuthenticatedApp = () => {
           <Route path="/worker/applications" element={<RoleGuard roles={['worker']}><MyApplications /></RoleGuard>} />
           <Route path="/worker/shifts/:id" element={<RoleGuard roles={['worker']}><WorkerShiftDetail /></RoleGuard>} />
           {/* Employer */}
-          <Route path="/employer" element={<RoleGuard roles={['employer']}><EmployerDashboard /></RoleGuard>} />
+          <Route path="/employer" element={<Navigate to="/employer/shifts" replace />} />
           <Route path="/employer/shifts" element={<RoleGuard roles={['employer']}><MyShifts /></RoleGuard>} />
           <Route path="/employer/shifts/new" element={<RoleGuard roles={['employer']}><CreateShift /></RoleGuard>} />
           <Route path="/employer/shifts/:id" element={<RoleGuard roles={['employer']}><EmployerShiftDetail /></RoleGuard>} />
