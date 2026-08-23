@@ -1,0 +1,110 @@
+{
+  "name": "ShiftTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Andoza nomi"
+    },
+    "title": {
+      "type": "string",
+      "title": "Sarlavha"
+    },
+    "description": {
+      "type": "string",
+      "title": "Tavsif"
+    },
+    "tasks_text": {
+      "type": "string",
+      "title": "Vazifalar"
+    },
+    "important_notes_text": {
+      "type": "string",
+      "title": "Muhim eslatmalar"
+    },
+    "requirements_text": {
+      "type": "string",
+      "title": "Talablar"
+    },
+    "dress_code_text": {
+      "type": "string",
+      "title": "Kiyinish tartibi"
+    },
+    "map_link": {
+      "type": "string",
+      "title": "Yandex xarita havolasi"
+    },
+    "city": {
+      "type": "string",
+      "title": "Shahar"
+    },
+    "daily_rate": {
+      "type": "number",
+      "title": "Kunlik stavka (so'm)"
+    },
+    "required_workers": {
+      "type": "number",
+      "default": 1,
+      "title": "Kerakli ishchilar soni"
+    },
+    "required_skill": {
+      "type": "string",
+      "enum": [
+        "warehouse",
+        "waiter",
+        "cashier",
+        "courier",
+        "promoter",
+        "event_staff",
+        "cleaner"
+      ],
+      "title": "Lavozim turi"
+    },
+    "company_id": {
+      "type": "string",
+      "title": "Kompaniya"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

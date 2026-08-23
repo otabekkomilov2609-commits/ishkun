@@ -6,7 +6,8 @@ import { base44 } from '@/api/base44Client';
 import { CITIES, isValidMapLink } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
-import { PlusCircle, Check, Building2, X, CalendarPlus, Navigation } from 'lucide-react';
+import TemplatePickerDrawer from '@/components/TemplatePickerDrawer';
+import { PlusCircle, Check, Building2, X, CalendarPlus, Navigation, LayoutTemplate } from 'lucide-react';
 
 export default function CreateShift() {
   const { user } = useAuth();
@@ -45,6 +46,12 @@ export default function CreateShift() {
   const [saving, setSaving] = useState(false);
   const [posted, setPosted] = useState(false);
   const [dupHintDismissed, setDupHintDismissed] = useState(false);
+  const [hintText, setHintText] = useState(duplicateFrom ? t('shift.duplicatedHint') : '');
+  const [templates, setTemplates] = useState([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [showTemplateSave, setShowTemplateSave] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateSaved, setTemplateSaved] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -52,6 +59,16 @@ export default function CreateShift() {
     (async () => {
       const comps = await base44.entities.Company.filter({ created_by_id: user.id });
       setCompany(comps[0] || null);
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const tpls = await base44.entities.ShiftTemplate.filter({ created_by_id: user.id }, '-created_date', 20);
+        setTemplates(tpls);
+      } catch (e) { console.error(e); }
     })();
   }, [user]);
 
@@ -105,6 +122,61 @@ export default function CreateShift() {
     setSaving(false);
   };
 
+  const pickTemplate = (tpl) => {
+    setForm(prev => ({
+      ...prev,
+      title: tpl.title || '',
+      description: tpl.description || '',
+      tasks_text: tpl.tasks_text || '',
+      important_notes_text: tpl.important_notes_text || '',
+      requirements_text: tpl.requirements_text || '',
+      dress_code_text: tpl.dress_code_text || '',
+      map_link: tpl.map_link || '',
+      city: tpl.city || prev.city || '',
+      daily_rate: tpl.daily_rate != null ? String(tpl.daily_rate) : '',
+      required_workers: tpl.required_workers || 1,
+      required_skill: tpl.required_skill || '',
+      date: '',
+      start_time: '',
+      end_time: ''
+    }));
+    setDupHintDismissed(false);
+    setHintText(t('shift.templateApplied'));
+  };
+
+  const deleteTemplate = async (tpl) => {
+    try {
+      await base44.entities.ShiftTemplate.delete(tpl.id);
+      setTemplates(prev => prev.filter(x => x.id !== tpl.id));
+    } catch (e) { console.error(e); }
+  };
+
+  const saveAsTemplate = async () => {
+    try {
+      await base44.entities.ShiftTemplate.create({
+        name: templateName.trim() || form.title,
+        title: form.title,
+        description: form.description,
+        tasks_text: form.tasks_text,
+        important_notes_text: form.important_notes_text,
+        requirements_text: form.requirements_text,
+        dress_code_text: form.dress_code_text,
+        map_link: form.map_link,
+        city: form.city,
+        daily_rate: Number(form.daily_rate),
+        required_workers: Number(form.required_workers) || 1,
+        required_skill: form.required_skill || undefined,
+        company_id: company.id
+      });
+      setShowTemplateSave(false);
+      setTemplateSaved(true);
+      setTimeout(() => setTemplateSaved(false), 2000);
+    } catch (e) {
+      console.error(e);
+      toast({ title: e?.message || 'Xatolik', variant: 'destructive' });
+    }
+  };
+
   if (company === undefined) return null;
   if (company === null) {
     return (
@@ -129,7 +201,22 @@ export default function CreateShift() {
           <div className="flex flex-wrap gap-3 justify-center">
             <Button onClick={() => navigate('/employer/shifts')}>{t('shift.backToList')}</Button>
             <Button variant="outline" onClick={postAnotherDay}><CalendarPlus className="h-4 w-4" /> {t('shift.postAnotherDay')}</Button>
+            <Button variant="outline" onClick={() => { setTemplateName(form.title); setShowTemplateSave(true); }}><LayoutTemplate className="h-4 w-4" /> {t('shift.saveAsTemplate')}</Button>
           </div>
+          {showTemplateSave && (
+            <div className="mt-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-center">
+              <Input
+                value={templateName}
+                onChange={e => setTemplateName(e.target.value)}
+                placeholder={t('shift.templateName')}
+                className="sm:max-w-xs"
+              />
+              <Button onClick={saveAsTemplate}><Check className="h-4 w-4" /> {t('save')}</Button>
+            </div>
+          )}
+          {templateSaved && (
+            <p className="mt-3 inline-flex items-center gap-1 text-sm text-emerald-600 font-medium"><Check className="h-4 w-4" /> {t('shift.templateSaved')}</p>
+          )}
         </Card>
       </div>
     );
@@ -140,11 +227,14 @@ export default function CreateShift() {
       <div className="flex items-center gap-2 mb-5">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><PlusCircle className="h-5 w-5" /></div>
         <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{t('shift.create')}</h1>
+        {templates.length > 0 && !duplicateFrom && (
+          <Button variant="outline" size="sm" className="ml-auto" onClick={() => setPickerOpen(true)}><LayoutTemplate className="h-4 w-4" /> {t('shift.useTemplate')}</Button>
+        )}
       </div>
 
-      {duplicateFrom && !dupHintDismissed && (
+      {hintText && !dupHintDismissed && (
         <div className="mb-4 flex items-start gap-3 rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">
-          <p className="flex-1">{t('shift.duplicatedHint')}</p>
+          <p className="flex-1">{hintText}</p>
           <button type="button" onClick={() => setDupHintDismissed(true)} className="shrink-0 text-primary/70 hover:text-primary" aria-label={t('cancel')}>
             <X className="h-4 w-4" />
           </button>
@@ -238,6 +328,14 @@ export default function CreateShift() {
           <Button variant="outline" onClick={() => navigate('/employer/shifts')}>{t('cancel')}</Button>
         </div>
       </Card>
+
+      <TemplatePickerDrawer
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        templates={templates}
+        onPick={pickTemplate}
+        onDelete={deleteTemplate}
+      />
     </div>
   );
 }
