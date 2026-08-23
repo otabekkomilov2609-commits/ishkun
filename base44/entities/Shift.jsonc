@@ -131,8 +131,19 @@
     "company_id"
   ],
   "rls": {
-    "create": true,
-    "read": true,
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": null,
     "update": {
       "$or": [
         {
