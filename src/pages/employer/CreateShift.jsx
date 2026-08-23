@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
@@ -13,41 +13,19 @@ export default function CreateShift() {
   const { user } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
-  const location = useLocation();
-  const duplicateFrom = location.state?.duplicateFrom;
   const [company, setCompany] = useState(undefined);
-  const [form, setForm] = useState(() => {
-    if (duplicateFrom) {
-      return {
-        title: duplicateFrom.title || '',
-        description: duplicateFrom.description || '',
-        tasks_text: duplicateFrom.tasks_text || '',
-        important_notes_text: duplicateFrom.important_notes_text || '',
-        requirements_text: duplicateFrom.requirements_text || '',
-        dress_code_text: duplicateFrom.dress_code_text || '',
-        map_link: duplicateFrom.map_link || '',
-        date: '',
-        start_time: duplicateFrom.start_time || '',
-        end_time: duplicateFrom.end_time || '',
-        location: duplicateFrom.location || '',
-        city: duplicateFrom.city || user?.city || '',
-        daily_rate: duplicateFrom.daily_rate != null ? String(duplicateFrom.daily_rate) : '',
-        required_workers: duplicateFrom.required_workers || 1,
-        required_skill: duplicateFrom.required_skill || ''
-      };
-    }
-    return {
-      title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
-      map_link: '',
-      date: '', start_time: '', end_time: '',
-      location: '', city: user?.city || '', daily_rate: '', required_workers: 1, required_skill: ''
-    };
+  const [form, setForm] = useState({
+    title: '', description: '', tasks_text: '', important_notes_text: '', requirements_text: '', dress_code_text: '',
+    map_link: '',
+    date: '', start_time: '', end_time: '',
+    location: '', city: user?.city || '', daily_rate: '', required_workers: 1, required_skill: ''
   });
   const [saving, setSaving] = useState(false);
   const [posted, setPosted] = useState(false);
   const [dupHintDismissed, setDupHintDismissed] = useState(false);
-  const [hintText, setHintText] = useState(duplicateFrom ? t('shift.duplicatedHint') : '');
+  const [hintText, setHintText] = useState('');
   const [templates, setTemplates] = useState([]);
+  const [recentShifts, setRecentShifts] = useState([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showTemplateSave, setShowTemplateSave] = useState(false);
   const [templateName, setTemplateName] = useState('');
@@ -68,6 +46,8 @@ export default function CreateShift() {
       try {
         const tpls = await base44.entities.ShiftTemplate.filter({ created_by_id: user.id }, '-created_date', 20);
         setTemplates(tpls);
+        const recents = await base44.entities.Shift.filter({ created_by_id: user.id }, '-created_date', 20);
+        setRecentShifts(recents);
       } catch (e) { console.error(e); }
     })();
   }, [user]);
@@ -142,6 +122,28 @@ export default function CreateShift() {
     }));
     setDupHintDismissed(false);
     setHintText(t('shift.templateApplied'));
+  };
+
+  const pickShift = (shift) => {
+    setForm(prev => ({
+      ...prev,
+      title: shift.title || '',
+      description: shift.description || '',
+      tasks_text: shift.tasks_text || '',
+      important_notes_text: shift.important_notes_text || '',
+      requirements_text: shift.requirements_text || '',
+      dress_code_text: shift.dress_code_text || '',
+      map_link: shift.map_link || '',
+      city: shift.city || prev.city || '',
+      daily_rate: shift.daily_rate != null ? String(shift.daily_rate) : '',
+      required_workers: shift.required_workers || 1,
+      required_skill: shift.required_skill || '',
+      date: '',
+      start_time: '',
+      end_time: ''
+    }));
+    setDupHintDismissed(false);
+    setHintText(t('shift.shiftApplied'));
   };
 
   const deleteTemplate = async (tpl) => {
@@ -227,7 +229,7 @@ export default function CreateShift() {
       <div className="flex items-center gap-2 mb-5">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><PlusCircle className="h-5 w-5" /></div>
         <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{t('shift.create')}</h1>
-        {templates.length > 0 && !duplicateFrom && (
+        {(templates.length > 0 || recentShifts.length > 0) && (
           <Button variant="outline" size="sm" className="ml-auto" onClick={() => setPickerOpen(true)}><LayoutTemplate className="h-4 w-4" /> {t('shift.useTemplate')}</Button>
         )}
       </div>
@@ -335,6 +337,8 @@ export default function CreateShift() {
         templates={templates}
         onPick={pickTemplate}
         onDelete={deleteTemplate}
+        recentShifts={recentShifts}
+        onPickShift={pickShift}
       />
     </div>
   );

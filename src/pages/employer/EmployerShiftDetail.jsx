@@ -7,7 +7,7 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Copy } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
@@ -181,9 +181,6 @@ export default function EmployerShiftDetail() {
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
-          <Button variant="outline" onClick={() => navigate('/employer/shifts/new', { state: { duplicateFrom: shift } })}>
-            <Copy className="h-4 w-4" /> {t('shift.duplicate')}
-          </Button>
           {shift.status !== 'completed' && shift.status !== 'cancelled' && (
             <>
               <Button variant="soft" onClick={markCompleted}>
