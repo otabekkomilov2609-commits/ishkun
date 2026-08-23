@@ -26,6 +26,7 @@ export default function Profile() {
   const [completedShifts, setCompletedShifts] = useState({});
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
+  const [company, setCompany] = useState(undefined);
 
   useEffect(() => {
     if (user) {
@@ -52,6 +53,16 @@ export default function Profile() {
         setCompletedShifts(map);
       })();
     }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || user.account_type !== 'employer') return;
+    (async () => {
+      try {
+        const comps = await base44.entities.Company.filter({ created_by_id: user.id });
+        setCompany(comps[0] || null);
+      } catch (e) { console.error(e); setCompany(null); }
+    })();
   }, [user]);
 
   const save = async () => {
@@ -88,6 +99,14 @@ export default function Profile() {
 
   const initials = (user.full_name || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase()).join('');
 
+  const isWorker = user.account_type === 'worker';
+  const isEmployer = user.account_type === 'employer';
+  const showRatingCard = isWorker || (isEmployer && company !== undefined);
+  const ratingAvg = isWorker ? user.rating_avg : company?.rating_avg;
+  const ratingCount = isWorker ? user.rating_count : company?.rating_count;
+  const ratingLabel = isWorker ? t('prf.myRating') : t('prf.companyRating');
+  const ratingHint = isWorker ? t('prf.notRatedHint') : t('prf.companyNotRatedHint');
+
   return (
     <div className="max-w-2xl mx-auto">
       <button
@@ -107,19 +126,19 @@ export default function Profile() {
         </div>
       </div>
 
-      {user.account_type === 'worker' && (
+      {showRatingCard && (
         <Card className="p-4 mb-4 flex items-center gap-3">
           <div className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-500">
             <Star className="h-6 w-6" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-foreground">{t('prf.myRating')}</p>
-            {user.rating_count > 0 ? (
-              <div className="mt-0.5"><StarsDisplay avg={user.rating_avg} count={user.rating_count} size="md" /></div>
+            <p className="text-xs font-bold text-foreground">{ratingLabel}</p>
+            {ratingCount > 0 ? (
+              <div className="mt-0.5"><StarsDisplay avg={ratingAvg} count={ratingCount} size="md" /></div>
             ) : (
               <>
                 <p className="text-sm text-muted-foreground">{t('prf.notRatedYet')}</p>
-                <p className="text-xs text-muted-foreground/70">{t('prf.notRatedHint')}</p>
+                <p className="text-xs text-muted-foreground/70">{ratingHint}</p>
               </>
             )}
           </div>
