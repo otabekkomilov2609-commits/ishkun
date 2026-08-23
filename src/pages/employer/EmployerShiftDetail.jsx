@@ -16,6 +16,14 @@ import { StarsDisplay } from '@/components/RatingStars';
 import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded } from '@/lib/shiftTime';
 import CorrectHoursDialog from '@/components/CorrectHoursDialog';
 
+function appStatusKey(status) {
+  if (!status) return 'app.statusPending';
+  const camel = status.split('_')
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+    .join('');
+  return `app.status${camel}`;
+}
+
 export default function EmployerShiftDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -208,7 +216,7 @@ export default function EmployerShiftDetail() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <StatusBadge status={a.status} label={t(`app.status${a.status.charAt(0).toUpperCase()}${a.status.slice(1)}`)} />
+                    <StatusBadge status={a.status} label={t(appStatusKey(a.status))} />
                     {mismatch && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
                   </div>
                 </div>
