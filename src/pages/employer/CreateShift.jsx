@@ -7,6 +7,7 @@ import { CITIES, isValidMapLink } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import TemplatePickerDrawer from '@/components/TemplatePickerDrawer';
+import ShiftPreviewSheet from '@/components/ShiftPreviewSheet';
 import { PlusCircle, Check, Building2, X, CalendarPlus, Navigation, LayoutTemplate } from 'lucide-react';
 
 export default function CreateShift() {
@@ -27,6 +28,7 @@ export default function CreateShift() {
   const [templates, setTemplates] = useState([]);
   const [recentShifts, setRecentShifts] = useState([]);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [showTemplateSave, setShowTemplateSave] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateSaved, setTemplateSaved] = useState(false);
@@ -52,7 +54,7 @@ export default function CreateShift() {
     })();
   }, [user]);
 
-  const submit = async () => {
+  const submit = () => {
     if (!form.title || !form.date || !form.start_time || !form.end_time || !form.daily_rate || !form.city || !form.map_link) {
       toast({ title: t('required'), variant: 'destructive' });
       return;
@@ -61,6 +63,10 @@ export default function CreateShift() {
       toast({ title: t('shift.mapLinkFormatError'), variant: 'destructive' });
       return;
     }
+    setPreviewOpen(true);
+  };
+
+  const confirmPublish = async () => {
     setSaving(true);
     try {
       const res = await base44.functions.invoke('createShift', {
@@ -88,6 +94,7 @@ export default function CreateShift() {
         link: `/employer/shifts/${shift.id}`
       });
       setSaving(false);
+      setPreviewOpen(false);
       setPosted(true);
     } catch (e) {
       console.error(e);
@@ -325,7 +332,7 @@ export default function CreateShift() {
         </div>
         <div className="flex gap-3 mt-5">
           <Button onClick={submit} disabled={saving}>
-            <Check className="h-4 w-4" /> {t('shift.submit')}
+            <Check className="h-4 w-4" /> {t('shift.reviewBeforePublish')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/employer/shifts')}>{t('cancel')}</Button>
         </div>
@@ -339,6 +346,15 @@ export default function CreateShift() {
         onDelete={deleteTemplate}
         recentShifts={recentShifts}
         onPickShift={pickShift}
+      />
+
+      <ShiftPreviewSheet
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        form={form}
+        company={company}
+        onConfirm={confirmPublish}
+        publishing={saving}
       />
     </div>
   );
