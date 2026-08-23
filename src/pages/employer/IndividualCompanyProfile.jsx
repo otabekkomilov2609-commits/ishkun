@@ -59,7 +59,7 @@ export default function IndividualCompanyProfile() {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-2 mb-5">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><User className="h-5 w-5" /></div>
-        <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{company ? t('co.editTitle') : t('co.createTitle')}</h1>
+        <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{company ? t('co.indivEditTitle') : t('co.indivCreateTitle')}</h1>
       </div>
 
       <Card className="p-5">
@@ -74,7 +74,7 @@ export default function IndividualCompanyProfile() {
         </div>
         <div className="flex gap-3 mt-5">
           <Button onClick={save} disabled={saving || !canSubmit}>
-            {saved ? <><Check className="h-4 w-4" /> {t('co.saved')}</> : t('save')}
+            {saved ? <><Check className="h-4 w-4" /> {t('co.indivSaved')}</> : t('save')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/employer')}>{t('back')}</Button>
         </div>

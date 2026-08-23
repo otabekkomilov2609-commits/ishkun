@@ -11,6 +11,7 @@ import PullToRefresh from '@/components/PullToRefresh';
 import ShiftFilterSheet from '@/components/ShiftFilterSheet';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import { getWorkerShiftState } from '@/lib/shiftStatus';
+import { isShiftEnded } from '@/lib/shiftTime';
 import { Search, CalendarDays, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -100,7 +101,7 @@ export default function WorkerDashboard() {
 
   const matchFilters = (list, f) => {
     return (list || []).filter(s => {
-      if (s.date < todayStr()) return false;
+      if (s.date < todayStr() || isShiftEnded(s)) return false;
       if (busyDates.has(s.date)) return false;
       if (appByShift[s.id]) return false;
       if (user && s.created_by_id === user.id) return false;
