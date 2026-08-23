@@ -21,7 +21,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const scrollMap = useRef({});
 
-  const role = user?.role || 'worker';
+  const role = user?.role === 'admin' ? 'admin' : (user?.account_type || 'worker');
 
   const navByRole = {
     worker: [
