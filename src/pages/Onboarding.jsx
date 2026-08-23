@@ -24,7 +24,7 @@ export default function Onboarding() {
     try {
       await base44.functions.invoke('updateMyProfile', { account_type: type, city, onboarded: true });
       await checkUserAuth();
-      navigate(type === 'employer' ? '/employer' : '/worker');
+      navigate(type === 'employer' ? '/employer/company' : '/worker');
     } catch (e) {
       console.error(e);
       setSaving(false);
