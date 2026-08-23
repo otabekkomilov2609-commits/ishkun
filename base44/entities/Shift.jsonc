@@ -126,7 +126,6 @@
     "start_time",
     "end_time",
     "city",
-    "location",
     "map_link",
     "company_id"
   ],

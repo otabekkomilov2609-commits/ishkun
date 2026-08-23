@@ -56,7 +56,7 @@ export default function CreateShift() {
   }, [user]);
 
   const submit = async () => {
-    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.daily_rate || !form.city || !form.location || !form.map_link) {
+    if (!form.title || !form.date || !form.start_time || !form.end_time || !form.daily_rate || !form.city || !form.map_link) {
       toast({ title: t('required'), variant: 'destructive' });
       return;
     }
@@ -77,7 +77,6 @@ export default function CreateShift() {
         date: form.date,
         start_time: form.start_time,
         end_time: form.end_time,
-        location: form.location,
         city: form.city,
         daily_rate: Number(form.daily_rate),
         required_workers: Number(form.required_workers) || 1,
@@ -171,9 +170,6 @@ export default function CreateShift() {
           <Field label={t('shift.endTime')} required>
             <Input type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
           </Field>
-          <Field label={t('shift.location')} required>
-            <Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Chilonzor tumani" />
-          </Field>
           <Field label={t('city')} required>
             <Select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}>
               <option value="">{t('allCities')}</option>
@@ -183,7 +179,7 @@ export default function CreateShift() {
           <div className="sm:col-span-2">
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-semibold text-foreground">{t('shift.mapLink')} <span className="text-destructive">*</span></label>
-              <a href={`https://yandex.com/maps/?text=${encodeURIComponent([form.location, form.city].filter(Boolean).join(', '))}`} target="_blank" rel="noreferrer">
+              <a href={`https://yandex.com/maps/?text=${encodeURIComponent(form.city || '')}`} target="_blank" rel="noreferrer">
                 <Button type="button" variant="soft" size="sm"><Navigation className="h-4 w-4" /> {t('shift.mapPickBtn')}</Button>
               </a>
             </div>
