@@ -7,7 +7,8 @@ import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
-import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2 } from 'lucide-react';
+import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2, Star } from 'lucide-react';
+import { StarsDisplay } from '@/components/RatingStars';
 import { formatSom, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
@@ -105,6 +106,25 @@ export default function Profile() {
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
       </div>
+
+      {user.account_type === 'worker' && (
+        <Card className="p-4 mb-4 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-500">
+            <Star className="h-6 w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-foreground">{t('prf.myRating')}</p>
+            {user.rating_count > 0 ? (
+              <div className="mt-0.5"><StarsDisplay avg={user.rating_avg} count={user.rating_count} size="md" /></div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">{t('prf.notRatedYet')}</p>
+                <p className="text-xs text-muted-foreground/70">{t('prf.notRatedHint')}</p>
+              </>
+            )}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-5 mb-4">
         {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}

@@ -5,7 +5,8 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Input, Select, Field, Card } from '@/components/ui';
 import { isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
-import { Building2, Check } from 'lucide-react';
+import { Building2, Check, Star } from 'lucide-react';
+import { StarsDisplay } from '@/components/RatingStars';
 
 export default function LegalCompanyProfile() {
   const { user } = useAuth();
@@ -60,6 +61,25 @@ export default function LegalCompanyProfile() {
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><Building2 className="h-5 w-5" /></div>
         <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">{company ? t('co.editTitle') : t('co.createTitle')}</h1>
       </div>
+
+      {company && (
+        <Card className="p-4 mb-4 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-500">
+            <Star className="h-6 w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-foreground">{t('prf.companyRating')}</p>
+            {company.rating_count > 0 ? (
+              <div className="mt-0.5"><StarsDisplay avg={company.rating_avg} count={company.rating_count} size="md" /></div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">{t('prf.notRatedYet')}</p>
+                <p className="text-xs text-muted-foreground/70">{t('prf.companyNotRatedHint')}</p>
+              </>
+            )}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-5">
         {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
