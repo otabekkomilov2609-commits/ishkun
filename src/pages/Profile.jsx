@@ -7,7 +7,7 @@ import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
-import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2 } from 'lucide-react';
 import { formatSom, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
@@ -137,6 +137,21 @@ export default function Profile() {
           </Button>
         </div>
       </Card>
+
+      {user.account_type === 'employer' && (
+        <Link to="/employer/company" className="mt-4 block">
+          <Card className="p-4 flex items-center gap-3 transition-colors hover:bg-muted/50">
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Building2 className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm">{t('prf.employerProfile')}</h3>
+              <p className="text-xs text-muted-foreground">{t('prf.employerProfileHint')}</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </Card>
+        </Link>
+      )}
 
       {user.role !== 'admin' && user.verification_status !== 'verified' && (
         <Link to="/verification" className="mt-4 block">
