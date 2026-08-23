@@ -7,7 +7,7 @@ import { CITIES } from '@/lib/format';
 import { Button, Input, Select, Field, Card, Skeleton } from '@/components/ui';
 import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
-import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2, Star } from 'lucide-react';
+import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2, Star, LogOut } from 'lucide-react';
 import { StarsDisplay } from '@/components/RatingStars';
 import { formatSom, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
 import {
@@ -211,6 +211,26 @@ export default function Profile() {
           </Card>
         </Link>
       )}
+
+      <div className="h-px bg-border my-4" />
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button className="w-full flex items-center justify-center gap-2 rounded-xl border border-input bg-card px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+            <LogOut className="h-4 w-4" />
+            {t('logout')}
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('prf.logoutConfirm')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('prf.logoutDesc')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => logout()}>{t('logout')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="mt-4">
         <AlertDialog>
