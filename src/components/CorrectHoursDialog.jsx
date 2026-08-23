@@ -3,13 +3,7 @@ import { useLang } from '@/lib/i18n';
 import { Button } from '@/components/ui';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 import { base44 } from '@/api/base44Client';
-import { shiftDurationHours, parseTime, formatSom } from '@/lib/format';
-
-function hhmmOf(iso, fallback) {
-  if (!iso) return fallback || '';
-  const d = new Date(iso);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
+import { shiftDurationHours, parseTime, formatSom, hhmmFromStamp } from '@/lib/format';
 
 export default function CorrectHoursDialog({ open, onOpenChange, app, shift, workerName, onDone }) {
   const { t } = useLang();
@@ -20,8 +14,8 @@ export default function CorrectHoursDialog({ open, onOpenChange, app, shift, wor
 
   useEffect(() => {
     if (open && shift) {
-      setStartVal(hhmmOf(app?.check_in_time, shift.start_time));
-      setEndVal(hhmmOf(app?.check_out_time, shift.end_time));
+      setStartVal(hhmmFromStamp(app?.check_in_time, shift.start_time));
+      setEndVal(hhmmFromStamp(app?.check_out_time, shift.end_time));
       setNote('');
     }
   }, [open, shift, app]);

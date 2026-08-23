@@ -15,7 +15,7 @@ import { AlertTriangle } from 'lucide-react';
 import { shiftPay } from '@/lib/format';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { ClipboardList, Calendar, Clock, Wallet, XCircle } from 'lucide-react';
-import { formatSom, formatDateDMY } from '@/lib/format';
+import { formatSom, formatDateDMY, hhmmFromStamp } from '@/lib/format';
 
 export default function MyApplications() {
   const { user } = useAuth();
@@ -100,6 +100,20 @@ export default function MyApplications() {
                     <WorkerShiftBadge state={state} />
                   </div>
                 </div>
+                {a.hours_status === 'pending_confirmation' && (
+                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-sm font-semibold text-foreground">{hhmmFromStamp(a.check_in_time)} — {hhmmFromStamp(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
+                    <p className="text-sm font-semibold text-foreground mt-1">{formatSom(a.final_payment_amount)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('hours.waitingEmployer')}</p>
+                  </div>
+                )}
+                {a.hours_status === 'confirmed' && a.final_payment_amount != null && (
+                  <div className="mt-3 rounded-xl border border-border bg-muted/30 p-3">
+                    <p className="text-sm text-foreground">{hhmmFromStamp(a.check_in_time)} — {hhmmFromStamp(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
+                    <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
+                    {a.hours_corrected_by_employer && a.employer_correction_note && <p className="text-xs text-muted-foreground mt-1">{t('hours.employerCorrected')}: {a.employer_correction_note}</p>}
+                  </div>
+                )}
                 {(a.status === 'pending' || a.status === 'approved') && (
                   <div className="mt-3">
                     {['blocked', 'paused'].includes(user?.account_status) ? (

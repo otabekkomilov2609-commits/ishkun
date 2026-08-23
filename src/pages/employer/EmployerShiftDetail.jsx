@@ -8,7 +8,7 @@ import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban } from 'lucide-react';
-import { formatSom, shiftPay, shiftDurationHours } from '@/lib/format';
+import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
@@ -250,7 +250,7 @@ export default function EmployerShiftDetail() {
                 )}
                 {a.hours_status === 'pending_confirmation' && (
                   <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-sm font-semibold text-foreground">{hhmmOf(a.check_in_time)} — {hhmmOf(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')} <span className="text-xs text-muted-foreground font-normal">{t('hours.plannedShort')} {durLabel}</span></p>
+                    <p className="text-sm font-semibold text-foreground">{hhmmFromStamp(a.check_in_time)} — {hhmmFromStamp(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')} <span className="text-xs text-muted-foreground font-normal">{t('hours.plannedShort')} {durLabel}</span></p>
                     {a.worker_deviation_reason && <p className="text-xs text-muted-foreground mt-1">{t('hours.workerReason')}: {a.worker_deviation_reason}</p>}
                     <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
                     <p className="text-xs text-muted-foreground">{t('hours.notFinalYet')}</p>
@@ -262,7 +262,7 @@ export default function EmployerShiftDetail() {
                 )}
                 {a.hours_status === 'confirmed' && a.final_payment_amount != null && (
                   <div className="mt-3 rounded-xl border border-border bg-muted/30 p-3">
-                    <p className="text-sm text-foreground">{hhmmOf(a.check_in_time)} — {hhmmOf(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
+                    <p className="text-sm text-foreground">{hhmmFromStamp(a.check_in_time)} — {hhmmFromStamp(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
                     <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
                     {a.hours_corrected_by_employer && a.employer_correction_note && <p className="text-xs text-muted-foreground mt-1">{t('hours.youCorrected')}: {a.employer_correction_note}</p>}
                   </div>
@@ -329,12 +329,6 @@ export default function EmployerShiftDetail() {
       />
     </div>
   );
-}
-
-function hhmmOf(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function Info({ icon: Icon, label, value }) {

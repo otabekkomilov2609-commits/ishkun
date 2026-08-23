@@ -7,17 +7,12 @@ import { useToast } from '@/components/ui/use-toast';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
 import { isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
-import { shiftDurationHours, parseTime, formatSom } from '@/lib/format';
+import { shiftDurationHours, parseTime, formatSom, hhmmFromStamp } from '@/lib/format';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 
 function hhmmNow() {
   const d = new Date();
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-function hhmmOf(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 function computeLive(shift, start, end) {
@@ -61,8 +56,19 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
     return () => { alive = false; };
   }, [needKey]);
 
-  const endTarget = list.find(a => a.check_in_time && !a.check_out_time && shiftsById[a.shift_id] && isShiftEnded(shiftsById[a.shift_id]));
-  const startTarget = list.find(a => a.status === 'approved' && !a.check_in_time && shiftsById[a.shift_id] && isCheckInWindowOpen(shiftsById[a.shift_id]));
+  const endTarget = list.find(a =>
+    shiftsById[a.shift_id] &&
+    isShiftEnded(shiftsById[a.shift_id]) &&
+    !a.check_out_time &&
+    (a.check_in_time || a.status === 'approved')
+  );
+  const startTarget = list.find(a =>
+    a.status === 'approved' &&
+    !a.check_in_time &&
+    shiftsById[a.shift_id] &&
+    isCheckInWindowOpen(shiftsById[a.shift_id]) &&
+    !isShiftEnded(shiftsById[a.shift_id])
+  );
   const workingTarget = list.find(a => a.check_in_time && !a.check_out_time && shiftsById[a.shift_id] && !isShiftEnded(shiftsById[a.shift_id]));
   const target = endTarget || startTarget;
 
@@ -89,7 +95,7 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
     return (
       <Card className="p-4 mb-4">
         <p className="text-sm font-semibold text-foreground">{t('hours.workingTitle')}</p>
-        <p className="text-xs text-muted-foreground mt-1">{t('att.came')}: {hhmmOf(workingTarget.check_in_time)} · {shift?.title}</p>
+        <p className="text-xs text-muted-foreground mt-1">{t('att.came')}: {hhmmFromStamp(workingTarget.check_in_time)} · {shift?.title}</p>
         <p className="text-xs text-muted-foreground mt-1">{t('hours.endHint')}</p>
       </Card>
     );
@@ -102,7 +108,7 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
 
   const openDrawer = () => {
     if (isEnd) {
-      setStartVal(hhmmOf(target.check_in_time) || shift.start_time);
+      setStartVal(hhmmFromStamp(target.check_in_time, shift.start_time));
       setEndVal(shift.end_time);
     } else {
       setStartVal(shift.start_time);

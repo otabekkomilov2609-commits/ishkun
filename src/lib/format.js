@@ -119,3 +119,9 @@ export function isValidStir(v) {
 export function isValidMapLink(v) {
   return /^https?:\/\/.+/.test((v || '').trim());
 }
+
+export function hhmmFromStamp(iso, fallback = '') {
+  if (!iso) return fallback;
+  const s = String(iso);
+  return s.length >= 16 ? s.slice(11, 16) : fallback;
+}

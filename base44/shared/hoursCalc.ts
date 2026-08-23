@@ -1,19 +1,21 @@
 // Shared hours/payment calculation for submitHours and confirmHours.
-// Build absolute datetimes from a shift date + "HH:MM" strings, applying the
-// overnight rule (end <= start means end is the next day), then compute actual
-// hours, deviation from planned, hourly pro-rata rate, and final payment.
+// All datetimes are built with Date.UTC so .toISOString() yields exactly the
+// entered wall-clock time, independent of the server or client timezone.
 
-export function buildDateTime(dateStr, hhmm) {
-  if (!dateStr || !hhmm) return null;
+export function toStamp(dateStr, hhmm, addDays = 0) {
   const [y, m, d] = dateStr.split('-').map(Number);
   const [h, mi] = hhmm.split(':').map(Number);
-  return new Date(y, m - 1, d, h || 0, mi || 0);
+  return new Date(Date.UTC(y, m - 1, (d || 1) + addDays, h || 0, mi || 0, 0, 0)).toISOString();
+}
+
+export function buildDateTime(dateStr, hhmm) {
+  return new Date(toStamp(dateStr, hhmm));
 }
 
 export function buildTimes(dateStr, startHHMM, endHHMM) {
   const start = buildDateTime(dateStr, startHHMM);
-  const end = buildDateTime(dateStr, endHHMM);
-  if (end.getTime() <= start.getTime()) end.setDate(end.getDate() + 1);
+  let end = buildDateTime(dateStr, endHHMM);
+  if (end.getTime() <= start.getTime()) end = new Date(toStamp(dateStr, endHHMM, 1));
   return { start, end };
 }
 
