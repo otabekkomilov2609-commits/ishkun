@@ -44,16 +44,20 @@ export default function MyApplications() {
 
   const activeApps = (apps || []).filter(a => a.status !== 'cancelled');
 
+  const matchTab = (a, key) => {
+    if (key === 'pending') return a.status === 'pending';
+    if (key === 'approved') return (a.status === 'approved' || a.status === 'in_progress') && shifts[a.shift_id]?.status !== 'completed';
+    if (key === 'completed') return !['pending', 'approved', 'in_progress'].includes(a.status) || shifts[a.shift_id]?.status === 'completed';
+    return false;
+  };
+
   const tabs = [
-    { id: 'pending', label: t('wrk.tabPending'), count: activeApps.filter(a => a.status === 'pending').length },
-    { id: 'approved', label: t('wrk.tabApproved'), count: activeApps.filter(a => a.status === 'approved').length },
-    { id: 'completed', label: t('wrk.tabCompleted'), count: activeApps.filter(a => a.status === 'completed' || (a.status === 'approved' && shifts[a.shift_id]?.status === 'completed')).length }
+    { id: 'pending', label: t('wrk.tabPending'), count: activeApps.filter(a => matchTab(a, 'pending')).length },
+    { id: 'approved', label: t('wrk.tabApproved'), count: activeApps.filter(a => matchTab(a, 'approved')).length },
+    { id: 'completed', label: t('wrk.tabCompleted'), count: activeApps.filter(a => matchTab(a, 'completed')).length }
   ];
 
-  const visible = activeApps.filter(a => {
-    if (tab === 'completed') return a.status === 'completed' || (a.status === 'approved' && shifts[a.shift_id]?.status === 'completed');
-    return a.status === tab;
-  });
+  const visible = activeApps.filter(a => matchTab(a, tab));
 
   return (
     <div className="max-w-3xl mx-auto">
