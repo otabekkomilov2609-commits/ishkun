@@ -50,6 +50,7 @@ export default function WorkerShiftDetail() {
   }, [id, user]);
 
   const verified = user?.verification_status === 'verified';
+  const ended = shift ? isShiftEnded(shift) : false;
   const state = getWorkerShiftState(myApp, shift);
   const pay = shift ? shiftPay(shift) : null;
   const dur = shift ? shiftDurationHours(shift) : 0;
@@ -223,7 +224,9 @@ export default function WorkerShiftDetail() {
       />
 
       <div className="sticky bottom-20">
-        {state.key === 'apply' && verified && !sameDayConflict ? (
+        {state.key === 'apply' && ended ? (
+          <div className="rounded-xl bg-muted text-muted-foreground text-sm font-medium px-4 py-3 text-center">{t('wrk.shiftEnded')}</div>
+        ) : state.key === 'apply' && verified && !sameDayConflict ? (
           ['blocked', 'paused'].includes(user?.account_status) ? (
             <div className="rounded-xl bg-rose-50 text-rose-700 text-sm font-medium px-4 py-3 text-center">{t('cancelDialog.blockedMsg')}</div>
           ) : (

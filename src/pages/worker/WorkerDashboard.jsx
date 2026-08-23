@@ -100,6 +100,7 @@ export default function WorkerDashboard() {
 
   const matchFilters = (list, f) => {
     return (list || []).filter(s => {
+      if (s.date < todayStr()) return false;
       if (busyDates.has(s.date)) return false;
       if (appByShift[s.id]) return false;
       if (user && s.created_by_id === user.id) return false;
