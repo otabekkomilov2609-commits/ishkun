@@ -32,7 +32,10 @@
         "shift_reminder_1h",
         "urgent_replacement_needed",
         "shift_cancelled_by_employer",
-        "shift_updated"
+        "shift_updated",
+        "hours_pending",
+        "hours_confirmed",
+        "hours_corrected"
       ],
       "title": "Turi"
     },

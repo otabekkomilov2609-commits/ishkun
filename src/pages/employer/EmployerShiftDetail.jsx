@@ -13,7 +13,8 @@ import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
 import { StarsDisplay } from '@/components/RatingStars';
-import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen } from '@/lib/shiftTime';
+import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded } from '@/lib/shiftTime';
+import CorrectHoursDialog from '@/components/CorrectHoursDialog';
 
 export default function EmployerShiftDetail() {
   const { id } = useParams();
@@ -28,6 +29,7 @@ export default function EmployerShiftDetail() {
   const [preferredWorkers, setPreferredWorkers] = useState(new Set());
   const [absentApp, setAbsentApp] = useState(null);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [correctApp, setCorrectApp] = useState(null);
 
   const load = async () => {
     const s = await base44.entities.Shift.get(id);
@@ -151,7 +153,15 @@ export default function EmployerShiftDetail() {
         });
       }
     } catch (e) { console.error(e); }
-  };
+  }
+
+  const confirmHours = async (app, action) => {
+    setApps(prev => prev.map(x => x.id === app.id ? { ...x, hours_status: 'confirmed' } : x));
+    try {
+      await base44.functions.invoke('confirmHours', { application_id: app.id, action });
+      load();
+    } catch (e) { console.error(e); }
+  };;
 
   if (!shift) return <div className="max-w-2xl mx-auto"><Skeleton className="h-48 w-full" /></div>;
 
@@ -209,7 +219,7 @@ export default function EmployerShiftDetail() {
             const mismatch = isMismatch(a);
             const preferred = preferredWorkers.has(a.worker_id);
             const attPending = booked && a.company_attendance_status === 'pending' && isCheckInWindowOpen(shift);
-            const rateEligible = a.company_attendance_status === 'confirmed_present';
+            const rateEligible = a.hours_status === 'confirmed';
             return (
               <Card key={a.id} className="p-4">
                 <div className="flex items-center gap-3">
@@ -238,6 +248,31 @@ export default function EmployerShiftDetail() {
                     <span className="font-semibold text-foreground">{t(`att.${attLabel}`)}</span>
                   </div>
                 )}
+                {a.hours_status === 'pending_confirmation' && (
+                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-sm font-semibold text-foreground">{hhmmOf(a.check_in_time)} — {hhmmOf(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')} <span className="text-xs text-muted-foreground font-normal">{t('hours.plannedShort')} {durLabel}</span></p>
+                    {a.worker_deviation_reason && <p className="text-xs text-muted-foreground mt-1">{t('hours.workerReason')}: {a.worker_deviation_reason}</p>}
+                    <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
+                    <p className="text-xs text-muted-foreground">{t('hours.notFinalYet')}</p>
+                    <div className="flex gap-2 mt-2">
+                      <Button size="sm" variant="outline" onClick={() => setCorrectApp(a)}>{t('hours.correctBtn')}</Button>
+                      <Button size="sm" onClick={() => confirmHours(a, 'confirm')}>{t('hours.confirmBtn')}</Button>
+                    </div>
+                  </div>
+                )}
+                {a.hours_status === 'confirmed' && a.final_payment_amount != null && (
+                  <div className="mt-3 rounded-xl border border-border bg-muted/30 p-3">
+                    <p className="text-sm text-foreground">{hhmmOf(a.check_in_time)} — {hhmmOf(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
+                    <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
+                    {a.hours_corrected_by_employer && a.employer_correction_note && <p className="text-xs text-muted-foreground mt-1">{t('hours.youCorrected')}: {a.employer_correction_note}</p>}
+                  </div>
+                )}
+                {isShiftEnded(shift) && a.hours_status === 'not_submitted' && booked && (
+                  <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3">
+                    <p className="text-sm text-rose-700 font-medium">{t('hours.workerNotSubmitted')}</p>
+                    <Button size="sm" variant="outline" className="mt-2" onClick={() => setCorrectApp(a)}>{t('hours.enterForWorker')}</Button>
+                  </div>
+                )}
                 {a.cancellation_reason && (
                   <p className="text-xs text-muted-foreground mt-2"><span className="font-semibold">{t('att.cancellationReason')}:</span> {a.cancellation_reason}</p>
                 )}
@@ -249,14 +284,6 @@ export default function EmployerShiftDetail() {
                 )}
                 {rateEligible && (
                   <div className="mt-3 border-t border-border pt-3">
-                    {a.final_payment_amount != null && (
-                      <div className="mb-3">
-                        <p className="text-sm font-semibold text-foreground">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
-                        {a.overtime_hours > 0 && (
-                          <p className="mt-1 text-xs font-medium text-primary">{t('att.overtimePrefix')} {a.overtime_hours} {t('att.overtimeSuffix')} +{formatSom(a.final_payment_amount - (shift.daily_rate || 0))}</p>
-                        )}
-                      </div>
-                    )}
                     <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-foreground"><Star className="h-4 w-4 text-primary" /> {t('rating.rateWorker')}</div>
                     <RatingPrompt applicationId={a.id} shiftId={shift.id} workerId={a.worker_id} companyId={shift.company_id} employerId={user.id} ratedBy="company" />
                   </div>
@@ -292,8 +319,22 @@ export default function EmployerShiftDetail() {
         shift={shift}
         onCancelled={() => setShift(prev => ({ ...prev, status: 'cancelled', urgent_replacement: false }))}
       />
+      <CorrectHoursDialog
+        open={!!correctApp}
+        onOpenChange={(o) => { if (!o) setCorrectApp(null); }}
+        app={correctApp}
+        shift={shift}
+        workerName={users[correctApp?.worker_id]?.full_name}
+        onDone={load}
+      />
     </div>
   );
+}
+
+function hhmmOf(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function Info({ icon: Icon, label, value }) {

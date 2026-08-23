@@ -88,6 +88,34 @@
       "type": "boolean",
       "default": false,
       "title": "1 soatlik eslatma yuborildi"
+    },
+    "hours_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "pending_confirmation",
+        "confirmed"
+      ],
+      "default": "not_submitted",
+      "title": "Ish vaqti holati"
+    },
+    "worker_deviation_reason": {
+      "type": "string",
+      "title": "Ishchi izohi"
+    },
+    "employer_correction_note": {
+      "type": "string",
+      "title": "Ish beruvchi izohi"
+    },
+    "hours_confirmed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Tasdiqlangan vaqt"
+    },
+    "hours_corrected_by_employer": {
+      "type": "boolean",
+      "default": false,
+      "title": "Ish beruvchi to'g'rilagan"
     }
   },
   "required": [

@@ -9,7 +9,8 @@ const ALLOWED_TYPES = [
   'application_approved', 'application_rejected', 'new_application',
   'shift_completed', 'worker_no_show', 'shift_created',
   'registration', 'verification_approved', 'verification_rejected',
-  'rating_received', 'application_cancelled'
+  'rating_received', 'application_cancelled',
+  'hours_pending', 'hours_confirmed', 'hours_corrected'
 ];
 
 export default async function(req) {

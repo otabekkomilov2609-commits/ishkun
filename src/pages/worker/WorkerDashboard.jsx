@@ -9,7 +9,7 @@ import ShiftCard from '@/components/ShiftCard';
 import EmptyState from '@/components/EmptyState';
 import PullToRefresh from '@/components/PullToRefresh';
 import ShiftFilterSheet from '@/components/ShiftFilterSheet';
-import AttendanceBanner from '@/components/AttendanceBanner';
+import WorkHoursBanner from '@/components/WorkHoursBanner';
 import { getWorkerShiftState } from '@/lib/shiftStatus';
 import { isShiftEnded } from '@/lib/shiftTime';
 import { Search, CalendarDays, SlidersHorizontal } from 'lucide-react';
@@ -148,7 +148,7 @@ export default function WorkerDashboard() {
         </Link>
       )}
 
-      <AttendanceBanner apps={apps} onRefresh={refresh} />
+      <WorkHoursBanner apps={apps} onRefresh={refresh} />
 
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">

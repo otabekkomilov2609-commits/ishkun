@@ -7,7 +7,7 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import WorkerShiftBadge from '@/components/WorkerShiftBadge';
 import EmptyState from '@/components/EmptyState';
 import TabsNav from '@/components/TabsNav';
-import AttendanceBanner from '@/components/AttendanceBanner';
+import WorkHoursBanner from '@/components/WorkHoursBanner';
 import UpcomingShiftBanner from '@/components/UpcomingShiftBanner';
 import { getWorkerShiftState } from '@/lib/shiftStatus';
 import { isMismatch } from '@/lib/shiftTime';
@@ -63,7 +63,7 @@ export default function MyApplications() {
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-display font-bold tracking-tight text-primary mb-4">{t('wrk.myAppsTitle')}</h1>
 
-      <AttendanceBanner apps={apps} onRefresh={load} />
+      <WorkHoursBanner apps={apps} onRefresh={load} />
       <UpcomingShiftBanner apps={apps} shifts={shifts} />
 
       <TabsNav tabs={tabs} active={tab} onChange={setTab} className="mb-4" />
