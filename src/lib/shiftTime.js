@@ -30,6 +30,17 @@ export function isShiftEnded(shift) {
   return !!e && Date.now() >= e.getTime();
 }
 
+// True once the shift is close enough to its end for "mark completed" to make
+// sense: from 2 hours before end_time, but never before the shift has started
+// (short shifts would otherwise unlock it before they begin).
+export function isCompletableWindowOpen(shift, leadHours = 2) {
+  const s = shiftStartDateTime(shift);
+  const e = shiftEndDateTime(shift);
+  if (!s || !e) return false;
+  const gate = Math.max(s.getTime(), e.getTime() - leadHours * 60 * 60 * 1000);
+  return Date.now() >= gate;
+}
+
 // Worker self-report vs company confirmation disagreement.
 export function isMismatch(app) {
   if (!app) return false;

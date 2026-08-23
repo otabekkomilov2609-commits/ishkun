@@ -8,6 +8,7 @@ import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
 import { isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
 import { shiftDurationHours, parseTime, formatSom, hhmmFromStamp } from '@/lib/format';
+import { queryClientInstance } from '@/lib/query-client';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 
@@ -60,11 +61,13 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
     shiftsById[a.shift_id] &&
     isShiftEnded(shiftsById[a.shift_id]) &&
     !a.check_out_time &&
+    a.hours_status !== 'confirmed' &&
     (a.check_in_time || a.status === 'approved')
   );
   const startTarget = list.find(a =>
     a.status === 'approved' &&
     !a.check_in_time &&
+    a.hours_status !== 'confirmed' &&
     shiftsById[a.shift_id] &&
     isCheckInWindowOpen(shiftsById[a.shift_id]) &&
     !isShiftEnded(shiftsById[a.shift_id])
@@ -138,12 +141,18 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
           toast({ title: t('hours.sentToEmployer') });
         }
         onRefresh?.();
+        queryClientInstance.invalidateQueries({ queryKey: ['myApps'] });
       } else {
         await base44.functions.invoke('submitHours', { application_id: target.id, phase: 'start', start_time: startVal });
         setDrawer(null);
         onRefresh?.();
+        queryClientInstance.invalidateQueries({ queryKey: ['myApps'] });
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
+      setDrawer(null);
+    }
     setBusy(false);
   };
 

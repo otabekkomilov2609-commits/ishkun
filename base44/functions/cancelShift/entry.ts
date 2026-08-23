@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { toStamp } from '../../shared/hoursCalc.ts';
 
 // Cancel a whole shift. Verifies the caller owns the shift (created_by_id) or is
 // an admin, rejects completed/already-cancelled shifts, sets the shift status to
@@ -24,6 +25,17 @@ export default async function(req) {
 
     if (shift.status === 'completed' || shift.status === 'cancelled') {
       return Response.json({ error: 'Cannot cancel a completed or already cancelled shift' }, { status: 400 });
+    }
+
+    if (shift.date && shift.start_time) {
+      const startMs = new Date(toStamp(shift.date, shift.start_time)).getTime();
+      const nowMs = new Date(new Date().toISOString().slice(0, 19) + 'Z').getTime();
+      if (nowMs >= startMs) {
+        return Response.json(
+          { error: 'Cannot cancel a shift that has already started' },
+          { status: 400 }
+        );
+      }
     }
 
     await base44.asServiceRole.entities.Shift.update(shift_id, { status: 'cancelled', urgent_replacement: false });

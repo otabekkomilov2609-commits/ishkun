@@ -7,13 +7,13 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
 import { StarsDisplay } from '@/components/RatingStars';
-import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded } from '@/lib/shiftTime';
+import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded, isCompletableWindowOpen } from '@/lib/shiftTime';
 import CorrectHoursDialog from '@/components/CorrectHoursDialog';
 
 function appStatusKey(status) {
@@ -169,11 +169,16 @@ export default function EmployerShiftDetail() {
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
-          {shift.status !== 'completed' && shift.status !== 'cancelled' && (
+          {shift.status !== 'completed' && shift.status !== 'cancelled' && isCompletableWindowOpen(shift) && (
             <>
               <Button variant="soft" onClick={markCompleted}>
                 <CheckCircle2 className="h-4 w-4" /> {t('shift.markCompleted')}
               </Button>
+              <p className="text-xs text-muted-foreground w-full">{t('shift.completeHint')}</p>
+            </>
+          )}
+          {shift.status !== 'completed' && shift.status !== 'cancelled' && !isShiftStarted(shift) && (
+            <>
               <Button variant="outline" onClick={() => navigate(`/employer/shifts/${id}/edit`)}>
                 <Pencil className="h-4 w-4" /> {t('edit')}
               </Button>
@@ -181,6 +186,11 @@ export default function EmployerShiftDetail() {
                 <Ban className="h-4 w-4" /> {t('shift.cancelShift')}
               </Button>
             </>
+          )}
+          {shift.status !== 'completed' && shift.status !== 'cancelled' && isShiftStarted(shift) && (
+            <div className="w-full flex items-center gap-2 rounded-xl border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+              <Lock className="h-4 w-4" /> {t('shift.lockedAfterStart')}
+            </div>
           )}
         </div>
       </Card>
