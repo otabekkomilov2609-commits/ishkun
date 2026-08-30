@@ -16,7 +16,6 @@ export default function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [dob, setDob] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,23 +39,8 @@ export default function Register() {
       setError("Telefon raqami noto'g'ri formatda. Namuna: +998 90 123 45 67");
       return;
     }
-    if (!dob) {
-      setError("Tug'ilgan sanani kiriting");
-      return;
-    }
-    {
-      const dobDate = new Date(dob);
-      const today = new Date();
-      let age = today.getFullYear() - dobDate.getFullYear();
-      const m = today.getMonth() - dobDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
-      if (age < 18) {
-        setError("Ro'yxatdan o'tish uchun kamida 18 yoshda bo'lishingiz kerak.");
-        return;
-      }
-    }
     if (password !== confirmPassword) {
-      setError("Parollar mos kelmadi");
+      setError("Passwords do not match");
       return;
     }
     setLoading(true);
@@ -64,7 +48,7 @@ export default function Register() {
       await base44.auth.register({ email, password, full_name: `${firstName} ${lastName}`.trim() });
       setShowOtp(true);
     } catch (err) {
-      setError(err.message || "Ro'yxatdan o'tish amalga oshmadi");
+      setError(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -78,7 +62,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
         try {
-          await base44.functions.invoke('updateMyProfile', { phone_number: phone, date_of_birth: dob });
+          await base44.functions.invoke('updateMyProfile', { phone_number: phone });
           const me = await base44.auth.me();
           if (me?.id) {
             await base44.entities.Notification.create({
@@ -92,7 +76,7 @@ export default function Register() {
       }
       window.location.href = safeReturnTo();
     } catch (err) {
-      setError(err.message || "Tasdiqlash kodi noto'g'ri");
+      setError(err.message || "Invalid verification code");
     } finally {
       setLoading(false);
     }
@@ -103,11 +87,11 @@ export default function Register() {
     try {
       await base44.auth.resendOtp(email);
       toast({
-        title: "Kod yuborildi",
-        description: "Yangi kodni email orqali tekshiring.",
+        title: "Code sent",
+        description: "Check your email for the new code.",
       });
     } catch (err) {
-      setError(err.message || "Kodni qayta yuborib bo'lmadi");
+      setError(err.message || "Failed to resend code");
     }
   };
 
@@ -119,8 +103,8 @@ export default function Register() {
     return (
       <AuthLayout
         icon={Mail}
-        title="Emailingizni tasdiqlang"
-        subtitle={`Kod ${email} manzilingizga yuborildi`}
+        title="Verify your email"
+        subtitle={`We sent a code to ${email}`}
       >
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
@@ -153,16 +137,16 @@ export default function Register() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Tekshirilmoqda...
+              Verifying...
             </>
           ) : (
-            "Tasdiqlash"
+            "Verify"
           )}
         </Button>
         <p className="text-center text-sm text-muted-foreground mt-4">
-          Kod kelmadimi?{" "}
+          Didn't receive the code?{" "}
           <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            Qayta yuborish
+            Resend
           </button>
         </p>
       </AuthLayout>
@@ -172,16 +156,16 @@ export default function Register() {
   return (
     <AuthLayout
       icon={UserPlus}
-      title="Hisob yarating"
-      subtitle="Boshlash uchun ro'yxatdan o'ting"
+      title="Create your account"
+      subtitle="Sign up to get started"
       footer={
         <>
-          Hisobingiz bormi?{" "}
+          Already have an account?{" "}
           <Link
             to={"/login" + (safeReturnTo() !== "/" ? "?returnTo=" + encodeURIComponent(safeReturnTo()) : "")}
             className="text-primary font-medium hover:underline"
           >
-            Kirish
+            Log in
           </Link>
         </>
       }
@@ -192,7 +176,7 @@ export default function Register() {
         onClick={handleGoogle}
       >
         <GoogleIcon className="w-5 h-5 mr-2" />
-        Google orqali davom etish
+        Continue with Google
       </Button>
 
       <div className="relative mb-6">
@@ -200,7 +184,7 @@ export default function Register() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">yoki</span>
+          <span className="bg-card px-3 text-muted-foreground">or</span>
         </div>
       </div>
 
@@ -226,10 +210,6 @@ export default function Register() {
           <Input id="phone" type="tel" autoComplete="tel" placeholder="+998 90 123 45 67" value={phone} onChange={(e) => setPhone(formatUzPhoneInput(e.target.value))} className="h-12" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="dob">Tug'ilgan sana</Label>
-          <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="h-12" required />
-        </div>
-        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
@@ -247,7 +227,7 @@ export default function Register() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Parol</Label>
+          <Label htmlFor="password">Password</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -263,7 +243,7 @@ export default function Register() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirm">Parolni tasdiqlang</Label>
+          <Label htmlFor="confirm">Confirm Password</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -282,10 +262,10 @@ export default function Register() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Hisob yaratilmoqda...
+              Creating account...
             </>
           ) : (
-            "Hisob yaratish"
+            "Create account"
           )}
         </Button>
       </form>
