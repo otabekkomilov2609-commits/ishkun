@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLang } from '@/lib/i18n';
 import { useAuth } from '@/lib/AuthContext';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Select } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
@@ -201,10 +201,10 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
                     <p className="text-xs text-amber-700 font-medium">{t('hours.deviationWarn')}</p>
                     <div>
                       <label className="text-sm font-semibold text-foreground block mb-1.5">{t('hours.reasonLabel')}</label>
-                      <select value={reason} onChange={e => setReason(e.target.value)} className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm">
+                      <Select value={reason} onChange={e => setReason(e.target.value)}>
                         <option value="">—</option>
                         {['r1', 'r2', 'r3', 'r4', 'r5'].map(r => <option key={r} value={r}>{t('hours.' + r)}</option>)}
-                      </select>
+                      </Select>
                     </div>
                     {reason === 'r5' && (
                       <input value={otherText} onChange={e => setOtherText(e.target.value)} placeholder={t('hours.otherPh')} className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm" />

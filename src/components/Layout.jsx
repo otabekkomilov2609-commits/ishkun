@@ -100,6 +100,13 @@ export default function Layout() {
                 key={item.to}
                 to={item.to}
                 end={item.end}
+                onClick={(e) => {
+                  const path = location.pathname;
+                  if (path !== item.to && path.startsWith(item.to + '/')) {
+                    e.preventDefault();
+                    navigate(item.to);
+                  }
+                }}
                 className={({ isActive }) => cn(
                   'flex flex-col items-center gap-0.5 px-3 py-2.5 text-[11px] font-medium transition-colors flex-1 min-w-0',
                   isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
