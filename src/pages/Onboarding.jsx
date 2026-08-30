@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES } from '@/lib/format';
-import { Button, Select } from '@/components/ui';
+import { CITIES, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
+import { Button, Select, Input } from '@/components/ui';
 import Brand from '@/components/Brand';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Briefcase, Building2, MapPin, ArrowRight, Check } from 'lucide-react';
@@ -16,17 +16,30 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const [type, setType] = useState('');
   const [city, setCity] = useState(user?.city || '');
+  const [phone, setPhone] = useState('');
+  const [dob, setDob] = useState('');
+  const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   const finish = async () => {
-    if (!type || !city) return;
+    setError('');
+    if (!type || !city || !phone || !dob) return;
+    if (!isValidUzPhone(phone)) { setError(t('kyc.phoneFormatError')); return; }
+    {
+      const d = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - d.getFullYear();
+      const m = today.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+      if (age < 18) { setError(t('kyc.ageError')); return; }
+    }
     setSaving(true);
     try {
-      await base44.functions.invoke('updateMyProfile', { account_type: type, city, onboarded: true });
+      await base44.functions.invoke('updateMyProfile', { account_type: type, city, phone_number: phone, date_of_birth: dob, onboarded: true });
       await checkUserAuth();
       navigate(type === 'employer' ? '/employer/company' : '/worker');
     } catch (e) {
-      console.error(e);
+      setError(e?.message || t('errUpdate'));
       setSaving(false);
     }
   };
@@ -79,6 +92,17 @@ export default function Onboarding() {
             })}
           </div>
 
+          <div className="mb-6 space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-1.5">{t('kyc.phone')}</label>
+              <Input value={phone} onChange={e => setPhone(formatUzPhoneInput(e.target.value))} placeholder="+998 90 123 45 67" inputMode="tel" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-1.5">{t('kyc.dob')}</label>
+              <Input type="date" value={dob} onChange={e => setDob(e.target.value)} />
+            </div>
+          </div>
+
           <div className="mb-6">
             <label className="flex items-center gap-1.5 text-sm font-semibold text-foreground mb-2">
               <MapPin className="h-4 w-4 text-primary" /> {t('onb.chooseCity')}
@@ -89,6 +113,8 @@ export default function Onboarding() {
             </Select>
             <p className="mt-1.5 text-xs text-muted-foreground">{t('onb.cityHint')}</p>
           </div>
+
+          {error && <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
 
           <Button size="lg" className="w-full" disabled={!type || !city || saving} onClick={finish}>
             {t('confirm')} <ArrowRight className="h-4 w-4" />
