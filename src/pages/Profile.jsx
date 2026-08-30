@@ -19,7 +19,7 @@ export default function Profile() {
   const { user, checkUserAuth, logout } = useAuth();
   const { t, lang, setLang } = useLang();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
+  const [form, setForm] = useState({ full_name: '', phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [completedApps, setCompletedApps] = useState(null);
@@ -31,6 +31,7 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setForm({
+        full_name: user.full_name || '',
         phone_number: user.phone_number || '',
         city: user.city || '',
         profile_image: user.profile_image || '',
@@ -67,10 +68,12 @@ export default function Profile() {
 
   const save = async () => {
     setError('');
+    if (form.full_name.trim().length < 2) { setError(t('onb.nameError')); return; }
     if (!isValidUzPhone(form.phone_number)) { setError(t('prf.phoneFormatError')); return; }
     setSaving(true);
     try {
       await base44.functions.invoke('updateMyProfile', {
+        full_name: form.full_name.trim(),
         phone_number: form.phone_number,
         city: form.city,
         profile_image: form.profile_image,
@@ -148,6 +151,11 @@ export default function Profile() {
       <Card className="p-5 mb-4">
         {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="sm:col-span-2">
+            <Field label={t('prf.fullName')}>
+              <Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
+            </Field>
+          </div>
           <Field label={t('prf.phone')}>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
