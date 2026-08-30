@@ -16,10 +16,9 @@ const WHITELIST = [
   'bank_card_number', 'self_employed', 'self_employed_cert', 'onboarded'
 ];
 
-const KYC_FIELDS = [
-  'jshshir', 'date_of_birth', 'address',
-  'passport_front', 'passport_back', 'liveness_selfie', 'student_id',
-  'bank_card_number', 'self_employed', 'self_employed_cert'
+const DOCUMENT_FIELDS = [
+  'jshshir', 'passport_front', 'passport_back',
+  'bank_card_number', 'liveness_selfie'
 ];
 
 export default async function(req) {
@@ -40,11 +39,8 @@ export default async function(req) {
     }
 
     const wantsAccountType = Object.prototype.hasOwnProperty.call(payload, 'account_type');
-    const hasKyc = KYC_FIELDS.some(k => Object.prototype.hasOwnProperty.call(update, k));
-    let current = null;
-    if (wantsAccountType || hasKyc) {
-      current = await base44.asServiceRole.entities.User.get(user.id);
-    }
+    const hasKyc = DOCUMENT_FIELDS.some(k => Object.prototype.hasOwnProperty.call(update, k));
+    const current = await base44.asServiceRole.entities.User.get(user.id);
 
     // account_type: only on first onboarding write (stored value empty)
     if (wantsAccountType) {
@@ -57,6 +53,17 @@ export default async function(req) {
     if (hasKyc && current && current.verification_status === 'verified') {
       update.verification_status = 'submitted';
       update.verification_note = '';
+    }
+
+    // Pilot auto-verify: once a user has both a phone number and a date of
+    // birth on file, mark them verified — no document upload required during
+    // the pilot. Never silently un-reject someone an admin explicitly rejected.
+    {
+      const resultingPhone = Object.prototype.hasOwnProperty.call(update, 'phone_number') ? update.phone_number : current?.phone_number;
+      const resultingDob = Object.prototype.hasOwnProperty.call(update, 'date_of_birth') ? update.date_of_birth : current?.date_of_birth;
+      if (resultingPhone && resultingDob && current?.verification_status !== 'verified' && current?.verification_status !== 'rejected') {
+        update.verification_status = 'verified';
+      }
     }
 
     if (Object.keys(update).length === 0) {

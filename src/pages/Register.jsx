@@ -16,6 +16,7 @@ export default function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [dob, setDob] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,6 +39,21 @@ export default function Register() {
     if (!isValidUzPhone(phone)) {
       setError("Telefon raqami noto'g'ri formatda. Namuna: +998 90 123 45 67");
       return;
+    }
+    if (!dob) {
+      setError("Tug'ilgan sanani kiriting");
+      return;
+    }
+    {
+      const dobDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
+      if (age < 18) {
+        setError("Ro'yxatdan o'tish uchun kamida 18 yoshda bo'lishingiz kerak.");
+        return;
+      }
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -62,7 +78,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
         try {
-          await base44.functions.invoke('updateMyProfile', { phone_number: phone });
+          await base44.functions.invoke('updateMyProfile', { phone_number: phone, date_of_birth: dob });
           const me = await base44.auth.me();
           if (me?.id) {
             await base44.entities.Notification.create({
@@ -208,6 +224,10 @@ export default function Register() {
         <div className="space-y-2">
           <Label htmlFor="phone">Telefon raqami</Label>
           <Input id="phone" type="tel" autoComplete="tel" placeholder="+998 90 123 45 67" value={phone} onChange={(e) => setPhone(formatUzPhoneInput(e.target.value))} className="h-12" required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="dob">Tug'ilgan sana</Label>
+          <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="h-12" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
