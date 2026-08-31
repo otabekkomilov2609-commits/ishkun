@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
 import { isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
-import { shiftDurationHours, parseTime, formatSom, hhmmFromStamp, displayName } from '@/lib/format';
+import { shiftDurationHours, shiftDurationHoursExact, parseTime, formatSom, hhmmFromStamp, displayName } from '@/lib/format';
 import { queryClientInstance } from '@/lib/query-client';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
@@ -19,11 +19,13 @@ function hhmmNow() {
 function computeLive(shift, start, end) {
   let s = parseTime(start), e = parseTime(end);
   if (e <= s) e += 24 * 60;
-  const actualHours = Math.round(((e - s) / 60) * 10) / 10;
+  const actualHoursExact = (e - s) / 60;
+  const actualHours = Math.round(actualHoursExact * 10) / 10;
   const plannedHours = shiftDurationHours(shift);
-  const hourlyRate = plannedHours > 0 ? (shift.daily_rate || 0) / plannedHours : 0;
-  const deviation = actualHours - plannedHours;
-  const payment = Math.abs(deviation) <= 0.5 ? (shift.daily_rate || 0) : Math.round(hourlyRate * actualHours);
+  const plannedHoursExact = shiftDurationHoursExact(shift);
+  const hourlyRate = plannedHoursExact > 0 ? (shift.daily_rate || 0) / plannedHoursExact : 0;
+  const deviation = actualHoursExact - plannedHoursExact;
+  const payment = Math.abs(deviation) <= 0.5 ? (shift.daily_rate || 0) : Math.round(hourlyRate * actualHoursExact);
   return { actualHours, plannedHours, deviation, payment };
 }
 

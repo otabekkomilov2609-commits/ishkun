@@ -117,7 +117,7 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={submitting}>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogCancel disabled={submitting}>{t('closeBtn')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => { e.preventDefault(); doCancel(); }}
             disabled={submitting || (isLate && (!reason || (reason === 'other' && !otherText.trim())))}

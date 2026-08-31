@@ -59,6 +59,24 @@ export default function EmployerShiftDetail() {
   useEffect(() => { load(); }, [id]);
 
   const setStatus = async (app, status) => {
+    // The worker-side conflict check only runs in the browser when applying,
+    // so nothing stopped an employer approving someone already booked that day.
+    if (status === 'approved') {
+      try {
+        const others = await base44.entities.Application.filter({ worker_id: app.worker_id }, '-created_date', 200);
+        const booked = (others || []).filter(a => a.id !== app.id && (a.status === 'approved' || a.status === 'in_progress'));
+        for (const b of booked) {
+          let s = null;
+          try { s = await base44.entities.Shift.get(b.shift_id); } catch { continue; }
+          if (s && s.date === shift.date) {
+            toast({ title: t('app.sameDayConflict'), variant: 'destructive' });
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('same-day conflict check failed', e);
+      }
+    }
     const currentApproved = (apps || []).filter(a => a.status === 'approved' && a.id !== app.id).length;
     if (status === 'approved' && currentApproved >= (shift.required_workers || 1)) {
       toast({ title: t('app.positionFull'), variant: 'destructive' });
@@ -293,7 +311,7 @@ export default function EmployerShiftDetail() {
         app={absentApp}
         shift={shift}
         workerName={displayName(users[absentApp?.worker_id])}
-        onConfirmed={(appId) => setApps(prev => prev.map(x => x.id === appId ? { ...x, company_attendance_status: 'confirmed_absent' } : x))}
+        onConfirmed={(appId) => setApps(prev => prev.map(x => x.id === appId ? { ...x, company_attendance_status: 'confirmed_absent', status: 'no_show' } : x))}
       />
       <CancelShiftDialog
         open={cancelOpen}

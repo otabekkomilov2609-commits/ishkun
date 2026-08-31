@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
+import { Textarea } from '@/components/ui';
 import { queryClientInstance } from '@/lib/query-client';
 import {
   AlertDialog,
@@ -13,23 +14,32 @@ import {
   AlertDialogCancel
 } from '@/components/ui/alert-dialog';
 
-// Company-side "Kelmadi" confirmation: collects a reason, marks the booking
-// confirmed_absent, saves the reason to cancellation_reason, and records a
-// no-show violation (idempotent via violation_recorded). Used from
+// Company-side "Kelmadi" confirmation: collects an optional reason, marks the
+// booking confirmed_absent AND status no_show, saves the reason to
+// cancellation_reason, and records a no-show violation (idempotent via
+// violation_recorded). Setting status matters: while the application stayed
+// 'approved' the worker was still offered "Ishni boshlash" and could submit
+// hours for a shift they had been marked absent from. Used from
 // EmployerShiftDetail and the employer dashboard attendance reminder.
 export default function AbsentReasonDialog({ open, onOpenChange, app, shift, workerName, onConfirmed }) {
   const { t } = useLang();
   const [submitting, setSubmitting] = useState(false);
+  const [reason, setReason] = useState('');
 
   if (!app || !shift) return null;
+
+  const close = (o) => { if (!o) setReason(''); onOpenChange(o); };
 
   const doConfirm = async () => {
     setSubmitting(true);
     try {
       const now = new Date().toISOString();
+      const trimmed = reason.trim();
       await base44.entities.Application.update(app.id, {
         company_attendance_status: 'confirmed_absent',
-        company_confirmed_at: now
+        company_confirmed_at: now,
+        status: 'no_show',
+        ...(trimmed ? { cancellation_reason: trimmed } : {})
       });
       if (!app.violation_recorded) {
         await base44.functions.invoke('recordViolation', {
@@ -41,7 +51,7 @@ export default function AbsentReasonDialog({ open, onOpenChange, app, shift, wor
         });
       }
       queryClientInstance.invalidateQueries({ queryKey: ['employerApps'] });
-      onOpenChange(false);
+      close(false);
       onConfirmed?.(app.id);
     } catch (e) {
       console.error(e);
@@ -50,11 +60,20 @@ export default function AbsentReasonDialog({ open, onOpenChange, app, shift, wor
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={(o) => { if (!submitting) onOpenChange(o); }}>
+    <AlertDialog open={open} onOpenChange={(o) => { if (!submitting) close(o); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t('att.absentTitle')}</AlertDialogTitle>
           <AlertDialogDescription>{t('att.absentDesc').replace('{name}', workerName || '—')}</AlertDialogDescription>
+          <div className="mt-3">
+            <p className="text-sm font-semibold text-foreground mb-2">{t('att.absentReasonLabel')}</p>
+            <Textarea
+              rows={2}
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              placeholder={t('att.absentReasonPh')}
+            />
+          </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={submitting}>{t('cancel')}</AlertDialogCancel>

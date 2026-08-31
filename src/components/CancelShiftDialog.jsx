@@ -44,7 +44,7 @@ export default function CancelShiftDialog({ open, onOpenChange, shift, onCancell
           <AlertDialogDescription>{t('shift.cancelConfirmDesc')}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={submitting}>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogCancel disabled={submitting}>{t('closeBtn')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => { e.preventDefault(); doConfirm(); }}
             disabled={submitting}
