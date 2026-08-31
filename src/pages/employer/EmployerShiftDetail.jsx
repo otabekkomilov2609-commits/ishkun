@@ -40,20 +40,20 @@ export default function EmployerShiftDetail() {
   const [correctApp, setCorrectApp] = useState(null);
 
   const load = async () => {
-    const s = await base44.entities.Shift.get(id);
-    setShift(s);
-    const a = await base44.entities.Application.filter({ shift_id: id }, '-created_date', 200);
-    setApps(a);
-    const u = await base44.entities.User.list('-created_date', 200, 0, ['id', 'first_name', 'last_name', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']);
-    const map = {};
-    u.forEach(x => { map[x.id] = x; });
-    setUsers(map);
-    const comp = await base44.entities.Application.filter({ status: 'completed', company_attendance_status: 'confirmed_present' }, '-created_date', 500);
-    const cc = {};
-    comp.forEach(a => { cc[a.worker_id] = (cc[a.worker_id] || 0) + 1; });
-    setCompletedCounts(cc);
-    const ratings = await base44.entities.Rating.filter({ rated_by: 'company', employer_id: user.id }, '-created_date', 500);
-    setPreferredWorkers(new Set(ratings.filter(r => r.score >= 4).map(r => r.worker_id)));
+    try {
+      const s = await base44.entities.Shift.get(id);
+      setShift(s);
+      const a = await base44.entities.Application.filter({ shift_id: id }, '-created_date', 200);
+      setApps(a);
+      const res = await base44.functions.invoke('getMyApplicants', { shift_id: id });
+      const workers = res?.data?.workers || [];
+      setUsers(Object.fromEntries(workers.map(w => [w.id, w])));
+      setCompletedCounts(Object.fromEntries(workers.map(w => [w.id, w.completed_count || 0])));
+      const ratings = await base44.entities.Rating.filter({ rated_by: 'company', employer_id: user.id }, '-created_date', 500);
+      setPreferredWorkers(new Set(ratings.filter(r => r.score >= 4).map(r => r.worker_id)));
+    } catch (e) {
+      console.error('EmployerShiftDetail load failed', e);
+    }
   };
 
   useEffect(() => { load(); }, [id]);

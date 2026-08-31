@@ -30,8 +30,12 @@ export default function AttendanceReminderSection() {
     staleTime: 60_000,
   });
   const usersQ = useQuery({
-    queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list('-created_date', 200, 0, ['id', 'first_name', 'last_name', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']),
+    queryKey: ['myApplicants', user?.id],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getMyApplicants', {});
+      return res?.data?.workers || [];
+    },
+    enabled: !!user,
     staleTime: 60_000,
   });
 
