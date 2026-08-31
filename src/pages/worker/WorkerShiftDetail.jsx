@@ -5,7 +5,8 @@ import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { queryClientInstance } from '@/lib/query-client';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, Star, AlertTriangle } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, Star, AlertTriangle } from 'lucide-react';
 import { formatSom, formatDateDMY, shiftPay, shiftDurationHours, displayName } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
@@ -18,6 +19,7 @@ export default function WorkerShiftDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const { t } = useLang();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [shift, setShift] = useState(null);
   const [company, setCompany] = useState(null);
@@ -79,6 +81,7 @@ export default function WorkerShiftDetail() {
         }]
       });
       queryClientInstance.invalidateQueries({ queryKey: ['myApps'] });
+      toast({ title: t('wstat.applied') });
     } catch (e) {
       setMyApp(null);
       console.error(e);
@@ -96,11 +99,7 @@ export default function WorkerShiftDetail() {
   const tasksList = (shift.tasks_text || '').split('\n').map(s => s.trim()).filter(Boolean);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <button onClick={() => navigate('/worker')} className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors mb-4" aria-label={t('back')}>
-        <ArrowLeft className="h-5 w-5" />
-      </button>
-
+    <div className="max-w-2xl mx-auto pb-24">
       <h1 className="text-xl font-display font-bold text-foreground mb-4">{shift.title}</h1>
 
       {isMismatch(myApp) && (
@@ -205,6 +204,10 @@ export default function WorkerShiftDetail() {
             companyId={shift.company_id}
             employerId={shift.created_by_id}
             ratedBy="worker"
+            onDone={async () => {
+              if (!shift.company_id) return;
+              try { setCompany(await base44.entities.Company.get(shift.company_id)); } catch (e) { console.error(e); }
+            }}
           />
         </Card>
       )}

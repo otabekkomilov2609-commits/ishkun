@@ -48,7 +48,7 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
             </span>
           )}
           {shift.urgent_replacement && (
-            <span className="inline-flex items-center gap-1 rounded-lg bg-rose-50 text-rose-700 text-xs font-bold px-2 py-1 ring-1 ring-rose-200">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 text-xs font-bold px-2 py-1 ring-1 ring-rose-200">
               <AlertTriangle className="h-3 w-3" /> {t('shift.urgentReplacement')}
             </span>
           )}

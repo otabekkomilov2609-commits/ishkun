@@ -83,7 +83,7 @@ export default function MyShifts() {
   ];
 
   const renderCard = (s, isOverdue = false) => {
-    const count = apps.filter(a => a.shift_id === s.id).length;
+    const count = apps.filter(a => a.shift_id === s.id && a.status !== 'cancelled' && a.status !== 'rejected').length;
     return (
       <div key={s.id} className="relative">
         <ShiftCard shift={s} to={`/employer/shifts/${s.id}`} showStatus statusLabel={t(`shift.${s.status}`)} />

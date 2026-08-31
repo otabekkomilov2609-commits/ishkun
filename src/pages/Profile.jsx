@@ -9,7 +9,7 @@ import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
 import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2, Star, LogOut } from 'lucide-react';
 import { StarsDisplay } from '@/components/RatingStars';
-import { formatSom, isValidUzPhone, formatUzPhoneInput, displayName } from '@/lib/format';
+import { formatSom, isValidUzPhone, formatUzPhoneInput, displayName, formatDateDMY } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
   AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel
@@ -151,7 +151,6 @@ export default function Profile() {
       )}
 
       <Card className="p-5 mb-4">
-        {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2 grid grid-cols-2 gap-3">
             <Field label={t('onb.firstName')}>
@@ -183,6 +182,7 @@ export default function Profile() {
             </Select>
           </Field>
         </div>
+        {error && <div className="mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
         <div className="flex items-center gap-3 mt-5">
           <Button onClick={save} disabled={saving}>
             {saved ? <><Check className="h-4 w-4" /> {t('prf.saved')}</> : t('save')}
@@ -295,7 +295,7 @@ export default function Profile() {
                       <div className="min-w-0">
                         <h3 className="font-semibold text-foreground text-sm line-clamp-1">{s?.title || '—'}</h3>
                         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                          <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s?.date}</span>
+                          <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDateDMY(s?.date)}</span>
                           <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {s ? formatSom(a.final_payment_amount != null ? a.final_payment_amount : s.payment_amount) : ''}</span>
                         </div>
                       </div>

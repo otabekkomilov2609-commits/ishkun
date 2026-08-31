@@ -12,7 +12,7 @@ export default function Brand({ size = 'md', className }) {
       </div>
       <div className="leading-none">
         <div className="font-display font-extrabold tracking-tight text-foreground text-lg">IshKun</div>
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">kunlik ish</div>
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold whitespace-nowrap">kunlik ish</div>
       </div>
     </Link>
   );

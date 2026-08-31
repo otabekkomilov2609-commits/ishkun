@@ -8,7 +8,7 @@ import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
-import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp, displayName } from '@/lib/format';
+import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp, displayName, formatDateDMY } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
@@ -178,7 +178,7 @@ export default function EmployerShiftDetail() {
         </div>
         {shift.description && <p className="text-sm text-muted-foreground mb-4">{shift.description}</p>}
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <Info icon={Calendar} label={t('shift.date')} value={shift.date} />
+          <Info icon={Calendar} label={t('shift.date')} value={formatDateDMY(shift.date)} />
           <Info icon={Clock} label={t('shift.startTime')} value={`${shift.start_time} — ${shift.end_time}`} />
           <Info icon={Clock} label={t('shift.duration')} value={`${durLabel} ${t('shift.durationShort')}`} />
           <Info icon={MapPin} label={t('shift.location')} value={shift.location || shift.city} />

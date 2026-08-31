@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { setSomLang } from '@/lib/format';
 
 const dict = {
   uz: {
@@ -25,7 +26,7 @@ const dict = {
     profile: "Profil",
     notifications: "Bildirishnomalar",
     language: "Til",
-    markAllRead: "Hammasini o'qilgan deb belgilash",
+    markAllRead: "Hammasini o'qildi",
     noData: "Hozircha hech narsa yo'q",
     confirm: "Tasdiqlash",
     required: "Majburiy maydon",
@@ -85,7 +86,7 @@ const dict = {
     profile: "Профиль",
     notifications: "Уведомления",
     language: "Язык",
-    markAllRead: "Отметить все прочитанными",
+    markAllRead: "Прочитать все",
     noData: "Пока ничего нет",
     confirm: "Подтвердить",
     required: "Обязательное поле",
@@ -116,10 +117,17 @@ const dict = {
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState(() => localStorage.getItem('ishkun_lang') || 'uz');
+  // Seeded synchronously as well as in the effect below: the effect only runs
+  // after the first render, which would paint "so'm" once for a ru user.
+  const [lang, setLang] = useState(() => {
+    const stored = localStorage.getItem('ishkun_lang') || 'uz';
+    setSomLang(stored);
+    return stored;
+  });
 
   useEffect(() => {
     localStorage.setItem('ishkun_lang', lang);
+    setSomLang(lang);
   }, [lang]);
 
   const t = useCallback((path) => {

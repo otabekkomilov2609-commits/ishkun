@@ -92,7 +92,7 @@ export default function MyApplications() {
                     <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {s ? formatDateDMY(s.date) : ''}</span>
                       <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {s?.start_time}</span>
-                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium"><Wallet className="h-3 w-3" /> {pay?.total != null ? formatSom(pay.total) : ''}</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium whitespace-nowrap"><Wallet className="h-3 w-3" /> {pay?.total != null ? formatSom(pay.total) : ''}</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">

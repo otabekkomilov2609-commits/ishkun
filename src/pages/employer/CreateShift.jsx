@@ -69,7 +69,7 @@ export default function CreateShift() {
   const confirmPublish = async () => {
     setSaving(true);
     try {
-      const res = await base44.functions.invoke('createShift', {
+      await base44.functions.invoke('createShift', {
         title: form.title,
         description: form.description,
         tasks_text: form.tasks_text || undefined,
@@ -84,14 +84,6 @@ export default function CreateShift() {
         daily_rate: Number(form.daily_rate),
         required_workers: Number(form.required_workers) || 1,
         required_skill: form.required_skill || undefined
-      });
-      const shift = res?.data?.shift;
-      await base44.entities.Notification.create({
-        user_id: user.id,
-        title: "E'lon qilindi",
-        body: `Sizning '${form.title}' bo'yicha e'loningiz muvaffaqiyatli e'lon qilindi.`,
-        type: 'shift_created',
-        link: `/employer/shifts/${shift.id}`
       });
       setSaving(false);
       setPreviewOpen(false);

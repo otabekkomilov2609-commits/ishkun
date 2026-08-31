@@ -1,4 +1,10 @@
-export const formatSom = (n) => new Intl.NumberFormat('ru-RU').format(Number(n || 0)) + " so'm";
+// The currency suffix follows the UI language. LanguageProvider calls
+// setSomLang() on every change, so the ~40 existing formatSom() call sites
+// need no edits.
+let somLang = 'uz';
+export function setSomLang(l) { somLang = l === 'ru' ? 'ru' : 'uz'; }
+
+export const formatSom = (n) => new Intl.NumberFormat('ru-RU').format(Number(n || 0)) + (somLang === 'ru' ? ' сум' : " so'm");
 
 export const CITIES = [
   "Toshkent",
@@ -29,7 +35,7 @@ const WEEKDAYS = {
   ru: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
 };
 const MONTHS = {
-  uz: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekaber'],
+  uz: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'],
   ru: ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря']
 };
 
@@ -40,7 +46,10 @@ export function formatDateWeekDay(dateStr, lang = 'uz') {
   const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
   const wd = WEEKDAYS[lang] || WEEKDAYS.uz;
   const mn = MONTHS[lang] || MONTHS.uz;
-  return `${wd[d.getDay()]} ${Number(p[2])}.${mn[Number(p[1]) - 1]}`;
+  const day = Number(p[2]);
+  const month = mn[Number(p[1]) - 1].toLowerCase();
+  const weekday = wd[d.getDay()].toLowerCase();
+  return lang === 'ru' ? `${day} ${month}, ${weekday}` : `${day}-${month}, ${weekday}`;
 }
 
 export function parseTime(t) {
