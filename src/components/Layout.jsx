@@ -8,6 +8,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import NotificationsBell from './NotificationsBell';
 import AnimatedOutlet from './AnimatedOutlet';
 import { cn } from '@/lib/utils';
+import { displayName } from '@/lib/format';
 
 function initials(name) {
   if (!name) return '?';
@@ -79,7 +80,7 @@ export default function Layout() {
             <LanguageSwitcher />
             <NotificationsBell />
             <Link to="/profile" className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-bold ring-2 ring-background shadow-sm">
-              {initials(user?.full_name)}
+              {initials(displayName(user))}
             </Link>
           </div>
         </div>

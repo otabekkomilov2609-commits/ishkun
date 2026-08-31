@@ -29,6 +29,14 @@
       "type": "string",
       "title": "Telefon raqami"
     },
+    "first_name": {
+      "type": "string",
+      "title": "Ism"
+    },
+    "last_name": {
+      "type": "string",
+      "title": "Familiya"
+    },
     "city": {
       "type": "string",
       "title": "Shahar"

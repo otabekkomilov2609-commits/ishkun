@@ -9,7 +9,7 @@ import FileUploadField from '@/components/FileUploadField';
 import StatusBadge from '@/components/StatusBadge';
 import { Phone, MapPin, Globe, Check, History, Calendar, Wallet, Trash2, AlertTriangle, ShieldCheck, ChevronRight, ArrowLeft, Building2, Star, LogOut } from 'lucide-react';
 import { StarsDisplay } from '@/components/RatingStars';
-import { formatSom, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
+import { formatSom, isValidUzPhone, formatUzPhoneInput, displayName } from '@/lib/format';
 import {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
   AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel
@@ -19,7 +19,7 @@ export default function Profile() {
   const { user, checkUserAuth, logout } = useAuth();
   const { t, lang, setLang } = useLang();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ full_name: '', phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [completedApps, setCompletedApps] = useState(null);
@@ -31,7 +31,8 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setForm({
-        full_name: user.full_name || '',
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
         phone_number: user.phone_number || '',
         city: user.city || '',
         profile_image: user.profile_image || '',
@@ -68,12 +69,13 @@ export default function Profile() {
 
   const save = async () => {
     setError('');
-    if (form.full_name.trim().length < 2) { setError(t('onb.nameError')); return; }
+    if (form.first_name.trim().length < 2 || form.last_name.trim().length < 2) { setError(t('onb.nameError')); return; }
     if (!isValidUzPhone(form.phone_number)) { setError(t('prf.phoneFormatError')); return; }
     setSaving(true);
     try {
       await base44.functions.invoke('updateMyProfile', {
-        full_name: form.full_name.trim(),
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
         phone_number: form.phone_number,
         city: form.city,
         profile_image: form.profile_image,
@@ -100,7 +102,7 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const initials = (user.full_name || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase()).join('');
+  const initials = (displayName(user) || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase()).join('');
 
   const isWorker = user.account_type === 'worker';
   const isEmployer = user.account_type === 'employer';
@@ -124,7 +126,7 @@ export default function Profile() {
           {initials}
         </div>
         <div>
-          <h1 className="text-xl font-display font-bold text-primary">{user.full_name || '—'}</h1>
+          <h1 className="text-xl font-display font-bold text-primary">{displayName(user) || '—'}</h1>
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
       </div>
@@ -151,9 +153,12 @@ export default function Profile() {
       <Card className="p-5 mb-4">
         {error && <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="sm:col-span-2">
-            <Field label={t('prf.fullName')}>
-              <Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
+          <div className="sm:col-span-2 grid grid-cols-2 gap-3">
+            <Field label={t('onb.firstName')}>
+              <Input value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} />
+            </Field>
+            <Field label={t('onb.lastName')}>
+              <Input value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} />
             </Field>
           </div>
           <Field label={t('prf.phone')}>

@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { queryClientInstance } from '@/lib/query-client';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, Star, AlertTriangle } from 'lucide-react';
-import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/format';
+import { formatSom, formatDateDMY, shiftPay, shiftDurationHours, displayName } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { StarsDisplay } from '@/components/RatingStars';
@@ -73,7 +73,7 @@ export default function WorkerShiftDetail() {
         notifications: [{
           user_id: shift.created_by_id,
           title: 'Yangi arizachi',
-          body: `${user.full_name || 'Ishchi'} sizning '${shift.title}' e'loningizga ariza topshirdi.`,
+          body: `${displayName(user) || 'Ishchi'} sizning '${shift.title}' e'loningizga ariza topshirdi.`,
           type: 'new_application',
           link: `/employer/shifts/${id}`
         }]
@@ -219,7 +219,7 @@ export default function WorkerShiftDetail() {
         onOpenChange={setCancelOpen}
         app={myApp}
         shift={shift}
-        workerName={user?.full_name}
+        workerName={displayName(user)}
         onCancelled={() => setMyApp(prev => prev ? { ...prev, status: 'cancelled' } : prev)}
       />
 

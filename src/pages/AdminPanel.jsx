@@ -9,7 +9,7 @@ import { Users, CalendarDays, Building2, ClipboardList, Shield, ShieldCheck, Shi
 import AdminKycReview from '@/components/AdminKycReview';
 import AdminInvite from '@/components/AdminInvite';
 import AdminAttendanceIssues from '@/components/AdminAttendanceIssues';
-import { formatSom } from '@/lib/format';
+import { formatSom, displayName } from '@/lib/format';
 
 export default function AdminPanel() {
   const { user } = useAuth();
@@ -148,10 +148,10 @@ export default function AdminPanel() {
                 return (
                   <div key={u.id} className="flex items-center gap-3 p-4">
                     <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                      {(u.full_name || '?').trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()).join('')}
+                      {(displayName(u) || '?').trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()).join('')}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-foreground truncate">{u.full_name || '—'}</p>
+                      <p className="font-medium text-foreground truncate">{displayName(u) || '—'}</p>
                       <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">{u.role === 'admin' ? t('admin') : (u.account_type === 'employer' ? t('employer') : t('worker'))}</span>

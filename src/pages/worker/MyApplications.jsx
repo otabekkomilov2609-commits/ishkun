@@ -12,7 +12,7 @@ import UpcomingShiftBanner from '@/components/UpcomingShiftBanner';
 import { getWorkerShiftState } from '@/lib/shiftStatus';
 import { isMismatch } from '@/lib/shiftTime';
 import { AlertTriangle } from 'lucide-react';
-import { shiftPay } from '@/lib/format';
+import { shiftPay, displayName } from '@/lib/format';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { ClipboardList, Calendar, Clock, Wallet, XCircle } from 'lucide-react';
 import { formatSom, formatDateDMY, hhmmFromStamp } from '@/lib/format';
@@ -136,7 +136,7 @@ export default function MyApplications() {
         onOpenChange={(o) => { if (!o) setCancelApp(null); }}
         app={cancelApp}
         shift={cancelApp ? shifts[cancelApp.shift_id] : null}
-        workerName={user?.full_name}
+        workerName={displayName(user)}
         onCancelled={load}
       />
     </div>

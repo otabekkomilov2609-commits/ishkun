@@ -8,7 +8,7 @@ import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
-import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp } from '@/lib/format';
+import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp, displayName } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
@@ -44,7 +44,7 @@ export default function EmployerShiftDetail() {
     setShift(s);
     const a = await base44.entities.Application.filter({ shift_id: id }, '-created_date', 200);
     setApps(a);
-    const u = await base44.entities.User.list('-created_date', 200, 0, ['id', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']);
+    const u = await base44.entities.User.list('-created_date', 200, 0, ['id', 'first_name', 'last_name', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']);
     const map = {};
     u.forEach(x => { map[x.id] = x; });
     setUsers(map);
@@ -212,11 +212,11 @@ export default function EmployerShiftDetail() {
               <Card key={a.id} className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                    {(w?.full_name || '?').trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()).join('')}
+                    {(displayName(w) || '?').trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()).join('')}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground truncate">{w?.full_name || '—'}</p>
+                      <p className="font-medium text-foreground truncate">{displayName(w) || '—'}</p>
                       {preferred && <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5"><Heart className="h-3 w-3" /> {t('att.goodWorker')}</span>}
                     </div>
                     <p className="text-xs text-muted-foreground">{w?.phone_number || w?.email}</p>
@@ -292,7 +292,7 @@ export default function EmployerShiftDetail() {
         onOpenChange={(o) => { if (!o) setAbsentApp(null); }}
         app={absentApp}
         shift={shift}
-        workerName={users[absentApp?.worker_id]?.full_name}
+        workerName={displayName(users[absentApp?.worker_id])}
         onConfirmed={(appId) => setApps(prev => prev.map(x => x.id === appId ? { ...x, company_attendance_status: 'confirmed_absent' } : x))}
       />
       <CancelShiftDialog
@@ -306,7 +306,7 @@ export default function EmployerShiftDetail() {
         onOpenChange={(o) => { if (!o) setCorrectApp(null); }}
         app={correctApp}
         shift={shift}
-        workerName={users[correctApp?.worker_id]?.full_name}
+        workerName={displayName(users[correctApp?.worker_id])}
         onDone={load}
       />
     </div>

@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
 import { isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
-import { shiftDurationHours, parseTime, formatSom, hhmmFromStamp } from '@/lib/format';
+import { shiftDurationHours, parseTime, formatSom, hhmmFromStamp, displayName } from '@/lib/format';
 import { queryClientInstance } from '@/lib/query-client';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
@@ -226,7 +226,7 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
         onOpenChange={(o) => { if (!o) setCancelApp(null); }}
         app={cancelApp}
         shift={cancelApp ? shiftsById[cancelApp.shift_id] : null}
-        workerName={user?.full_name}
+        workerName={displayName(user)}
         onCancelled={() => { setCancelApp(null); onRefresh?.(); }}
       />
     </>

@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card } from '@/components/ui';
 import { AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { isShiftEnded } from '@/lib/shiftTime';
+import { displayName } from '@/lib/format';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 
 // Persistent reminder on the employer dashboard: shifts that ended but the
@@ -30,7 +31,7 @@ export default function AttendanceReminderSection() {
   });
   const usersQ = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list('-created_date', 200, 0, ['id', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']),
+    queryFn: () => base44.entities.User.list('-created_date', 200, 0, ['id', 'first_name', 'last_name', 'full_name', 'profile_image', 'phone_number', 'email', 'rating_avg', 'rating_count', 'verification_status', 'account_status']),
     staleTime: 60_000,
   });
 
@@ -73,7 +74,7 @@ export default function AttendanceReminderSection() {
             <div className="flex items-start gap-2 mb-3">
               <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">{t('att.confirmReminder').replace('{name}', w?.full_name || '—')}</p>
+                <p className="text-sm font-semibold text-foreground">{t('att.confirmReminder').replace('{name}', displayName(w) || '—')}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{s?.title} · {s?.date}</p>
               </div>
             </div>
@@ -89,7 +90,7 @@ export default function AttendanceReminderSection() {
         onOpenChange={(o) => { if (!o) setAbsentApp(null); }}
         app={absentApp}
         shift={absentApp ? shiftById[absentApp.shift_id] : null}
-        workerName={absentApp ? userById[absentApp.worker_id]?.full_name : null}
+        workerName={absentApp ? displayName(userById[absentApp.worker_id]) : null}
         onConfirmed={(appId) => setHidden(prev => new Set([...prev, appId]))}
       />
     </div>

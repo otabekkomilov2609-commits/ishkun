@@ -6,6 +6,7 @@ import EmptyState from '@/components/EmptyState';
 import StatusBadge from '@/components/StatusBadge';
 import { Image } from '@/components/ui/image';
 import { ShieldCheck, ShieldOff, UserCircle, FileText } from 'lucide-react';
+import { displayName } from '@/lib/format';
 
 export default function AdminKycReview() {
   const { t } = useLang();
@@ -49,10 +50,10 @@ export default function AdminKycReview() {
         <Card className="p-5 mb-4">
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground font-bold">
-              {(u.full_name || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase()).join('')}
+              {(displayName(u) || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase()).join('')}
             </div>
             <div className="min-w-0">
-              <h2 className="font-display font-bold text-foreground truncate">{u.full_name || '—'}</h2>
+              <h2 className="font-display font-bold text-foreground truncate">{displayName(u) || '—'}</h2>
               <p className="text-sm text-muted-foreground truncate">{u.email} · {u.phone_number || '—'}</p>
             </div>
           </div>
@@ -99,7 +100,7 @@ export default function AdminKycReview() {
           {users.map(u => (
             <Card key={u.id} className="p-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-semibold text-foreground truncate">{u.full_name || '—'}</p>
+                <p className="font-semibold text-foreground truncate">{displayName(u) || '—'}</p>
                 <p className="text-xs text-muted-foreground truncate">{u.email} · {u.phone_number || '—'}</p>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">

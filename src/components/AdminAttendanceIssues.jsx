@@ -5,6 +5,7 @@ import { Card, Skeleton } from '@/components/ui';
 import EmptyState from '@/components/EmptyState';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { isUnresolved } from '@/lib/shiftTime';
+import { displayName } from '@/lib/format';
 
 // Admin section: bookings unresolved 3+ days after shift end — neither side
 // confirmed attendance and the worker didn't self-report (cancel). No automatic
@@ -54,7 +55,7 @@ export default function AdminAttendanceIssues() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-semibold text-foreground line-clamp-1">{shift?.title || '—'}</h3>
-                  <p className="text-sm text-muted-foreground mt-0.5">{worker?.full_name || '—'} · {shift?.date || ''}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{displayName(worker) || '—'} · {shift?.date || ''}</p>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 ring-1 ring-inset ring-amber-600/20 whitespace-nowrap">
                   {t('adm.unresolved')}

@@ -39,7 +39,7 @@ export default function Onboarding() {
     }
     setSaving(true);
     try {
-      await base44.functions.invoke('updateMyProfile', { account_type: type, full_name: `${firstName.trim()} ${lastName.trim()}`, city, phone_number: phone, date_of_birth: dob, onboarded: true });
+      await base44.functions.invoke('updateMyProfile', { account_type: type, first_name: firstName.trim(), last_name: lastName.trim(), city, phone_number: phone, date_of_birth: dob, onboarded: true });
       await checkUserAuth();
       navigate(type === 'employer' ? '/employer/company' : '/worker');
     } catch (e) {

@@ -10,7 +10,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // while already verified re-arms admin review (verification_status -> submitted).
 
 const WHITELIST = [
-  'full_name', 'phone_number', 'city', 'profile_image', 'language',
+  'first_name', 'last_name', 'phone_number', 'city', 'profile_image', 'language',
   'jshshir', 'date_of_birth', 'address',
   'passport_front', 'passport_back', 'liveness_selfie', 'student_id',
   'bank_card_number', 'self_employed', 'self_employed_cert', 'onboarded'

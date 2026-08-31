@@ -125,3 +125,11 @@ export function hhmmFromStamp(iso, fallback = '') {
   const s = String(iso);
   return s.length >= 16 ? s.slice(11, 16) : fallback;
 }
+
+// Names live in first_name/last_name on the app's own User entity. Accounts
+// created before that change still carry their name in Base44's auth-owned
+// full_name, which we can read but never write — hence the fallback.
+export function displayName(u) {
+  const n = [u?.first_name, u?.last_name].filter(Boolean).join(' ').trim();
+  return n || u?.full_name || '';
+}
