@@ -45,20 +45,36 @@ export default function RatingPrompt({ applicationId, shiftId, workerId, company
   };
 
   if (existing === undefined) return null;
+
+  // The heading lives here so it cannot go stale against the state below: once
+  // rated it must read "my rating", not an instruction to rate.
+  const heading = (key) => (
+    <div className="flex items-center gap-1.5 mb-3">
+      <Star className="h-4 w-4 text-primary" />
+      <h2 className="text-sm font-bold text-foreground">{t(key)}</h2>
+    </div>
+  );
+
   if (existing) {
     return (
-      <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
-        <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {t('rating.alreadyRated')}
-      </div>
+      <>
+        {heading('rating.myRating')}
+        <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+          <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {t('rating.alreadyRated')}
+        </div>
+      </>
     );
   }
   return (
-    <div className="space-y-3">
-      <StarSelector value={score} onChange={setScore} />
-      <Textarea rows={2} placeholder={t('rating.commentPh')} value={comment} onChange={e => setComment(e.target.value)} />
-      <Button size="sm" disabled={score < 1 || submitting} onClick={submit}>
-        {submitting ? t('loading') : t('rating.submit')}
-      </Button>
-    </div>
+    <>
+      {heading(ratedBy === 'company' ? 'rating.rateWorker' : 'rating.rateCompany')}
+      <div className="space-y-3">
+        <StarSelector value={score} onChange={setScore} />
+        <Textarea rows={2} placeholder={t('rating.commentPh')} value={comment} onChange={e => setComment(e.target.value)} />
+        <Button size="sm" disabled={score < 1 || submitting} onClick={submit}>
+          {submitting ? t('loading') : t('rating.submit')}
+        </Button>
+      </div>
+    </>
   );
 }

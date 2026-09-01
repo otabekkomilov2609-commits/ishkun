@@ -30,6 +30,32 @@ export function isShiftEnded(shift) {
   return !!e && Date.now() >= e.getTime();
 }
 
+// A shift is finished once it is explicitly completed or cancelled, or simply
+// once its end time has passed. Employers no longer mark this by hand, so an
+// ended shift must not keep reading "Ochiq" or sit in the active tab.
+export function isShiftClosed(shift) {
+  if (!shift) return false;
+  if (shift.status === 'completed' || shift.status === 'cancelled') return true;
+  const start = shiftStartDateTime(shift);
+  const end = shiftEndDateTime(shift);
+  if (!end) return false;
+  // shiftEndDateTime() stamps end_time onto the shift's own date, so an
+  // overnight 22:00->02:00 shift ends "before" it starts. Roll it forward here
+  // rather than in isShiftEnded(), which the attendance flow depends on.
+  const realEnd = (start && end.getTime() <= start.getTime())
+    ? new Date(end.getTime() + 24 * 60 * 60 * 1000)
+    : end;
+  return Date.now() >= realEnd.getTime();
+}
+
+// i18n key for a shift's status badge. An ended shift must not read "Ochiq"
+// just because nobody moved its stored status off 'open'.
+export function shiftStatusKey(shift) {
+  if (!shift) return 'shift.open';
+  if (shift.status === 'cancelled') return 'shift.cancelled';
+  return isShiftClosed(shift) ? 'shift.completed' : `shift.${shift.status}`;
+}
+
 // True once the shift is close enough to its end for "mark completed" to make
 // sense: from 2 hours before end_time, but never before the shift has started
 // (short shifts would otherwise unlock it before they begin).

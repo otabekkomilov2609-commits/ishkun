@@ -4,6 +4,7 @@ import { MapPin, Wallet, CalendarDays, Heart, Clock, AlertTriangle } from 'lucid
 import { useLang } from '@/lib/i18n';
 import { formatSom, formatDateWeekDay, shiftPay } from '@/lib/format';
 import StatusBadge from './StatusBadge';
+import { isShiftClosed, shiftStatusKey } from '@/lib/shiftTime';
 import WorkerShiftBadge from './WorkerShiftBadge';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +12,9 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
   const { t, lang } = useLang();
   const link = to || (shift.id ? `/worker/shifts/${shift.id}` : '#');
   const pay = shiftPay(shift);
+  // An ended shift shows as completed even if its stored status is still 'open',
+  // so the badge colour matches the label.
+  const badgeStatus = shift.status === 'cancelled' ? 'cancelled' : (isShiftClosed(shift) ? 'completed' : shift.status);
 
   return (
     <Link to={link} className="block group">
@@ -25,7 +29,7 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
               <div className="text-xs text-muted-foreground mt-0.5">{formatSom(pay.hourlyRate)}/{t('shift.hourShort')}</div>
             )}
           </div>
-          {workerState ? <WorkerShiftBadge state={workerState} /> : showStatus ? <StatusBadge status={shift.status} label={statusLabel} /> : null}
+          {workerState ? <WorkerShiftBadge state={workerState} /> : showStatus ? <StatusBadge status={badgeStatus} label={statusLabel || t(shiftStatusKey(shift))} /> : null}
         </div>
 
         <div className="mt-2.5">

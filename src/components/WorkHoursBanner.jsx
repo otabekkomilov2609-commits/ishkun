@@ -4,7 +4,6 @@ import { useLang } from '@/lib/i18n';
 import { useAuth } from '@/lib/AuthContext';
 import { Button, Card, Select } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
-import { Star } from 'lucide-react';
 import RatingPrompt from '@/components/RatingPrompt';
 import { isShiftEnded, isCheckInWindowOpen } from '@/lib/shiftTime';
 import { shiftDurationHours, shiftDurationHoursExact, parseTime, formatSom, hhmmFromStamp, displayName } from '@/lib/format';
@@ -81,10 +80,6 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
     const shift = shiftsById[rateApp.shift_id];
     return (
       <Card className="p-4 mb-4">
-        <div className="flex items-center gap-1.5 mb-3">
-          <Star className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-bold text-foreground">{t('rating.rateCompany')}</h2>
-        </div>
         <RatingPrompt applicationId={rateApp.id} shiftId={rateApp.shift_id} workerId={rateApp.worker_id} companyId={shift?.company_id} employerId={shift?.created_by_id} ratedBy="worker" onDone={onRefresh} />
       </Card>
     );

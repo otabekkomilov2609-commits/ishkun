@@ -33,7 +33,9 @@ export default function CancelBookingDialog({ open, onOpenChange, app, shift, wo
 
   const start = shiftStartDateTime(shift);
   const msUntilStart = start ? start.getTime() - Date.now() : 0;
-  const isLate = msUntilStart < HOURS_24;
+  // Only an approved booking can be cancelled "late": withdrawing an
+  // application nobody has accepted yet is never a violation.
+  const isLate = app.status === 'approved' && msUntilStart < HOURS_24;
 
   const doCancel = async () => {
     setSubmitting(true);

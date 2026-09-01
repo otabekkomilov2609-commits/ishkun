@@ -10,16 +10,14 @@ import EmptyState from '@/components/EmptyState';
 import TabsNav from '@/components/TabsNav';
 import PullToRefresh from '@/components/PullToRefresh';
 import AttendanceReminderSection from '@/components/AttendanceReminderSection';
-import { PlusCircle, CalendarDays, ClipboardList, AlertCircle, Building2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { PlusCircle, CalendarDays, ClipboardList, Building2 } from 'lucide-react';
+import { isShiftClosed, shiftStatusKey } from '@/lib/shiftTime';
 
 export default function MyShifts() {
   const { user } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [tab, setTab] = useState('active');
-  const [completing, setCompleting] = useState(null);
 
   const shiftsQ = useQuery({
     queryKey: ['myShifts', user?.id],
@@ -55,25 +53,12 @@ export default function MyShifts() {
     await Promise.all([shiftsQ.refetch(), appsQ.refetch()]);
   };
 
-  const completeShift = async (s) => {
-    setCompleting(s.id);
-    try {
-      await base44.entities.Shift.update(s.id, { status: 'completed' });
-      await shiftsQ.refetch();
-    } catch (e) {
-      console.error(e);
-      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
-    }
-    setCompleting(null);
-  };
-
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-  const activeShifts = (shifts || []).filter(s => s.status === 'open' || s.status === 'filled');
-  const upcoming = activeShifts.filter(s => s.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-  const overdue = activeShifts.filter(s => s.date < today).sort((a, b) => b.date.localeCompare(a.date));
-  const completed = (shifts || []).filter(s => s.status === 'completed').sort((a, b) => b.date.localeCompare(a.date));
+  // A shift leaves the active tab once its end time has passed, whether or not
+  // its stored status was ever moved off 'open'.
+  const notCancelled = (shifts || []).filter(s => s.status !== 'cancelled');
+  const activeShifts = notCancelled.filter(s => !isShiftClosed(s));
+  const upcoming = [...activeShifts].sort((a, b) => a.date.localeCompare(b.date));
+  const completed = notCancelled.filter(s => isShiftClosed(s)).sort((a, b) => b.date.localeCompare(a.date));
   const cancelled = (shifts || []).filter(s => s.status === 'cancelled').sort((a, b) => b.date.localeCompare(a.date));
 
   const tabs = [
@@ -82,40 +67,26 @@ export default function MyShifts() {
     { id: 'cancelled', label: t('emp.tabCancelled'), count: cancelled.length },
   ];
 
-  const renderCard = (s, isOverdue = false) => {
+  const renderCard = (s) => {
     const count = apps.filter(a => a.shift_id === s.id && a.status !== 'cancelled' && a.status !== 'rejected').length;
     return (
       <div key={s.id} className="relative">
-        <ShiftCard shift={s} to={`/employer/shifts/${s.id}`} showStatus statusLabel={t(`shift.${s.status}`)} />
+        <ShiftCard shift={s} to={`/employer/shifts/${s.id}`} showStatus statusLabel={t(shiftStatusKey(s))} />
         {count > 0 && (
           <span className="absolute top-14 right-3 pointer-events-none inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5">
             <ClipboardList className="h-3 w-3" /> {count} {t('shift.applicants')}
           </span>
         )}
-        {isOverdue && (
-          <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-amber-300/60 bg-amber-50 px-3 py-2">
-            <span className="text-xs font-medium text-amber-800">{t('emp.overdueQuestion')}</span>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={completing === s.id}
-              onClick={async (e) => { e.preventDefault(); e.stopPropagation(); await completeShift(s); }}
-              className="border-amber-400 text-amber-800 hover:bg-amber-100"
-            >
-              {completing === s.id ? t('loading') : t('emp.overdueConfirmBtn')}
-            </Button>
-          </div>
-        )}
       </div>
     );
   };
 
-  const renderGrid = (list, overdue = false) =>
+  const renderGrid = (list) =>
     list.length === 0 ? (
       <EmptyState icon={CalendarDays} title={t('emp.tabEmpty')} />
     ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {list.map(s => renderCard(s, overdue))}
+        {list.map(s => renderCard(s))}
       </div>
     );
 
@@ -151,27 +122,13 @@ export default function MyShifts() {
             <TabsNav tabs={tabs} active={tab} onChange={setTab} className="mb-4" />
 
             {tab === 'active' && (
-              <>
-                {upcoming.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {upcoming.map(s => renderCard(s))}
-                  </div>
-                )}
-                {overdue.length > 0 && (
-                  <div className="mt-5">
-                    <div className="mb-2 flex items-center gap-1.5 text-amber-700">
-                      <AlertCircle className="h-4 w-4" />
-                      <h2 className="text-sm font-bold">{t('emp.overdueShifts')}</h2>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {overdue.map(s => renderCard(s, true))}
-                    </div>
-                  </div>
-                )}
-                {upcoming.length === 0 && overdue.length === 0 && (
-                  <EmptyState icon={CalendarDays} title={t('emp.tabEmpty')} />
-                )}
-              </>
+              upcoming.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {upcoming.map(s => renderCard(s))}
+                </div>
+              ) : (
+                <EmptyState icon={CalendarDays} title={t('emp.tabEmpty')} />
+              )
             )}
 
             {tab === 'completed' && renderGrid(completed)}

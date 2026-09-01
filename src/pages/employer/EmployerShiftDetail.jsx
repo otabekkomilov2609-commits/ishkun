@@ -7,13 +7,13 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
-import { MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
+import { MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp, displayName, formatDateDMY } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
 import { StarsDisplay } from '@/components/RatingStars';
-import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded, isCompletableWindowOpen } from '@/lib/shiftTime';
+import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded } from '@/lib/shiftTime';
 import CorrectHoursDialog from '@/components/CorrectHoursDialog';
 
 function appStatusKey(status) {
@@ -106,24 +106,6 @@ export default function EmployerShiftDetail() {
     }
   };
 
-  const markCompleted = async () => {
-    const prevStatus = shift.status;
-    setShift({ ...shift, status: 'completed' });
-    try {
-      await base44.entities.Shift.update(id, { status: 'completed' });
-      const approved = apps.filter(a => a.status === 'approved');
-      await base44.functions.invoke('createNotificationFor', {
-        notifications: approved.map(a => ({
-          user_id: a.worker_id, title: t('notif.shiftDone'), body: shift.title, type: 'shift_completed', link: '/worker/applications'
-        }))
-      });
-    } catch (e) {
-      setShift({ ...shift, status: prevStatus });
-      console.error(e);
-      toast({ title: t('errUpdate'), description: e?.message, variant: 'destructive' });
-    }
-  };
-
   const confirmAttendance = async (app, status) => {
     const now = new Date().toISOString();
     setApps(prevApps => prevApps.map(a => a.id === app.id ? { ...a, company_attendance_status: status, company_confirmed_at: now, ...(status === 'confirmed_absent' ? { status: 'no_show' } : {}) } : a));
@@ -183,14 +165,6 @@ export default function EmployerShiftDetail() {
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
-          {shift.status !== 'completed' && shift.status !== 'cancelled' && isCompletableWindowOpen(shift) && (
-            <>
-              <Button variant="soft" onClick={markCompleted}>
-                <CheckCircle2 className="h-4 w-4" /> {t('shift.markCompleted')}
-              </Button>
-              <p className="text-xs text-muted-foreground w-full">{t('shift.completeHint')}</p>
-            </>
-          )}
           {shift.status !== 'completed' && shift.status !== 'cancelled' && !isShiftStarted(shift) && (
             <>
               <Button variant="outline" onClick={() => navigate(`/employer/shifts/${id}/edit`)}>
@@ -286,7 +260,6 @@ export default function EmployerShiftDetail() {
                 )}
                 {rateEligible && (
                   <div className="mt-3 border-t border-border pt-3">
-                    <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-foreground"><Star className="h-4 w-4 text-primary" /> {t('rating.rateWorker')}</div>
                     <RatingPrompt applicationId={a.id} shiftId={shift.id} workerId={a.worker_id} companyId={shift.company_id} employerId={user.id} ratedBy="company" />
                   </div>
                 )}

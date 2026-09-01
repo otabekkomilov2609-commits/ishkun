@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES, isValidMapLink, RATE_MAX, groupDigits } from '@/lib/format';
+import { CITIES, isValidMapLink, RATE_MAX, groupDigits, toYMD } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card, Skeleton } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import { Pencil, Check, Navigation } from 'lucide-react';
@@ -21,6 +21,7 @@ export default function EditShift() {
   const [saving, setSaving] = useState(false);
   const [approvedCount, setApprovedCount] = useState(0);
   const [rateTooBig, setRateTooBig] = useState(false);
+  const todayStr = toYMD();
 
   const onRateChange = (v) => {
     const digits = v.replace(/\D/g, '');
@@ -129,7 +130,7 @@ export default function EditShift() {
             </Field>
           </div>
           <Field label={t('shift.date')} required>
-            <Input type="date" value={form.date} disabled={approvedCount > 0} onChange={e => setForm({ ...form, date: e.target.value })} />
+            <Input type="date" min={todayStr} value={form.date} disabled={approvedCount > 0} onChange={e => setForm({ ...form, date: e.target.value })} />
           </Field>
           <Field label={t('shift.dailyRate')} required hint={t('shift.dailyRateHint')}>
             <Input inputMode="numeric" value={groupDigits(form.daily_rate)} disabled={approvedCount > 0} onChange={e => onRateChange(e.target.value)} placeholder="25 000" />

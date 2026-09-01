@@ -14,6 +14,7 @@ import { isMismatch } from '@/lib/shiftTime';
 import { AlertTriangle } from 'lucide-react';
 import { shiftPay, displayName } from '@/lib/format';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
+import RatingPrompt from '@/components/RatingPrompt';
 import { ClipboardList, Calendar, Clock, Wallet, XCircle } from 'lucide-react';
 import { formatSom, formatDateDMY, hhmmFromStamp } from '@/lib/format';
 
@@ -112,6 +113,21 @@ export default function MyApplications() {
                     <p className="text-sm text-foreground">{hhmmFromStamp(a.check_in_time)} — {hhmmFromStamp(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
                     <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
                     {a.hours_corrected_by_employer && a.employer_correction_note && <p className="text-xs text-muted-foreground mt-1">{t('hours.employerCorrected')}: {a.employer_correction_note}</p>}
+                  </div>
+                )}
+                {/* Gated on status alone: the prompt must appear whether or not
+                    the hours still need employer confirmation. */}
+                {a.status === 'completed' && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <RatingPrompt
+                      applicationId={a.id}
+                      shiftId={a.shift_id}
+                      workerId={user.id}
+                      companyId={shifts[a.shift_id]?.company_id}
+                      employerId={shifts[a.shift_id]?.created_by_id || a.employer_id}
+                      ratedBy="worker"
+                      onDone={load}
+                    />
                   </div>
                 )}
                 {(a.status === 'pending' || a.status === 'approved') && (

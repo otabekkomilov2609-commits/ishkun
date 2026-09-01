@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { queryClientInstance } from '@/lib/query-client';
 import { useToast } from '@/components/ui/use-toast';
-import { MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, Star, AlertTriangle } from 'lucide-react';
+import { MapPin, Clock, Wallet, Users, Calendar, Building2, Navigation, ListChecks, AlertCircle, ClipboardCheck, Shirt, AlertTriangle } from 'lucide-react';
 import { formatSom, formatDateDMY, shiftPay, shiftDurationHours, displayName } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
@@ -193,10 +193,6 @@ export default function WorkerShiftDetail() {
 
       {state.key === 'completed' && myApp && (
         <Card className="p-4 mb-4">
-          <div className="flex items-center gap-1.5 mb-3">
-            <Star className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-bold text-foreground">{t('rating.rateCompany')}</h2>
-          </div>
           <RatingPrompt
             applicationId={myApp.id}
             shiftId={shift.id}

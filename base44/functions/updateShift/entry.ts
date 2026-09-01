@@ -14,6 +14,14 @@ function durationHours(start_time, end_time) {
   return mins / 60;
 }
 
+// Local date parts, not toISOString(): that renders the UTC day, which lags
+// Tashkent by up to five hours and would call today's date "past".
+function todayYMD() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -30,6 +38,10 @@ export default async function(req) {
     if (!shift_id) return Response.json({ error: 'Missing shift_id' }, { status: 400 });
     if (!title || !date || !start_time || !end_time || !daily_rate || !city || !map_link) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+    // Creating already rejects past dates; editing must not be a way around it.
+    if (String(date) < todayYMD()) {
+      return Response.json({ error: 'Date in the past' }, { status: 400 });
     }
     const rate = Number(daily_rate);
     if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid daily_rate' }, { status: 400 });
