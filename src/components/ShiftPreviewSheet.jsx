@@ -30,9 +30,9 @@ export default function ShiftPreviewSheet({ open, onOpenChange, form, company, o
           <SectionCard icon={MapPin} title={t('sdetail.address')}>
             <div className="text-sm text-foreground">{form.city}</div>
             {form.map_link && (
-              <div className="mt-3 inline-flex">
-                <Button variant="soft" size="sm" disabled><Navigation className="h-4 w-4" /> {t('sdetail.viewMap')}</Button>
-              </div>
+              <a href={form.map_link} target="_blank" rel="noreferrer" className="mt-3 inline-flex">
+                <Button variant="soft" size="sm"><Navigation className="h-4 w-4" /> {t('sdetail.viewMap')}</Button>
+              </a>
             )}
           </SectionCard>
 

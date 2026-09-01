@@ -152,7 +152,11 @@ export default function MyShifts() {
 
             {tab === 'active' && (
               <>
-                {renderGrid(upcoming)}
+                {upcoming.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {upcoming.map(s => renderCard(s))}
+                  </div>
+                )}
                 {overdue.length > 0 && (
                   <div className="mt-5">
                     <div className="mb-2 flex items-center gap-1.5 text-amber-700">

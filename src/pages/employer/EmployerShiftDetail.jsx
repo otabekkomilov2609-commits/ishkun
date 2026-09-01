@@ -7,7 +7,7 @@ import { Button, Card, Skeleton } from '@/components/ui';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
+import { MapPin, Clock, Wallet, Users, Calendar, CheckCircle2, XCircle, User, Star, AlertTriangle, Heart, Pencil, Ban, Lock } from 'lucide-react';
 import { formatSom, shiftPay, shiftDurationHours, hhmmFromStamp, displayName, formatDateDMY } from '@/lib/format';
 import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
@@ -167,10 +167,6 @@ export default function EmployerShiftDetail() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <button onClick={() => navigate('/employer/shifts')} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4" /> {t('back')}
-      </button>
-
       <Card className="p-5 mb-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <h1 className="text-xl font-display font-bold text-foreground">{shift.title}</h1>

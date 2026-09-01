@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES, isValidUzPhone, formatUzPhoneInput } from '@/lib/format';
+import { CITIES, isValidUzPhone, formatUzPhoneInput, toYMD } from '@/lib/format';
 import { Button, Select, Input } from '@/components/ui';
 import Brand from '@/components/Brand';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -87,6 +87,11 @@ export default function Onboarding() {
     { id: 'individual', icon: User, title: t('co.individualEntity'), desc: t('co.individualEntityDesc'), accent: 'from-emerald-500 to-teal-600' },
     { id: 'legal', icon: Building2, title: t('co.legalEntity'), desc: t('co.legalEntityDesc'), accent: 'from-indigo-500 to-violet-600' }
   ];
+
+  // Bound the picker to a plausible birth date. finish() still owns the 18+ rule.
+  const today = new Date();
+  const dobMax = toYMD(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
+  const dobMin = toYMD(new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()));
 
   const RoleIcon = type === 'employer' ? Building2 : Briefcase;
   const segments = type === 'employer' ? 3 : 2;
@@ -190,7 +195,7 @@ export default function Onboarding() {
         {phoneField}
         <div>
           <label className="block text-sm font-semibold text-foreground mb-1.5">{t('kyc.dob')}</label>
-          <Input type="date" value={dob} onChange={e => setDob(e.target.value)} />
+          <Input type="date" value={dob} onChange={e => setDob(e.target.value)} max={dobMax} min={dobMin} />
         </div>
       </div>
 

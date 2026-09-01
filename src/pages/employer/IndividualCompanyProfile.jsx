@@ -69,13 +69,13 @@ export default function IndividualCompanyProfile() {
             <Star className="h-6 w-6" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-foreground">{t('prf.companyRating')}</p>
+            <p className="text-xs font-bold text-foreground">{t('prf.myRating')}</p>
             {company.rating_count > 0 ? (
               <div className="mt-0.5"><StarsDisplay avg={company.rating_avg} count={company.rating_count} size="md" /></div>
             ) : (
               <>
                 <p className="text-sm text-muted-foreground">{t('prf.notRatedYet')}</p>
-                <p className="text-xs text-muted-foreground/70">{t('prf.companyNotRatedHint')}</p>
+                <p className="text-xs text-muted-foreground/70">{t('prf.notRatedHint')}</p>
               </>
             )}
           </div>

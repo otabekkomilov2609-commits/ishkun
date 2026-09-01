@@ -31,6 +31,10 @@ export default async function(req) {
     if (!title || !date || !start_time || !end_time || !daily_rate || !city || !map_link) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
+    // The date input's `min` is only a client hint; enforce it here too.
+    if (String(date) < new Date().toISOString().slice(0, 10)) {
+      return Response.json({ error: 'Date in the past' }, { status: 400 });
+    }
     const rate = Number(daily_rate);
     if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid daily_rate' }, { status: 400 });
 

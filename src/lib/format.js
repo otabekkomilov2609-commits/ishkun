@@ -23,6 +23,13 @@ export const CITIES = [
   "Qo'qon"
 ];
 
+// Local-date YYYY-MM-DD for date-input bounds. toISOString() would render the
+// UTC day, which is the previous date for most of the morning in UTC+5.
+export function toYMD(d = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 export function formatDateDMY(dateStr) {
   if (!dateStr) return '';
   const p = dateStr.split('T')[0].split('-');
@@ -127,6 +134,14 @@ export function formatUzPhoneInput(raw) {
   if (!d) return '';
   const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean);
   return '+998 ' + parts.join(' ');
+}
+
+// Daily rate is typed as grouped digits ("1 500 000") so large amounts stay
+// readable; state keeps the bare digits and submit sends a plain number.
+export const RATE_MAX = 100000000;
+
+export function groupDigits(v) {
+  return String(v ?? '').replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 export function isValidCardNumber(v) {

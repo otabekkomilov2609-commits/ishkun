@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
-import { CITIES, isValidMapLink } from '@/lib/format';
+import { CITIES, isValidMapLink, RATE_MAX, groupDigits } from '@/lib/format';
 import { Button, Input, Textarea, Select, Field, Card, Skeleton } from '@/components/ui';
 import { useToast } from '@/components/ui/use-toast';
 import { Pencil, Check, Navigation } from 'lucide-react';
@@ -20,6 +20,14 @@ export default function EditShift() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [approvedCount, setApprovedCount] = useState(0);
+  const [rateTooBig, setRateTooBig] = useState(false);
+
+  const onRateChange = (v) => {
+    const digits = v.replace(/\D/g, '');
+    const over = digits !== '' && Number(digits) > RATE_MAX;
+    setRateTooBig(over);
+    setForm(prev => ({ ...prev, daily_rate: over ? String(RATE_MAX) : digits }));
+  };
 
   useEffect(() => {
     (async () => {
@@ -124,7 +132,8 @@ export default function EditShift() {
             <Input type="date" value={form.date} disabled={approvedCount > 0} onChange={e => setForm({ ...form, date: e.target.value })} />
           </Field>
           <Field label={t('shift.dailyRate')} required hint={t('shift.dailyRateHint')}>
-            <Input type="number" value={form.daily_rate} disabled={approvedCount > 0} onChange={e => setForm({ ...form, daily_rate: e.target.value })} placeholder="25000" />
+            <Input inputMode="numeric" value={groupDigits(form.daily_rate)} disabled={approvedCount > 0} onChange={e => onRateChange(e.target.value)} placeholder="25 000" />
+            {rateTooBig && <p className="mt-1.5 text-xs text-destructive">{t('shift.rateTooBig')}</p>}
           </Field>
           <Field label={t('shift.startTime')} required>
             <Input type="time" value={form.start_time} disabled={approvedCount > 0} onChange={e => setForm({ ...form, start_time: e.target.value })} />
