@@ -13,7 +13,7 @@ import { Pencil, Check, Navigation } from 'lucide-react';
 // required_workers integrity — see base44/functions/updateShift/entry.ts).
 export default function EditShift() {
   const { id } = useParams();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [shift, setShift] = useState(undefined);
@@ -145,7 +145,7 @@ export default function EditShift() {
           <Field label={t('city')} required>
             <Select value={form.city} disabled={approvedCount > 0} onChange={e => setForm({ ...form, city: e.target.value })}>
               <option value="">{t('allCities')}</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {CITIES.map(c => <option key={c} value={c}>{tCity(c)}</option>)}
             </Select>
           </Field>
           <div className="sm:col-span-2">

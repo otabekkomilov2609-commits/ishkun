@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Image } from '@/components/ui/image';
+import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export default function FileUploadField({ label, value, onChange, hint }) {
+  const { t } = useLang();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -16,7 +18,7 @@ export default function FileUploadField({ label, value, onChange, hint }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       onChange(file_url);
     } catch (e) {
-      setError('Yuklash amalga oshmadi');
+      setError(t('upload.failed'));
     }
     setUploading(false);
   };
@@ -34,7 +36,7 @@ export default function FileUploadField({ label, value, onChange, hint }) {
       ) : (
         <label className={cn('flex flex-col items-center justify-center gap-2 h-40 rounded-xl border-2 border-dashed border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors', uploading && 'opacity-60 pointer-events-none')}>
           {uploading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <Upload className="h-5 w-5 text-muted-foreground" />}
-          <span className="text-xs text-muted-foreground">{uploading ? 'Yuklanmoqda…' : 'Rasm tanlash'}</span>
+          <span className="text-xs text-muted-foreground">{uploading ? t('loading') : t('upload.choose')}</span>
           <input type="file" accept="image/*" className="hidden" onChange={e => handleFile(e.target.files?.[0])} />
         </label>
       )}

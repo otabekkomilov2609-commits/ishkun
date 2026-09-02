@@ -17,7 +17,7 @@ import {
 
 export default function Profile() {
   const { user, checkUserAuth, logout } = useAuth();
-  const { t, lang, setLang } = useLang();
+  const { t, lang, setLang, tCity } = useLang();
   const navigate = useNavigate();
   const [form, setForm] = useState({ first_name: '', last_name: '', phone_number: '', city: '', profile_image: '', account_type: '', language: 'uz' });
   const [saving, setSaving] = useState(false);
@@ -169,7 +169,7 @@ export default function Profile() {
           <Field label={t('prf.city')}>
             <Select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}>
               <option value="">{t('allCities')}</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {CITIES.map(c => <option key={c} value={c}>{tCity(c)}</option>)}
             </Select>
           </Field>
           <div className="sm:col-span-2">
@@ -177,8 +177,8 @@ export default function Profile() {
           </div>
           <Field label={t('language')}>
             <Select value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
-              <option value="uz">O'zbekcha</option>
-              <option value="ru">Русский</option>
+              <option value="uz">{t('langUz')}</option>
+              <option value="ru">{t('langRu')}</option>
             </Select>
           </Field>
         </div>

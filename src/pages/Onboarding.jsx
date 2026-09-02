@@ -14,7 +14,7 @@ const INDUSTRIES = ['savdo', 'restoran', 'logistika', 'ombor', 'event', 'boshqa'
 
 export default function Onboarding() {
   const { user, checkUserAuth } = useAuth();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [type, setType] = useState('');
@@ -165,7 +165,7 @@ export default function Onboarding() {
       </label>
       <Select value={city} onChange={(e) => setCity(e.target.value)}>
         <option value="" disabled>{t('allCities')}</option>
-        {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+        {CITIES.map(c => <option key={c} value={c}>{tCity(c)}</option>)}
       </Select>
       <p className="mt-1.5 text-xs text-muted-foreground">{t('onb.cityHint')}</p>
     </div>

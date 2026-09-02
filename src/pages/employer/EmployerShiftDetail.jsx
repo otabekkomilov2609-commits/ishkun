@@ -27,7 +27,7 @@ function appStatusKey(status) {
 export default function EmployerShiftDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [shift, setShift] = useState(null);
@@ -159,7 +159,7 @@ export default function EmployerShiftDetail() {
           <Info icon={Calendar} label={t('shift.date')} value={formatDateDMY(shift.date)} />
           <Info icon={Clock} label={t('shift.startTime')} value={`${shift.start_time} — ${shift.end_time}`} />
           <Info icon={Clock} label={t('shift.duration')} value={`${durLabel} ${t('shift.durationShort')}`} />
-          <Info icon={MapPin} label={t('shift.location')} value={shift.location || shift.city} />
+          <Info icon={MapPin} label={t('shift.location')} value={shift.location || tCity(shift.city)} />
           <Info icon={Wallet} label={t('shift.hourlyRate')} value={pay.hourlyRate != null ? formatSom(pay.hourlyRate) : '—'} />
           <Info icon={Wallet} label={t('shift.totalAmount')} value={pay.total != null ? formatSom(pay.total) : '—'} />
           <Info icon={Users} label={t('shift.workers')} value={shift.required_workers} />
@@ -215,7 +215,7 @@ export default function EmployerShiftDetail() {
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <StatusBadge status={a.status} label={t(appStatusKey(a.status))} />
-                    {mismatch && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
+                    {mismatch && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
                   </div>
                 </div>
                 {booked && (

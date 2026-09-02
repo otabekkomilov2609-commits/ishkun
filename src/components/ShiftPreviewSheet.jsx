@@ -6,7 +6,7 @@ import { formatSom, formatDateDMY, shiftPay, shiftDurationHours } from '@/lib/fo
 import { MapPin, Wallet, Clock, Calendar, Users, Navigation, ClipboardCheck, ListChecks, AlertCircle, Shirt, Building2 } from 'lucide-react';
 
 export default function ShiftPreviewSheet({ open, onOpenChange, form, company, onConfirm, publishing }) {
-  const { t } = useLang();
+  const { t, tCity } = useLang();
 
   const pseudo = { daily_rate: Number(form.daily_rate), start_time: form.start_time, end_time: form.end_time };
   const pay = shiftPay(pseudo);
@@ -28,7 +28,7 @@ export default function ShiftPreviewSheet({ open, onOpenChange, form, company, o
 
           {/* Manzil */}
           <SectionCard icon={MapPin} title={t('sdetail.address')}>
-            <div className="text-sm text-foreground">{form.city}</div>
+            <div className="text-sm text-foreground">{tCity(form.city)}</div>
             {form.map_link && (
               <a href={form.map_link} target="_blank" rel="noreferrer" className="mt-3 inline-flex">
                 <Button variant="soft" size="sm"><Navigation className="h-4 w-4" /> {t('sdetail.viewMap')}</Button>

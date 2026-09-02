@@ -7,11 +7,11 @@ const map = {
   completed: 'bg-zinc-100 text-zinc-600 ring-zinc-500/20',
   pending: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   approved: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  rejected: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+  rejected: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 ring-rose-600/20',
   pending_mod: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  blocked: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-  no_show: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-  cancelled: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+  blocked: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 ring-rose-600/20',
+  no_show: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 ring-rose-600/20',
+  cancelled: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 ring-rose-600/20',
   approved_mod: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
 };
 

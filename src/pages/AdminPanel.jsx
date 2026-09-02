@@ -13,7 +13,7 @@ import { formatSom, displayName } from '@/lib/format';
 
 export default function AdminPanel() {
   const { user } = useAuth();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const [tab, setTab] = useState('overview');
   const [stats, setStats] = useState(null);
   const [shifts, setShifts] = useState(null);
@@ -116,7 +116,7 @@ export default function AdminPanel() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="font-semibold text-foreground line-clamp-1">{s.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-0.5">{s.city} · {s.date} · {formatSom(s.payment_amount)}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{tCity(s.city)} · {s.date} · {formatSom(s.payment_amount)}</p>
                       <div className="mt-2">
                         {s.moderation === 'approved' && <StatusBadge status="approved_mod" label={t('adm.approved')} />}
                         {s.moderation === 'pending' && <StatusBadge status="pending_mod" label={t('adm.pending')} />}
@@ -167,7 +167,7 @@ export default function AdminPanel() {
                           <Button size="sm" variant="soft" onClick={() => setUserStatus(u, 'active')}><ShieldCheck className="h-4 w-4" /> {t('adm.reactivate')}</Button>
                         </div>
                       ) : (
-                        u.city && <div className="text-xs text-muted-foreground">{u.city}</div>
+                        u.city && <div className="text-xs text-muted-foreground">{tCity(u.city)}</div>
                       )}
                     </div>
                   </div>

@@ -97,7 +97,7 @@ export default function MyApplications() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    {isMismatch(a) && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
+                    {isMismatch(a) && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 text-[10px] font-semibold px-2 py-0.5"><AlertTriangle className="h-3 w-3" /> {t('att.mismatch')}</span>}
                     <WorkerShiftBadge state={state} />
                   </div>
                 </div>

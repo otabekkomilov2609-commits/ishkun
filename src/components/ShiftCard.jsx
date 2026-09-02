@@ -9,7 +9,7 @@ import WorkerShiftBadge from './WorkerShiftBadge';
 import { cn } from '@/lib/utils';
 
 export default function ShiftCard({ shift, to, showStatus = false, statusLabel, workerState, liked }) {
-  const { t, lang } = useLang();
+  const { t, lang, tCity } = useLang();
   const link = to || (shift.id ? `/worker/shifts/${shift.id}` : '#');
   const pay = shiftPay(shift);
   // An ended shift shows as completed even if its stored status is still 'open',
@@ -36,7 +36,7 @@ export default function ShiftCard({ shift, to, showStatus = false, statusLabel, 
           <h3 className="font-semibold text-foreground leading-snug line-clamp-1">{shift.title}</h3>
           <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" />
-            <span className="truncate">{shift.location || shift.city}</span>
+            <span className="truncate">{shift.location || tCity(shift.city)}</span>
           </div>
         </div>
 

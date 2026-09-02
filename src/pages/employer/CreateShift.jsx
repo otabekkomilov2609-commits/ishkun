@@ -12,7 +12,7 @@ import { PlusCircle, Check, Building2, X, CalendarPlus, Navigation, LayoutTempla
 
 export default function CreateShift() {
   const { user } = useAuth();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const navigate = useNavigate();
   const [company, setCompany] = useState(undefined);
   const [form, setForm] = useState({
@@ -274,7 +274,7 @@ export default function CreateShift() {
           <Field label={t('city')} required>
             <Select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}>
               <option value="">{t('allCities')}</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {CITIES.map(c => <option key={c} value={c}>{tCity(c)}</option>)}
             </Select>
           </Field>
           <div className="sm:col-span-2">

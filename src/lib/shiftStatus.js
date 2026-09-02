@@ -7,7 +7,7 @@ export const STATE_STYLES = {
   booked: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20',
   active: 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/30',
   completed: 'bg-zinc-100 text-zinc-600 ring-1 ring-inset ring-zinc-500/20',
-  rejected: 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20',
+  rejected: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 ring-1 ring-inset ring-rose-600/20',
   muted: 'bg-muted text-muted-foreground ring-1 ring-inset ring-border'
 };
 

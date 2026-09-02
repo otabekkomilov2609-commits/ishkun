@@ -28,7 +28,7 @@ const EMPTY_FILTERS = { dateOption: null, dateFrom: '', dateTo: '', skills: [], 
 
 export default function WorkerDashboard() {
   const { user } = useAuth();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const [q, setQ] = useState('');
   const [city, setCity] = useState(user?.city || '');
   const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -157,7 +157,7 @@ export default function WorkerDashboard() {
         </div>
         <Select value={city} onChange={e => setCity(e.target.value)} className="w-36">
           <option value="">{t('allCities')}</option>
-          {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          {CITIES.map(c => <option key={c} value={c}>{tCity(c)}</option>)}
         </Select>
         <Button variant="outline" size="md" onClick={() => setSheetOpen(true)} className="relative">
           <SlidersHorizontal className="h-4 w-4" />

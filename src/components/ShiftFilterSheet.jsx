@@ -27,7 +27,7 @@ function Pill({ active, onClick, children }) {
 }
 
 export default function ShiftFilterSheet({ open, onOpenChange, companies, onApply, countFor, initialFilters }) {
-  const { t } = useLang();
+  const { t, tp } = useLang();
   const [dateOption, setDateOption] = useState(initialFilters?.dateOption || null); // 'today' | 'tomorrow' | 'custom' | null
   const [dateFrom, setDateFrom] = useState(initialFilters?.dateFrom || '');
   const [dateTo, setDateTo] = useState(initialFilters?.dateTo || '');
@@ -146,7 +146,7 @@ export default function ShiftFilterSheet({ open, onOpenChange, companies, onAppl
             <X className="h-4 w-4" /> {t('filter.reset')}
           </Button>
           <Button onClick={apply} className="flex-[2]">
-            {t('filter.showResults').replace('{n}', previewCount != null ? previewCount : '')}
+            {tp('filter.showResults', previewCount || 0).replace('{n}', previewCount != null ? previewCount : '')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

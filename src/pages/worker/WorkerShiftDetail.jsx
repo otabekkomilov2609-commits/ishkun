@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 export default function WorkerShiftDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLang();
+  const { t, tCity } = useLang();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [shift, setShift] = useState(null);
@@ -116,7 +116,7 @@ export default function WorkerShiftDetail() {
 
       {/* Manzil */}
       <SectionCard icon={MapPin} title={t('sdetail.address')}>
-        <div className="text-sm text-foreground">{[shift.location, shift.city].filter(Boolean).join(', ')}</div>
+        <div className="text-sm text-foreground">{[shift.location, tCity(shift.city)].filter(Boolean).join(', ')}</div>
         <a href={mapUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex">
           <Button variant="soft" size="sm"><Navigation className="h-4 w-4" /> {t('sdetail.viewMap')}</Button>
         </a>

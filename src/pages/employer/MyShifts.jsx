@@ -15,7 +15,7 @@ import { isShiftClosed, shiftStatusKey } from '@/lib/shiftTime';
 
 export default function MyShifts() {
   const { user } = useAuth();
-  const { t } = useLang();
+  const { t, tp } = useLang();
   const navigate = useNavigate();
   const [tab, setTab] = useState('active');
 
@@ -74,7 +74,7 @@ export default function MyShifts() {
         <ShiftCard shift={s} to={`/employer/shifts/${s.id}`} showStatus statusLabel={t(shiftStatusKey(s))} />
         {count > 0 && (
           <span className="absolute top-14 right-3 pointer-events-none inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5">
-            <ClipboardList className="h-3 w-3" /> {count} {t('shift.applicants')}
+            <ClipboardList className="h-3 w-3" /> {count} {tp('shift.applicants', count)}
           </span>
         )}
       </div>
