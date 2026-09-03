@@ -157,8 +157,13 @@ export function isValidStir(v) {
   return /^\d{9}$/.test(v || '');
 }
 
+// Must be a Yandex Maps link, not merely any URL — a Google Maps link used to
+// pass. Country TLDs are the common case (yandex.uz, yandex.ru), so the TLD is
+// matched as a set rather than pinned to .com.
+export const YANDEX_MAPS_RE = /^https?:\/\/(www\.)?yandex\.(uz|ru|com|kz|by)\/maps(\/|\?|$)/i;
+
 export function isValidMapLink(v) {
-  return /^https?:\/\/.+/.test((v || '').trim());
+  return YANDEX_MAPS_RE.test((v || '').trim());
 }
 
 export function hhmmFromStamp(iso, fallback = '') {

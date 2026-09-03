@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { isValidMapLink } from '../../shared/mapLink.ts';
 
 // Authoritative shift update for employers. Mirrors createShift's integrity
 // guarantees: payment_amount is ALWAYS recomputed server-side as
@@ -45,6 +46,14 @@ export default async function(req) {
     }
     const rate = Number(daily_rate);
     if (!Number.isFinite(rate) || rate < 0) return Response.json({ error: 'Invalid daily_rate' }, { status: 400 });
+    if (!isValidMapLink(map_link)) return Response.json({ error: 'Invalid map_link' }, { status: 400 });
+    // A negative count is truthy, so `Number(x) || 1` let it through unclamped.
+    // Missing/empty still falls back to 1 below; only an explicitly supplied
+    // non-positive number is an error.
+    const rw = Number(required_workers);
+    if (String(required_workers ?? '').trim() !== '' && Number.isFinite(rw) && rw <= 0) {
+      return Response.json({ error: 'required_workers must be positive' }, { status: 400 });
+    }
 
     const shift = await base44.asServiceRole.entities.Shift.get(shift_id);
     if (!shift) return Response.json({ error: 'Shift not found' }, { status: 404 });

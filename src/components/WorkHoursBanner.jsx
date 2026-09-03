@@ -111,7 +111,9 @@ export default function WorkHoursBanner({ apps, onRefresh }) {
       setStartVal(hhmmFromStamp(target.check_in_time, shift.start_time));
       setEndVal(shift.end_time);
     } else {
-      setStartVal(shift.start_time);
+      // Default to the actual arrival time, not the planned start: pre-filling
+      // the schedule hid a late worker's lateness unless they edited the field.
+      setStartVal(hhmmNow());
       setEndVal('');
     }
     setReason('');
