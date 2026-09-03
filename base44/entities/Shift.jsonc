@@ -153,10 +153,14 @@
         }
       ]
     },
-    // Nobody may delete a Shift through the entity API — not even an admin.
-    // Deleting a row directly left its Application records orphaned, so every
-    // deletion must go through the deleteShift function, which cascades first.
-    // asServiceRole (used by that function) bypasses RLS.
-    "delete": false
+    // Admin-only: the owner's direct-delete permission is removed, so every
+    // non-admin deletion goes through the deleteShift function, which cascades
+    // to the shift's Applications first. asServiceRole bypasses RLS, so the
+    // function itself is unaffected.
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
   }
 }
