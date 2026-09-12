@@ -19,6 +19,10 @@ export function getWorkerShiftState(app, shift) {
       return { key: 'rejected', labelKey: 'wstat.rejected', kind: 'rejected' };
     case 'cancelled':
       return { key: 'cancelled', labelKey: 'wstat.cancelled', kind: 'muted' };
+    // Expired applications are filtered out before they reach a list; this only
+    // stops one slipping through as a live-looking 'applied' if it ever does.
+    case 'expired':
+      return { key: 'expired', labelKey: 'wstat.cancelled', kind: 'muted' };
     case 'completed':
       return { key: 'completed', labelKey: 'wstat.completed', kind: 'completed' };
     case 'no_show':

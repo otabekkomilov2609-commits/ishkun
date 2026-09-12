@@ -13,7 +13,7 @@ import RatingPrompt from '@/components/RatingPrompt';
 import AbsentReasonDialog from '@/components/AbsentReasonDialog';
 import CancelShiftDialog from '@/components/CancelShiftDialog';
 import { StarsDisplay } from '@/components/RatingStars';
-import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen, isShiftEnded } from '@/lib/shiftTime';
+import { isShiftStarted, isMismatch, attendanceLabel, isCheckInWindowOpen } from '@/lib/shiftTime';
 import CorrectHoursDialog from '@/components/CorrectHoursDialog';
 
 function appStatusKey(status) {
@@ -241,12 +241,6 @@ export default function EmployerShiftDetail() {
                     <p className="text-sm text-foreground">{hhmmFromStamp(a.check_in_time)} — {hhmmFromStamp(a.check_out_time)} · {a.actual_hours} {t('shift.durationShort')}</p>
                     <p className="text-sm font-semibold text-foreground mt-1">{t('att.finalPayment')}: {formatSom(a.final_payment_amount)}</p>
                     {a.hours_corrected_by_employer && a.employer_correction_note && <p className="text-xs text-muted-foreground mt-1">{t('hours.youCorrected')}: {a.employer_correction_note}</p>}
-                  </div>
-                )}
-                {isShiftEnded(shift) && a.hours_status === 'not_submitted' && booked && (
-                  <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3">
-                    <p className="text-sm text-rose-700 font-medium">{t('hours.workerNotSubmitted')}</p>
-                    <Button size="sm" variant="outline" className="mt-2" onClick={() => setCorrectApp(a)}>{t('hours.enterForWorker')}</Button>
                   </div>
                 )}
                 {a.cancellation_reason && (

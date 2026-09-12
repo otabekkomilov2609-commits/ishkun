@@ -1,0 +1,16 @@
+{
+  "name": "sweepStaleRecords",
+  "entry": "entry.ts",
+  "automations": [
+    {
+      "type": "scheduled",
+      "name": "hourly",
+      "description": "Closes records nothing else moves on: expires unanswered pending applications, completes shifts whose end time has passed, completes applications whose hours were confirmed, and emails whoever skipped a step.",
+      "is_active": true,
+      "schedule_mode": "recurring",
+      "schedule_type": "simple",
+      "repeat_unit": "hours",
+      "repeat_interval": 1
+    }
+  ]
+}

@@ -43,7 +43,9 @@ export default function MyApplications() {
 
   // Cancellation is handled by <CancelBookingDialog /> below (single code path).
 
-  const activeApps = (apps || []).filter(a => a.status !== 'cancelled' && shifts[a.shift_id]);
+  // 'expired' is deliberately invisible: an application nobody ever answered
+  // appears in no tab and in no tab counter, and the worker is not notified.
+  const activeApps = (apps || []).filter(a => a.status !== 'cancelled' && a.status !== 'expired' && shifts[a.shift_id]);
 
   const matchTab = (a, key) => {
     if (key === 'pending') return a.status === 'pending';

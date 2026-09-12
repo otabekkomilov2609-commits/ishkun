@@ -23,7 +23,8 @@
         "rejected",
         "completed",
         "no_show",
-        "cancelled"
+        "cancelled",
+        "expired"
       ],
       "default": "pending",
       "title": "Holati"
@@ -88,6 +89,26 @@
       "type": "boolean",
       "default": false,
       "title": "1 soatlik eslatma yuborildi"
+    },
+    "checkin_reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "Ishni boshlash eslatmasi yuborildi"
+    },
+    "hours_reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "Ish vaqtini kiritish eslatmasi yuborildi"
+    },
+    "employer_hours_reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "Ish beruvchiga vaqtni tasdiqlash eslatmasi yuborildi"
+    },
+    "employer_attendance_reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "Ish beruvchiga davomat eslatmasi yuborildi"
     },
     "hours_status": {
       "type": "string",

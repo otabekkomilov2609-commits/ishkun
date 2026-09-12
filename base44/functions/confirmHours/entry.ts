@@ -2,9 +2,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { computeHours } from '../../shared/hoursCalc.ts';
 
 // Employer reviews worker-submitted hours: 'confirm' accepts them as-is;
-// 'correct' overrides start/end times (employer enters them, e.g. when the
-// worker didn't submit) with a required note. Payment is always recomputed
-// here using the same formula as submitHours.
+// 'correct' overrides start/end times with a required note. Payment is always
+// recomputed here using the same formula as submitHours.
+//
+// The employer may only ever review a submission, never create one — the worker
+// is the one being paid, so the worker records the hours. 'correct' therefore
+// requires hours_status 'pending_confirmation'; the UI hides the old
+// "enter for the worker" path, and this is the matching server-side rule.
+// Both actions also complete the application: without it, confirmed hours left
+// the application stuck in 'approved'/'in_progress' forever, so it never
+// reached the worker's "Bajarildi" tab and the rating prompt never appeared.
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -24,13 +31,17 @@ export default async function(req) {
     const employerId = app.employer_id || shift.created_by_id;
     if (user.id !== employerId && user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
     if (app.hours_status === 'confirmed') return Response.json({ error: 'Hours already confirmed' }, { status: 409 });
+    if (action === 'correct' && app.hours_status !== 'pending_confirmation') {
+      return Response.json({ error: 'Hours can only be corrected after the worker submits them' }, { status: 400 });
+    }
 
     const now = new Date().toISOString();
 
     if (action === 'confirm') {
       await base44.asServiceRole.entities.Application.update(application_id, {
         hours_status: 'confirmed',
-        hours_confirmed_at: now
+        hours_confirmed_at: now,
+        status: 'completed'
       });
       if (app.worker_id) {
         await base44.functions.invoke('createNotificationFor', {
@@ -60,7 +71,8 @@ export default async function(req) {
       hours_status: 'confirmed',
       hours_confirmed_at: now,
       employer_correction_note: note,
-      hours_corrected_by_employer: true
+      hours_corrected_by_employer: true,
+      status: 'completed'
     });
 
     if (app.worker_id) {
